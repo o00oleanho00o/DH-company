@@ -1,0 +1,232 @@
+{
+  "benchmark": "holdout",
+  "generated_at": "2026-09-05T16:41:14.472083+00:00",
+  "runtime_seconds": {
+    "ingest": 29.403,
+    "pricing": 129.403,
+    "evaluation": 0.107,
+    "total": 188.143
+  },
+  "input_dir": "F:\\BUL_Product\\DH-company\\input",
+  "holdout_file": "BOQ-HỆ THỐNG ĐIỆN TRẠI LƠN HẢI HÀ-DH290124.xlsx",
+  "training_files": [
+    "1. Bảng giá CÁP HẠ THẾ & DÂY DÂN DỤNG (01-01-2026).xls",
+    "2. Bảng giá CÁP TRUNG THẾ (01-01-2026).xls",
+    "BG. HT TT,TBA,CS,CNS_NOXH, NOTM_ AN KHANH_02.08.2026.xlsx",
+    "Báo giá hạ tầng Zon,6,7 (Nhân công-A LÝ).xls",
+    "Bảng giá nhân công lắp đặt theo vật tư DH.xlsx"
+  ],
+  "database_path": "C:\\Users\\email\\AppData\\Local\\Temp\\dh-holdout-54jjwv2c\\pricing.db",
+  "database_persisted": false,
+  "parsing": {
+    "workbooks_ingested": 6,
+    "training_workbooks": 5,
+    "sheets_inspected": 176,
+    "source_rows": 15539,
+    "data_rows": 11103,
+    "descriptions_present": 2480,
+    "quantities_present": 2358
+  },
+  "catalog": {
+    "source_files": 6,
+    "source_sheets": 176,
+    "source_rows": 15539,
+    "products": 2576,
+    "product_prices": 2586,
+    "labor_items": 1231,
+    "labor_rates": 923,
+    "projects": 3
+  },
+  "imports": [
+    {
+      "source_file_id": 1,
+      "filename": "1. Bảng giá CÁP HẠ THẾ & DÂY DÂN DỤNG (01-01-2026).xls",
+      "detected_type": "SUPPLIER_PRICE",
+      "confirmed_type": null,
+      "sheets": 84,
+      "source_rows": 4375,
+      "data_rows": 3404,
+      "products": 1717,
+      "product_prices": 1717,
+      "labor_items": 0,
+      "labor_rates": 0,
+      "boq_items": 0,
+      "warnings": [
+        "MUC LUC:HEADER_NOT_FOUND"
+      ],
+      "project_id": null
+    },
+    {
+      "source_file_id": 2,
+      "filename": "2. Bảng giá CÁP TRUNG THẾ (01-01-2026).xls",
+      "detected_type": "SUPPLIER_PRICE",
+      "confirmed_type": null,
+      "sheets": 65,
+      "source_rows": 2324,
+      "data_rows": 1504,
+      "products": 752,
+      "product_prices": 752,
+      "labor_items": 0,
+      "labor_rates": 0,
+      "boq_items": 0,
+      "warnings": [
+        "MUC LUC:HEADER_NOT_FOUND"
+      ],
+      "project_id": null
+    },
+    {
+      "source_file_id": 3,
+      "filename": "BG. HT TT,TBA,CS,CNS_NOXH, NOTM_ AN KHANH_02.08.2026.xlsx",
+      "detected_type": "HISTORICAL_BOQ",
+      "confirmed_type": null,
+      "sheets": 2,
+      "source_rows": 281,
+      "data_rows": 250,
+      "products": 117,
+      "product_prices": 117,
+      "labor_items": 136,
+      "labor_rates": 136,
+      "boq_items": 250,
+      "warnings": [],
+      "project_id": 1
+    },
+    {
+      "source_file_id": 4,
+      "filename": "Báo giá hạ tầng Zon,6,7 (Nhân công-A LÝ).xls",
+      "detected_type": "LABOR",
+      "confirmed_type": null,
+      "sheets": 11,
+      "source_rows": 4860,
+      "data_rows": 2653,
+      "products": 0,
+      "product_prices": 0,
+      "labor_items": 881,
+      "labor_rates": 787,
+      "boq_items": 2559,
+      "warnings": [
+        "DANH MUC BAN VE:HEADER_NOT_FOUND",
+        "RISER:HEADER_NOT_FOUND"
+      ],
+      "project_id": 2
+    },
+    {
+      "source_file_id": 5,
+      "filename": "Bảng giá nhân công lắp đặt theo vật tư DH.xlsx",
+      "detected_type": "LABOR",
+      "confirmed_type": null,
+      "sheets": 3,
+      "source_rows": 850,
+      "data_rows": 812,
+      "products": 0,
+      "product_prices": 0,
+      "labor_items": 812,
+      "labor_rates": 0,
+      "boq_items": 0,
+      "warnings": [],
+      "project_id": null
+    }
+  ],
+  "holdout_import": {
+    "source_file_id": 6,
+    "filename": "BOQ-HỆ THỐNG ĐIỆN TRẠI LƠN HẢI HÀ-DH290124.xlsx",
+    "detected_type": "HISTORICAL_BOQ",
+    "confirmed_type": null,
+    "sheets": 11,
+    "source_rows": 2849,
+    "data_rows": 2480,
+    "products": 0,
+    "product_prices": 0,
+    "labor_items": 0,
+    "labor_rates": 0,
+    "boq_items": 2473,
+    "warnings": [
+      "BIA:HEADER_NOT_FOUND"
+    ],
+    "project_id": 3
+  },
+  "evaluation": {
+    "run": {
+      "run_id": 1,
+      "project_id": 3,
+      "status": "COMPLETED",
+      "metrics": {
+        "total_items": 2473,
+        "auto_approved": 4,
+        "review_required": 87,
+        "no_match": 2269,
+        "no_price_found": 113,
+        "material_matched": 107,
+        "labor_matched": 204,
+        "material_priced": 107,
+        "labor_priced": 90,
+        "auto_coverage": 0.0016,
+        "material_coverage": 0.0433,
+        "labor_coverage": 0.0364
+      }
+    },
+    "rows": 2473,
+    "statuses": {
+      "NO_PRICE_FOUND": 113,
+      "NO_MATCH": 2269,
+      "AUTO_APPROVED": 4,
+      "REVIEW_REQUIRED": 87
+    },
+    "material": {
+      "evaluable_items": 1072,
+      "predicted_items": 106,
+      "coverage": 0.0989,
+      "exact_price_match": 0,
+      "exact_price_accuracy": 0.0,
+      "predicted_price_accuracy": 0.0,
+      "mean_relative_error": 1.029021,
+      "median_relative_error": 1.045123,
+      "high_confidence_items": 106,
+      "high_confidence_wrong": 106,
+      "high_confidence_price_error": 106,
+      "high_confidence_price_error_rate": 1.0,
+      "match_evaluable": 106,
+      "match_correct": 106,
+      "match_incorrect": 0,
+      "match_unknown": 0,
+      "match_accuracy": 1.0,
+      "high_confidence_wrong_match": 0,
+      "high_confidence_wrong_match_rate": 0.0,
+      "high_confidence_false_positive_rate": 0.0
+    },
+    "labor": {
+      "evaluable_items": 1095,
+      "predicted_items": 90,
+      "coverage": 0.0822,
+      "exact_price_match": 0,
+      "exact_price_accuracy": 0.0,
+      "predicted_price_accuracy": 0.0,
+      "mean_relative_error": 0.516009,
+      "median_relative_error": 0.354839,
+      "high_confidence_items": 23,
+      "high_confidence_wrong": 23,
+      "high_confidence_price_error": 23,
+      "high_confidence_price_error_rate": 1.0,
+      "match_evaluable": 88,
+      "match_correct": 88,
+      "match_incorrect": 0,
+      "match_unknown": 2,
+      "match_accuracy": 1.0,
+      "high_confidence_wrong_match": 0,
+      "high_confidence_wrong_match_rate": 0.0,
+      "high_confidence_false_positive_rate": 0.0
+    },
+    "provenance": {
+      "material_missing_source": 0,
+      "labor_missing_source": 0,
+      "applied_material_prices": 106,
+      "applied_labor_prices": 90,
+      "material_complete": true,
+      "labor_complete": true
+    },
+    "leakage": {
+      "holdout_product_price_rows": 0,
+      "holdout_labor_rate_rows": 0,
+      "passed": true
+    }
+  }
+}

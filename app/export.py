@@ -1,0 +1,170 @@
+from __future__ import annotations
+
+import json
+import shutil
+from pathlib import Path
+from typing import Any
+
+from openpyxl import Workbook, load_workbook
+from openpyxl.styles import Font, PatternFill
+
+from .config import EXPORT_DIR, ensure_directories
+from .db import db_session, dumps, loads, utc_now
+from .pricing import get_project_result
+
+
+def _column(mapping: dict[str, Any], key: str) -> int | None:
+    value = mapping.get(key)
+    try:
+        return int(value) + 1 if value is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _write_cell(ws, row_no: int, col_no: int | None, value: Any) -> None:
+    if col_no and row_no > 0:
+        ws.cell(row=row_no, column=col_no).value = value
+
+
+def _audit_rows(result: dict[str, Any]) -> list[list[Any]]:
+    rows = [[
+        "BOQ item", "Mô tả gốc", "Đơn vị", "Khối lượng",
+        "Giá vật tư", "Nguồn vật tư", "Confidence VT",
+        "Giá nhân công", "Nguồn nhân công", "Confidence NC",
+        "Trạng thái", "Rủi ro", "Giải thích",
+    ]]
+    for item in result.get("items", []):
+        ms = item.get("material_source") or {}
+        ls = item.get("labor_source") or {}
+        rows.append([
+            item.get("id"),
+            item.get("raw_description"),
+            item.get("unit"),
+            item.get("quantity"),
+            item.get("material_price"),
+            _source_label(ms),
+            item.get("material_confidence"),
+            item.get("labor_price"),
+            _source_label(ls),
+            item.get("labor_confidence"),
+            item.get("status"),
+            item.get("risk"),
+            item.get("explanation"),
+        ])
+    return rows
+
+
+def _source_label(source: dict[str, Any]) -> str:
+    if not source:
+        return ""
+    parts = []
+    if source.get("supplier"):
+        parts.append(str(source["supplier"]))
+    if source.get("filename"):
+        parts.append(str(source["filename"]))
+    if source.get("sheet_name"):
+        parts.append(f"sheet:{source['sheet_name']}")
+    if source.get("row_no"):
+        parts.append(f"row:{source['row_no']}")
+    if source.get("effective_date"):
+        parts.append(f"date:{source['effective_date']}")
+    if source.get("rate"):
+        parts.append(f"rate:{source['rate']}")
+    return " | ".join(parts)
+
+
+def _style_audit(ws) -> None:
+    for cell in ws[1]:
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill("solid", fgColor="1F4E78")
+    ws.freeze_panes = "A2"
+    ws.auto_filter.ref = ws.dimensions
+    widths = {
+        "A": 12, "B": 62, "C": 12, "D": 14, "E": 16, "F": 52,
+        "G": 16, "H": 16, "I": 52, "J": 16, "K": 18, "L": 12, "M": 52,
+    }
+    for col, width in widths.items():
+        ws.column_dimensions[col].width = width
+
+
+def export_project(project_id: int, run_id: int | None = None) -> Path:
+    """Create a usable XLSX result and append a provenance-rich AI Audit sheet."""
+
+    ensure_directories()
+    result = get_project_result(project_id, run_id)
+    with db_session() as conn:
+        project = conn.execute("SELECT * FROM projects WHERE id=?", (project_id,)).fetchone()
+        if not project:
+            raise KeyError(project_id)
+        source = conn.execute(
+            "SELECT * FROM source_files WHERE id=?", (project["source_file_id"],)
+        ).fetchone()
+        source_path = Path(source["storage_key"]) if source and source["storage_key"] else None
+        output_path = EXPORT_DIR / f"quotation-{project_id}-{run_id or 'latest'}.xlsx"
+
+        if source_path and source_path.exists() and source_path.suffix.lower() == ".xlsx":
+            shutil.copy2(source_path, output_path)
+            wb = load_workbook(output_path)
+            # Source sheet metadata stores the deterministic mapping selected at
+            # ingest time, so export does not depend on fixed columns.
+            for item in result.get("items", []):
+                if not item.get("source_sheet_id") or not item.get("source_row_id"):
+                    continue
+                ss = conn.execute(
+                    "SELECT * FROM source_sheets WHERE id=?", (item["source_sheet_id"],)
+                ).fetchone()
+                sr = conn.execute(
+                    "SELECT row_no FROM source_rows WHERE id=?", (item["source_row_id"],)
+                ).fetchone()
+                if not ss or not sr or ss["sheet_name"] not in wb.sheetnames:
+                    continue
+                ws = wb[ss["sheet_name"]]
+                mapping = loads(ss["mapping_json"], {})
+                row_no = int(sr["row_no"])
+                _write_cell(ws, row_no, _column(mapping, "material_price"), item.get("material_price"))
+                _write_cell(ws, row_no, _column(mapping, "labor_price"), item.get("labor_price"))
+                # Generic total columns are only written when the mapping is
+                # unambiguous; formulas are replaced by deterministic values.
+                total = None
+                if item.get("material_total") is not None or item.get("labor_total") is not None:
+                    total = (item.get("material_total") or 0) + (item.get("labor_total") or 0)
+                _write_cell(ws, row_no, _column(mapping, "total"), total)
+                _write_cell(ws, row_no, _column(mapping, "amount"), total)
+        else:
+            # Legacy .xls cannot be safely edited with openpyxl. Produce a
+            # normalized, fully usable workbook instead of silently failing.
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "BOQ kết quả"
+            headers = [
+                "STT", "Mô tả", "Mã", "Đơn vị", "Khối lượng",
+                "Đơn giá vật tư", "Đơn giá nhân công", "Tổng vật tư",
+                "Tổng nhân công", "Tổng cộng", "Trạng thái", "Nguồn",
+            ]
+            ws.append(headers)
+            for i, item in enumerate(result.get("items", []), 1):
+                total = (item.get("material_total") or 0) + (item.get("labor_total") or 0)
+                ws.append([
+                    i, item.get("raw_description"), item.get("product_code"),
+                    item.get("unit"), item.get("quantity"), item.get("material_price"),
+                    item.get("labor_price"), item.get("material_total"),
+                    item.get("labor_total"), total, item.get("status"),
+                    _source_label(item.get("material_source") or {}) or _source_label(item.get("labor_source") or {}),
+                ])
+            ws.freeze_panes = "A2"
+            ws.auto_filter.ref = ws.dimensions
+            for cell in ws[1]:
+                cell.font = Font(bold=True, color="FFFFFF")
+                cell.fill = PatternFill("solid", fgColor="1F4E78")
+            for col, width in {"A": 8, "B": 70, "C": 20, "D": 12, "E": 14, "F": 18, "G": 18, "H": 18, "I": 18, "J": 18, "K": 18, "L": 60}.items():
+                ws.column_dimensions[col].width = width
+
+        if "AI Audit" in wb.sheetnames:
+            del wb["AI Audit"]
+        audit = wb.create_sheet("AI Audit")
+        for row in _audit_rows(result):
+            audit.append(row)
+        _style_audit(audit)
+        wb.save(output_path)
+        return output_path
+
