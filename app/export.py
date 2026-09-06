@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import tempfile
 import zipfile
@@ -178,6 +179,139 @@ def _restore_formula_caches(source_path: Path, output_path: Path) -> None:
             temp_path.unlink()
 
 
+_CELL_REF_RE = re.compile(r"(?<![A-Z0-9_])(?:'[^']+'!)?\$?([A-Z]{1,3})\$?(\d+)")
+_SUM_RE = re.compile(
+    r"SUM\(\s*(?:'[^']+'!)?\$?([A-Z]{1,3})\$?(\d+)"
+    r"\s*:\s*(?:'[^']+'!)?\$?([A-Z]{1,3})\$?(\d+)\s*\)",
+    re.IGNORECASE,
+)
+
+
+def _recalculate_formula_caches(output_path: Path) -> None:
+    """Refresh caches for simple formulas after deterministic workbook edits."""
+
+    try:
+        wb = load_workbook(output_path, data_only=False)
+    except (OSError, ValueError):
+        return
+
+    memo: dict[tuple[int, str], float | None] = {}
+    active: set[tuple[int, str]] = set()
+
+    def formula_value(sheet_index: int, formula: str) -> float | None:
+        expression = formula.lstrip("=").strip()
+        if expression.startswith("+"):
+            expression = expression[1:].strip()
+
+        def replace_sum(match: re.Match[str]) -> str:
+            start_col, start_row, end_col, end_row = match.groups()
+            ws = wb.worksheets[sheet_index]
+            total = 0.0
+            for row in ws.iter_rows(
+                min_row=int(start_row),
+                max_row=int(end_row),
+                min_col=ws[f"{start_col}1"].column,
+                max_col=ws[f"{end_col}1"].column,
+            ):
+                for cell in row:
+                    value = cell_value(sheet_index, cell.coordinate)
+                    if value is not None:
+                        total += value
+            return str(total)
+
+        expression = _SUM_RE.sub(replace_sum, expression)
+
+        def replace_ref(match: re.Match[str]) -> str:
+            token = match.group(0)
+            if "!" in token:
+                return token
+            col, row = match.groups()
+            value = cell_value(sheet_index, f"{col}{row}")
+            return str(value) if value is not None else token
+
+        expression = _CELL_REF_RE.sub(replace_ref, expression)
+        if _CELL_REF_RE.search(expression):
+            return None
+        if not re.fullmatch(r"[0-9eE+\-*/().\s]+", expression):
+            return None
+        try:
+            value = float(eval(expression, {"__builtins__": {}}, {}))
+        except (ArithmeticError, SyntaxError, ValueError, TypeError):
+            return None
+        return value if value == value and abs(value) != float("inf") else None
+
+    def cell_value(sheet_index: int, coordinate: str) -> float | None:
+        key = (sheet_index, coordinate)
+        if key in memo:
+            return memo[key]
+        if key in active:
+            return None
+        active.add(key)
+        try:
+            value = wb.worksheets[sheet_index][coordinate].value
+            if isinstance(value, bool):
+                result = float(value)
+            elif isinstance(value, (int, float)):
+                result = float(value)
+            elif isinstance(value, str) and value.startswith("="):
+                result = formula_value(sheet_index, value)
+            else:
+                result = None
+        finally:
+            active.discard(key)
+        memo[key] = result
+        return result
+
+    updates: dict[str, dict[str, float]] = {}
+    for sheet_index, ws in enumerate(wb.worksheets):
+        xml_name = f"xl/worksheets/sheet{sheet_index + 1}.xml"
+        for row in ws.iter_rows():
+            for cell in row:
+                if isinstance(cell.value, str) and cell.value.startswith("="):
+                    value = cell_value(sheet_index, cell.coordinate)
+                    if value is not None:
+                        updates.setdefault(xml_name, {})[cell.coordinate] = value
+    if not updates:
+        return
+
+    fd, temp_name = tempfile.mkstemp(
+        prefix=f"{output_path.stem}-recalc-",
+        suffix=".xlsx",
+        dir=str(output_path.parent),
+    )
+    os.close(fd)
+    temp_path = Path(temp_name)
+    try:
+        with zipfile.ZipFile(output_path, "r") as source_zip, zipfile.ZipFile(
+            temp_path, "w", compression=zipfile.ZIP_DEFLATED
+        ) as target_zip:
+            for info in source_zip.infolist():
+                payload = source_zip.read(info.filename)
+                sheet_updates = updates.get(info.filename)
+                if sheet_updates:
+                    try:
+                        root = ET.fromstring(payload)
+                    except ET.ParseError:
+                        root = None
+                    if root is not None:
+                        for cell in root.findall(".//x:c", _XLSX_NS):
+                            value = sheet_updates.get(cell.attrib.get("r") or "")
+                            if value is None:
+                                continue
+                            cached = cell.find("x:v", _XLSX_NS)
+                            if cached is None:
+                                cached = ET.SubElement(cell, f"{{{_XLSX_MAIN_NS}}}v")
+                            cached.text = format(value, ".15g")
+                        payload = ET.tostring(
+                            root, encoding="utf-8", xml_declaration=True
+                        )
+                target_zip.writestr(info, payload)
+        os.replace(temp_path, output_path)
+    finally:
+        if temp_path.exists():
+            temp_path.unlink()
+
+
 def export_project(project_id: int, run_id: int | None = None) -> Path:
     """Create a usable XLSX result and append a provenance-rich AI Audit sheet."""
 
@@ -285,4 +419,5 @@ def export_project(project_id: int, run_id: int | None = None) -> Path:
         wb.save(output_path)
         if preserve_formula_source:
             _restore_formula_caches(preserve_formula_source, output_path)
+            _recalculate_formula_caches(output_path)
         return output_path

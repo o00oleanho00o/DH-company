@@ -366,6 +366,28 @@ def init_db() -> None:
             "CREATE INDEX IF NOT EXISTS idx_source_files_lifecycle "
             "ON source_files(lifecycle_status)"
         )
+        # Generated/uploaded quotations are input workbooks, not trusted
+        # historical references. Older builds could accidentally persist
+        # their prices as catalog observations/rates before the NEW_BOQ guard
+        # was applied. Remove those derived references while retaining the
+        # source file and BOQ rows for audit/export.
+        new_boq_sources = """
+            SELECT id FROM source_files
+            WHERE COALESCE(confirmed_type, detected_type) = 'NEW_BOQ'
+               OR json_extract(metadata_json, '$.excluded_from_knowledge') = 1
+        """
+        conn.execute(
+            f"DELETE FROM price_observations WHERE source_file_id IN ({new_boq_sources})"
+        )
+        conn.execute(
+            f"DELETE FROM product_prices WHERE source_file_id IN ({new_boq_sources})"
+        )
+        conn.execute(
+            f"DELETE FROM labor_rates WHERE source_file_id IN ({new_boq_sources})"
+        )
+        conn.execute(
+            f"DELETE FROM catalog_source_links WHERE source_file_id IN ({new_boq_sources})"
+        )
         conn.commit()
 
 

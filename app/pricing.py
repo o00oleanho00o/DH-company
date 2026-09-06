@@ -1408,8 +1408,11 @@ def _historical_exact_reference(
     is still safe to reuse for a matching BOQ description and unit.
     """
 
+    # Match the persisted normalized description exactly.  ``canonical_key``
+    # is intentionally more aggressive (it removes spaces around punctuation)
+    # and therefore does not always equal the value stored by ingestion.
     description_key = normalize_text(
-        item["raw_description"] or item["normalized_description"] or ""
+        item["normalized_description"] or item["raw_description"] or ""
     )
     if not description_key:
         return {}
@@ -1424,7 +1427,7 @@ def _historical_exact_reference(
         WHERE bi.project_id <> ?
           AND bi.normalized_description=?
           AND COALESCE(sf.lifecycle_status, 'ACTIVE')='ACTIVE'
-          AND COALESCE(sf.confirmed_type, sf.detected_type) <> 'NEW_BOQ'
+          AND COALESCE(sf.confirmed_type, sf.detected_type) = 'HISTORICAL_BOQ'
           AND COALESCE(
                 json_extract(sf.metadata_json, '$.excluded_from_knowledge'),
                 0
@@ -1439,6 +1442,21 @@ def _historical_exact_reference(
         (item["project_id"], description_key),
     ).fetchall()
     query_unit = normalize_unit(item["unit"] or "")
+    query_quantity = _safe_float(item["quantity"])
+    # A historical workbook can contain the same description more than once
+    # with different quantities/prices. Prefer the row with the same unit and
+    # quantity before falling back to the newest exact description.
+    rows = sorted(
+        rows,
+        key=lambda row: (
+            0 if query_unit and normalize_unit(row["unit"] or "") == query_unit else 1,
+            abs(
+                (_safe_float(row["quantity"]) or 0.0)
+                - (query_quantity or 0.0)
+            ),
+            -int(row["id"]),
+        ),
+    )
     for row in rows:
         if query_unit and normalize_unit(row["unit"] or "") != query_unit:
             continue
@@ -2109,15 +2127,36 @@ def run_pricing(
             # rows whose source stores a combined unit price in the total
             # column and therefore has no catalog product/labor identity.
             historical_reference = _historical_exact_reference(conn, item)
+            historical_material_selected = False
+            historical_labor_selected = False
             if historical_reference:
-                if product is None and historical_reference.get("material_price") is not None:
+                # A known quotation row is authoritative for the corresponding
+                # side even when a catalog candidate also exists. Previously
+                # this was only a fallback when no candidate was found, which
+                # silently replaced negotiated/project prices with the latest
+                # catalog values. Keep the candidate ID for traceability, but
+                # apply the exact historical amount as the selected source.
+                if historical_reference.get("material_price") is not None:
                     material_price = historical_reference["material_price"]
                     material_source = historical_reference["material_source"]
-                if labor is None and historical_reference.get("labor_price") is not None:
+                    historical_material_selected = True
+                if historical_reference.get("labor_price") is not None:
                     labor_price = historical_reference["labor_price"]
                     labor_source = historical_reference["labor_source"]
-            material_multiplier = _price_multiplier(description, product)
-            labor_multiplier = _price_multiplier(description, labor)
+                    historical_labor_selected = True
+            # Historical rows already carry the aggregate amount for their
+            # exact description (including parallel/compound cable notation).
+            # Do not multiply them again using a single-core catalog match.
+            material_multiplier = (
+                1.0
+                if historical_material_selected
+                else _price_multiplier(description, product)
+            )
+            labor_multiplier = (
+                1.0
+                if historical_labor_selected
+                else _price_multiplier(description, labor)
+            )
             if material_price is not None and material_multiplier != 1:
                 material_price = _round_money(material_price * material_multiplier)
                 material_source = {
@@ -2154,13 +2193,38 @@ def run_pricing(
                     explanation = "Khớp chính xác dòng tham chiếu lịch sử và đã giữ nguyên nguồn giá."
             material_conf = product.score if product else None
             labor_conf = labor.score if labor else None
-            if historical_reference.get("material_price") is not None and product is None:
+            if historical_reference.get("material_price") is not None:
                 material_conf = 0.99
-            if historical_reference.get("labor_price") is not None and labor is None:
+            if historical_reference.get("labor_price") is not None:
                 labor_conf = 0.99
             qty = _safe_float(item["quantity"])
-            material_total = _round_money(qty * material_price) if qty is not None and material_price is not None else None
-            labor_total = _round_money(qty * labor_price) if qty is not None and labor_price is not None else None
+            # Preserve full precision for exact historical rows. The source
+            # workbook's formulas calculate quantity × unit price without
+            # rounding each component, and rounding here can move the final
+            # quotation by several đồng. Catalog-derived prices keep the
+            # existing whole-đồng convention.
+            material_total = (
+                (qty * material_price)
+                if historical_material_selected
+                and qty is not None
+                and material_price is not None
+                else (
+                    _round_money(qty * material_price)
+                    if qty is not None and material_price is not None
+                    else None
+                )
+            )
+            labor_total = (
+                (qty * labor_price)
+                if historical_labor_selected
+                and qty is not None
+                and labor_price is not None
+                else (
+                    _round_money(qty * labor_price)
+                    if qty is not None and labor_price is not None
+                    else None
+                )
+            )
             material_alternatives: list[dict[str, Any]] = []
             for candidate in product_candidates:
                 candidate_price, candidate_source = _choose_product_price_with_policy(
