@@ -386,6 +386,13 @@
       id: pick(item, ["id", "boq_item_id", "item_id"], ""),
       rawDescription: pick(item, ["raw_description", "description", "name"], "Dòng BOQ chưa có mô tả"),
       normalizedDescription: pick(item, ["normalized_description", "normalized_name"], ""),
+      // Keep the normalized key for matching/debugging, but use source text
+      // as the human-facing label so Vietnamese accents are not lost in UI.
+      displayNormalizedDescription: pick(
+        item,
+        ["display_normalized_description", "display_name"],
+        pick(item, ["raw_description", "description", "name"], ""),
+      ),
       section: pick(item, ["section", "group", "category"], ""),
       code: pick(item, ["product_code", "code", "item_code"], ""),
       unit: pick(item, ["unit", "uom"], ""),
@@ -1731,6 +1738,37 @@
     `;
   }
 
+  function updateReviewSelection() {
+    if (state.route !== "review") return;
+    const list = $(".review-list");
+    const detail = $(".review-detail");
+    if (!list || !detail) {
+      renderReview();
+      return;
+    }
+    const items = filteredReviewItems();
+    const selected =
+      state.reviewItems.find((item) => String(item.id) === String(state.selectedReviewId)) ||
+      items[0] ||
+      null;
+    if (selected && state.selectedReviewId !== selected.id) {
+      state.selectedReviewId = selected.id;
+    }
+    $$(".review-item", list).forEach((element) => {
+      element.classList.toggle(
+        "is-selected",
+        String(element.dataset.id) === String(state.selectedReviewId),
+      );
+    });
+    detail.innerHTML = selected
+      ? renderReviewDetail(selected)
+      : emptyState({
+          iconName: "info",
+          title: "Chọn một dòng để bắt đầu",
+          description: "Candidate, confidence và nguồn giá sẽ hiển thị tại đây.",
+        });
+  }
+
   function renderReviewListItem(item, selectedId) {
     const status = reviewStatus(item.status);
     const isNoMatch = ["no_match", "no_price_found", "unmatched"].includes(String(item.status).toLowerCase());
@@ -1761,7 +1799,8 @@
       <div class="detail-section">
         <div class="detail-heading"><h3>Thuộc tính đã chuẩn hóa</h3></div>
         <div class="attribute-grid">
-          ${attribute("Mô tả chuẩn", item.normalizedDescription || "Chưa có")}
+          ${attribute("Mô tả chuẩn", item.displayNormalizedDescription || item.rawDescription || "Chưa có")}
+          ${item.normalizedDescription ? attribute("Khóa matching", item.normalizedDescription) : ""}
           ${attribute("Mã vật tư", item.code || "Chưa có")}
           ${attribute("Nhóm", item.section || "Chưa có")}
           ${attribute("Đơn vị", item.unit || "Chưa có")}
@@ -1805,7 +1844,7 @@
   }
 
   function renderCandidate(candidate, recommended = false) {
-    const name = pick(candidate, ["name", "normalized_name", "description", "product_name"], "Candidate không tên");
+    const name = pick(candidate, ["display_name", "raw_name", "name", "normalized_name", "description", "product_name"], "Candidate không tên");
     const code = pick(candidate, ["code", "product_code", "id"], "Không có mã");
     const confidence = pick(candidate, ["confidence", "score", "similarity"], null);
     return `
@@ -1882,7 +1921,7 @@
                         const candidateType = candidateKind(candidate);
                         const candidateId = pick(candidate, ["id", "candidate_id", "product_id", "labor_item_id", "labor_id", "code"], "");
                         const candidateCode = pick(candidate, ["code", "product_code", "labor_code"], "Không có mã");
-                        return `<label class="candidate ${index === 0 ? "is-recommended" : ""}" style="cursor:pointer"><span><input type="radio" name="candidate-choice" value="${escapeHtml(candidateId)}" data-type="${escapeHtml(candidateType)}" ${index === 0 ? "checked" : ""} style="margin-right:8px"><span class="candidate-name">${escapeHtml(pick(candidate, ["name", "description", "normalized_name", "product_name"], "Candidate không tên"))}</span><span class="candidate-meta">${escapeHtml(candidateCode)} • ${candidateType === "labor" ? "Nhân công" : "Vật tư"}</span></span><span class="candidate-confidence">${pick(candidate, ["confidence", "score", "similarity"], null) === null ? "—" : percentage(pick(candidate, ["confidence", "score", "similarity"], null))}</span></label>`;
+                        return `<label class="candidate ${index === 0 ? "is-recommended" : ""}" style="cursor:pointer"><span><input type="radio" name="candidate-choice" value="${escapeHtml(candidateId)}" data-type="${escapeHtml(candidateType)}" ${index === 0 ? "checked" : ""} style="margin-right:8px"><span class="candidate-name">${escapeHtml(pick(candidate, ["display_name", "raw_name", "name", "description", "normalized_name", "product_name"], "Candidate không tên"))}</span><span class="candidate-meta">${escapeHtml(candidateCode)} • ${candidateType === "labor" ? "Nhân công" : "Vật tư"}</span></span><span class="candidate-confidence">${pick(candidate, ["confidence", "score", "similarity"], null) === null ? "—" : percentage(pick(candidate, ["confidence", "score", "similarity"], null))}</span></label>`;
                       }).join("")
                     : `<div class="callout callout-warning">${icon("info")}<span>Chưa có ứng viên vật tư hoặc nhân công để chọn. Hãy nhập giá kèm nguồn hoặc đánh dấu cần báo giá nhà cung cấp.</span></div>`
                 }
@@ -2968,7 +3007,9 @@
     else if (action === "export-quotation") await exportQuotation(id);
     else if (action === "select-review") {
       state.selectedReviewId = id;
-      renderReview();
+      // Keep the left list DOM/scroll position intact; only the detail pane
+      // needs to change when an engineer selects another row.
+      updateReviewSelection();
     } else if (action === "approve-review") await reviewAction("approve", id);
     else if (action === "choose-candidate") await reviewAction("choose_candidate", id);
     else if (action === "manual-price") await reviewAction("manual_price", id);

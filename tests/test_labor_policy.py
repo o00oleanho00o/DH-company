@@ -226,3 +226,32 @@ def test_labor_warning_prevents_auto_approval() -> None:
     assert status == "REVIEW_REQUIRED"
     assert risk == "MEDIUM"
     assert "LABOR_RATE_SPREAD_HIGH" in explanation
+
+
+def test_labor_only_exact_match_does_not_require_material_candidate() -> None:
+    candidate = Candidate(
+        entity_id=124,
+        name="ong hdpe d225 pn10 (pe100 )",
+        code=None,
+        unit="100m",
+        brand=None,
+        origin=None,
+        attrs={"category": "pipe"},
+        score=0.975,
+        components={"exact_name": 1.0},
+        explanation="Khớp chính xác mô tả đã chuẩn hóa.",
+    )
+
+    status, risk, explanation = _status_for(
+        None,
+        None,
+        candidate,
+        6_500_000.0,
+        4.88,
+        pricing_scope="labor_only",
+        labor_source={"needs_review": False, "warnings": []},
+    )
+
+    assert status == "AUTO_APPROVED"
+    assert risk == "LOW"
+    assert "độ tin cậy cao" in explanation

@@ -1316,6 +1316,44 @@ def _round_money(value: float | None) -> float | None:
     return float(round(value))
 
 
+def _pricing_scope_for_item(conn, item: Any) -> str:
+    """Infer whether a source row is intentionally labor-only."""
+
+    material_value = (
+        _safe_float(item["material_price"])
+        if "material_price" in item.keys()
+        else None
+    )
+    labor_value = (
+        _safe_float(item["labor_price"])
+        if "labor_price" in item.keys()
+        else None
+    )
+    if (material_value is not None and material_value > 0) or not (
+        labor_value is not None and labor_value > 0
+    ):
+        return "mixed"
+    try:
+        source = conn.execute(
+            """
+            SELECT COALESCE(sf.confirmed_type, sf.detected_type) AS file_type,
+                   ss.detected_type AS sheet_type
+            FROM boq_items bi
+            LEFT JOIN source_files sf ON sf.id=bi.source_file_id
+            LEFT JOIN source_sheets ss ON ss.id=bi.source_sheet_id
+            WHERE bi.id=?
+            """,
+            (item["id"],),
+        ).fetchone()
+    except Exception:
+        source = None
+    if source:
+        file_type = normalize_text(source["file_type"] or "").upper().replace(" ", "_")
+        sheet_type = normalize_text(source["sheet_type"] or "").upper().replace(" ", "_")
+        if file_type in {"LABOR", "LABOR_MASTER"} or sheet_type in {"LABOR", "LABOR_MASTER"}:
+            return "labor_only"
+    return "mixed"
+
 def _status_for(
     material_candidate: Candidate | None,
     material_price: float | None,
@@ -1325,14 +1363,23 @@ def _status_for(
     *,
     material_source: dict[str, Any] | None = None,
     labor_source: dict[str, Any] | None = None,
+    pricing_scope: str = "mixed",
 ) -> tuple[str, str, str]:
     if not material_candidate and not labor_candidate:
         return "NO_MATCH", "HIGH", "Không tìm thấy ứng viên vật tư hoặc nhân công."
     hard_uncertain = any(
         c and c.score < AUTO_THRESHOLD for c in (material_candidate, labor_candidate)
     )
-    missing_price = (material_candidate is not None and material_price is None) or (
-        labor_candidate is not None and labor_price is None
+    scope = (
+        normalize_text(pricing_scope).replace(" ", "_").replace("-", "_")
+        or "mixed"
+    )
+    material_required = scope != "labor_only"
+    labor_required = scope != "material_only"
+    missing_price = (
+        material_required and material_candidate is not None and material_price is None
+    ) or (
+        labor_required and labor_candidate is not None and labor_price is None
     )
     if missing_price and not hard_uncertain:
         return "NO_PRICE_FOUND", "HIGH", "Có ứng viên nhưng chưa có đơn giá có nguồn."
@@ -1359,16 +1406,36 @@ def _status_for(
     # A row with only one side matched is not safe to auto-approve: the
     # platform is expected to surface the missing material/labor side for
     # human confirmation rather than implying a complete quotation.
-    missing_candidate = material_candidate is None or labor_candidate is None
+    missing_candidate = (
+        material_required and material_candidate is None
+    ) or (
+        labor_required and labor_candidate is None
+    )
     if hard_uncertain or missing_price or missing_candidate or quantity is None:
-        return "REVIEW_REQUIRED", "MEDIUM", "Cần kỹ sư kiểm tra ứng viên, thuộc tính hoặc nguồn giá."
+        missing_sides = []
+        if material_required and material_candidate is None:
+            missing_sides.append("vật tư")
+        if labor_required and labor_candidate is None:
+            missing_sides.append("nhân công")
+        suffix = f" Thiếu ứng viên {', '.join(missing_sides)}." if missing_sides else ""
+        return (
+            "REVIEW_REQUIRED",
+            "MEDIUM",
+            "Cần kỹ sư kiểm tra ứng viên, thuộc tính hoặc nguồn giá." + suffix,
+        )
     return "AUTO_APPROVED", "LOW", "Khớp độ tin cậy cao và đã truy xuất được nguồn giá."
 
 
-def _candidate_json(candidate: Candidate | None, price: float | None, source: dict[str, Any]) -> dict[str, Any]:
+def _candidate_json(
+    candidate: Candidate | None,
+    price: float | None,
+    source: dict[str, Any],
+    *,
+    display_name: str | None = None,
+) -> dict[str, Any]:
     if not candidate:
         return {}
-    return {
+    payload = {
         "id": candidate.entity_id,
         "name": candidate.name,
         "code": candidate.code,
@@ -1381,6 +1448,9 @@ def _candidate_json(candidate: Candidate | None, price: float | None, source: di
         "price": price,
         "source": source,
     }
+    if display_name:
+        payload["display_name"] = display_name
+    return payload
 
 
 def _policy_bool(value: Any, default: bool = False) -> bool:
@@ -1876,6 +1946,7 @@ def run_pricing(
                     "calculation": f"base_rate × {labor_multiplier:g} parallel runs",
                     "multiplier": labor_multiplier,
                 }
+            pricing_scope = _pricing_scope_for_item(conn, item)
             status, risk, explanation = _status_for(
                 product,
                 material_price,
@@ -1884,6 +1955,7 @@ def run_pricing(
                 _safe_float(item["quantity"]),
                 material_source=material_source,
                 labor_source=labor_source,
+                pricing_scope=pricing_scope,
             )
             material_conf = product.score if product else None
             labor_conf = labor.score if labor else None
@@ -1903,7 +1975,16 @@ def run_pricing(
                         candidate_price * _price_multiplier(description, candidate)
                     )
                 material_alternatives.append(
-                    _candidate_json(candidate, candidate_price, candidate_source)
+                    _candidate_json(
+                        candidate,
+                        candidate_price,
+                        candidate_source,
+                        display_name=(
+                            description
+                            if canonical_key(candidate.name) == canonical_key(description)
+                            else None
+                        ),
+                    )
                 )
             labor_alternatives: list[dict[str, Any]] = []
             for candidate in labor_candidates:
@@ -1918,7 +1999,16 @@ def run_pricing(
                         candidate_rate * _price_multiplier(description, candidate)
                     )
                 labor_alternatives.append(
-                    _candidate_json(candidate, candidate_rate, candidate_source)
+                    _candidate_json(
+                        candidate,
+                        candidate_rate,
+                        candidate_source,
+                        display_name=(
+                            description
+                            if canonical_key(candidate.name) == canonical_key(description)
+                            else None
+                        ),
+                    )
                 )
             alternatives = {
                 "material": material_alternatives,
@@ -2067,12 +2157,94 @@ def serialize_boq_item(conn, row: Any) -> dict[str, Any]:
         out_key = key.removesuffix("_json")
         result[out_key] = loads(result.pop(key), {} if "source" in key else [])
     result["technical_attributes"] = technical_attributes(result.get("raw_description") or "")
+    raw_description = str(result.get("raw_description") or "")
+    source_display_cache: dict[int, str] = {}
+
+    def _display_name(name: Any) -> str:
+        value = str(name or "")
+        return raw_description if value and canonical_key(value) == canonical_key(raw_description) else value
+
+    def _source_display_name(source: Any) -> str:
+        if not isinstance(source, dict):
+            return ""
+        references = []
+        provenance = source.get("provenance")
+        if isinstance(provenance, list):
+            references.extend(provenance)
+        references.append(source)
+        for reference in references:
+            if not isinstance(reference, dict):
+                continue
+            row_value = reference.get("source_row_id") or reference.get("row_id")
+            try:
+                row_id = int(row_value)
+            except (TypeError, ValueError):
+                continue
+            if row_id in source_display_cache:
+                return source_display_cache[row_id]
+            row = conn.execute(
+                """
+                SELECT sr.raw_cells_json, ss.mapping_json
+                FROM source_rows sr
+                JOIN source_sheets ss ON ss.id=sr.source_sheet_id
+                WHERE sr.id=?
+                """,
+                (row_id,),
+            ).fetchone()
+            if not row:
+                source_display_cache[row_id] = ""
+                continue
+            cells = loads(row["raw_cells_json"], {})
+            values = cells.get("values", cells) if isinstance(cells, dict) else {}
+            mapping = loads(row["mapping_json"], {})
+            description_index = mapping.get("description") if isinstance(mapping, dict) else None
+            candidates = []
+            if description_index is not None:
+                try:
+                    index = int(description_index)
+                    candidates.extend((str(index + 1), str(index)))
+                except (TypeError, ValueError):
+                    pass
+            candidates.extend(("2", "1"))
+            for key in candidates:
+                value = values.get(key) if isinstance(values, dict) else None
+                if isinstance(value, str) and value.strip():
+                    source_display_cache[row_id] = value.strip()
+                    return source_display_cache[row_id]
+        return ""
+
+    def _decorate_candidate(candidate: Any) -> dict[str, Any]:
+        if not isinstance(candidate, dict):
+            return candidate
+        output = dict(candidate)
+        display_name = output.get("display_name") or _display_name(output.get("name"))
+        source_name = _source_display_name(output.get("source"))
+        if source_name and (
+            not display_name
+            or display_name == output.get("name")
+            or not any(ord(character) > 127 for character in display_name)
+        ):
+            display_name = source_name
+        output["display_name"] = display_name
+        if not output.get("display_name"):
+            output.pop("display_name", None)
+        return output
+
     if result.get("matched_product_id"):
         p = conn.execute("SELECT * FROM products WHERE id=?", (result["matched_product_id"],)).fetchone()
+        product_display = _display_name(p["normalized_name"]) if p else ""
+        product_source_display = _source_display_name(result.get("material_source"))
+        if product_source_display and (
+            not product_display
+            or product_display == p["normalized_name"]
+            or not any(ord(character) > 127 for character in product_display)
+        ):
+            product_display = product_source_display
         result["matched_product"] = (
             {
                 "id": p["id"],
                 "name": p["normalized_name"],
+                "display_name": product_display or p["normalized_name"],
                 "code": p["product_code"],
                 "unit": p["unit"],
                 "attrs": loads(p["technical_attributes_json"], {}),
@@ -2084,8 +2256,22 @@ def serialize_boq_item(conn, row: Any) -> dict[str, Any]:
         result["matched_product"] = None
     if result.get("matched_labor_item_id"):
         l = conn.execute("SELECT * FROM labor_items WHERE id=?", (result["matched_labor_item_id"],)).fetchone()
+        labor_display = _display_name(l["normalized_name"]) if l else ""
+        labor_source_display = _source_display_name(result.get("labor_source"))
+        if labor_source_display and (
+            not labor_display
+            or labor_display == l["normalized_name"]
+            or not any(ord(character) > 127 for character in labor_display)
+        ):
+            labor_display = labor_source_display
         result["matched_labor"] = (
-            {"id": l["id"], "name": l["normalized_name"], "code": l["code"], "unit": l["unit"]}
+            {
+                "id": l["id"],
+                "name": l["normalized_name"],
+                "display_name": labor_display or l["normalized_name"],
+                "code": l["code"],
+                "unit": l["unit"],
+            }
             if l
             else None
         )
@@ -2097,8 +2283,12 @@ def serialize_boq_item(conn, row: Any) -> dict[str, Any]:
     result["material_source"] = result.get("material_source") or {}
     result["labor_source"] = result.get("labor_source") or {}
     alternatives = result.get("alternatives") or {}
-    material_candidates = alternatives.get("material", []) if isinstance(alternatives, dict) else []
+    material_candidates = (
+        alternatives.get("material", []) if isinstance(alternatives, dict) else []
+    )
     labor_candidates = alternatives.get("labor", []) if isinstance(alternatives, dict) else []
+    material_candidates = [_decorate_candidate(candidate) for candidate in material_candidates]
+    labor_candidates = [_decorate_candidate(candidate) for candidate in labor_candidates]
     result["candidates"] = [
         {**candidate, "candidate_type": "material"} for candidate in material_candidates
     ] + [
