@@ -147,6 +147,20 @@ def technical_attributes(description: str) -> dict[str, Any]:
         or "trung the" in text
     ):
         attrs["voltage_class"] = "mv"
+    # Supplier tables often encode only the numeric voltage suffix
+    # (``1x10-7.2kV``) and omit the words LV/MV.  Infer the broad class from
+    # the highest stated system voltage while preserving any explicit class
+    # marker above.  The 1.2kV boundary follows the common LV cable rating;
+    # this is a retrieval hint, not an electrical design decision.
+    if "voltage_class" not in attrs and voltage:
+        voltage_values = [
+            float(value)
+            for value in re.findall(r"\d+(?:\.\d+)?", voltage.group(0))
+        ]
+        if voltage_values:
+            attrs["voltage_class"] = (
+                "mv" if max(voltage_values) > 1.2 else "lv"
+            )
     for token, field in [
         ("xlpe", "insulation"),
         ("pvc", "sheath_or_insulation"),

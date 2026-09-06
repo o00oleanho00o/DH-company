@@ -1,0 +1,88 @@
+{
+  "experiment": "bounded_semantic_reranking",
+  "generated_date_utc": "2026-09-06",
+  "holdout": "BOQ-HỆ THỐNG ĐIỆN TRẠI LƠN HẢI HÀ-DH290124.xlsx",
+  "controls": {
+    "same_code_version": true,
+    "llm_max_calls": 20,
+    "canonical_summary": "embedded_in_this_file",
+    "scratch_reports_required_after_clone": false,
+    "reproduction_commands": {
+      "deterministic": "ENABLE_LLM=false python -m benchmarks.holdout --output-dir benchmarks/deterministic-experiment",
+      "semantic_assisted": "ENABLE_LLM=true LLM_MAX_CALLS=20 python -m benchmarks.holdout --output-dir benchmarks/llm-experiment-final --enable-llm"
+    }
+  },
+  "deterministic": {
+    "runtime_seconds": 231.594,
+    "pricing_runtime_seconds": 149.685,
+    "material_predicted": 133,
+    "material_evaluable": 1072,
+    "material_coverage": 0.1241,
+    "labor_predicted": 89,
+    "labor_evaluable": 1095,
+    "labor_coverage": 0.0813,
+    "auto_approved": 4,
+    "review_required": 214,
+    "no_match": 2169,
+    "no_price_found": 36,
+    "material_match_accuracy_proxy": 1.0,
+    "labor_match_accuracy_proxy": 1.0,
+    "high_confidence_wrong_match_rate_proxy": 0.0,
+    "provenance_complete": true
+  },
+  "semantic_assisted": {
+    "runtime_seconds": 456.571,
+    "pricing_runtime_seconds": 391.107,
+    "material_predicted": 134,
+    "material_evaluable": 1072,
+    "material_coverage": 0.125,
+    "labor_predicted": 89,
+    "labor_evaluable": 1095,
+    "labor_coverage": 0.0813,
+    "auto_approved": 4,
+    "review_required": 215,
+    "no_match": 2169,
+    "no_price_found": 35,
+    "material_match_accuracy_proxy": 1.0,
+    "labor_match_accuracy_proxy": 1.0,
+    "high_confidence_wrong_match_rate_proxy": 0.0,
+    "provenance_complete": true,
+    "llm_calls": 20,
+    "rerank_attempts": 20,
+    "rerank_applied": 1,
+    "rerank_review": 19,
+    "rerank_skipped": 4826,
+    "prompt_tokens": 89631,
+    "completion_tokens": 6491,
+    "total_tokens": 96122,
+    "model_latency_ms": 263620.945,
+    "reason_counts": {
+      "model_needs_review": 19,
+      "model_rerank": 1
+    }
+  },
+  "delta_semantic_minus_deterministic": {
+    "runtime_seconds": 224.977,
+    "runtime_ratio": 1.9713,
+    "pricing_runtime_seconds": 241.422,
+    "material_predicted": 1,
+    "material_coverage": 0.0009,
+    "labor_predicted": 0,
+    "labor_coverage": 0.0,
+    "auto_approved": 0,
+    "review_required": 1,
+    "no_match": 0,
+    "no_price_found": -1,
+    "high_confidence_wrong_match_rate_proxy": 0.0
+  },
+  "interpretation": {
+    "measured_gain": "One additional material ground-truth row was priced. Labor coverage, NO_MATCH and AUTO_APPROVED did not improve.",
+    "limitations": [
+      "Match accuracy and false-positive fields are conservative proxies because the holdout has no catalog IDs.",
+      "Exact historical price accuracy remained zero; semantic reranking does not address list/net/VAT/discount/project-price semantics.",
+      "The provider made exactly 20 external calls; no post-budget budget_exhausted attempts were recorded after short-circuiting.",
+      "Scratch benchmark directories are intentionally gitignored. This committed comparison embeds the canonical compact metrics needed after cloning."
+    ],
+    "recommendation": "Keep LLM disabled by default. Restrict any opt-in use to narrowly defined ambiguous material families after deterministic retrieval, and short-circuit reranking once the call budget is exhausted."
+  }
+}

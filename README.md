@@ -104,12 +104,26 @@ nên upload holdout qua màn **Tạo báo giá**.
 
 - `benchmarks/holdout-report.json`
 - `benchmarks/holdout-report.md`
+- `benchmarks/round2-report.json`
+- `benchmarks/round2-report.md`
+- `ROUND2-FINAL-REPORT.md`
 
 Giá holdout không được chèn vào `product_prices`/`labor_rates`; report có
 leakage guard, parsing metrics, coverage, sai số giá, false-positive ở
 confidence cao và provenance completeness. Kết quả baseline phải được đọc
 trung thực; target KPI trong prompt không được coi là số đạt được nếu report
 chưa chứng minh.
+
+Round 2 còn sinh `data-gap-report.json/.md`, `failure-analysis.md`,
+`temporal-modes-report.json/.md` và `row-classification.json/.md`. Các metric
+`source_supported` là upper bound theo category/catalog, không phải cam kết
+đúng SKU. Benchmark deterministic vẫn là baseline; semantic reranking chỉ
+được bật tường minh bằng `--enable-llm` và bị giới hạn ngân sách.
+
+Nếu doanh nghiệp đã xác nhận chính sách thương mại, có thể khai báo discount
+theo supplier/category/product family trong `.env` bằng
+`MANUAL_PRICING_RULES_JSON`. Khi chưa có xác nhận, hệ thống giữ list ex-VAT và
+ghi rõ lý do thay vì tự đoán net price.
 
 ## Kiểm thử
 

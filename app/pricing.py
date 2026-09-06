@@ -10,11 +10,23 @@ from typing import Any, Iterable
 
 from .ai import AIProvider, RerankResult, ai_provider, safe_rerank_sync
 from .db import db_session, dumps, loads, utc_now, row_dict
+from .labor_policy import normalise_labor_policy, select_labor_rate
 from .normalize import canonical_key, normalize_text, normalize_unit, technical_attributes
 
 
 AUTO_THRESHOLD = 0.90
 REVIEW_THRESHOLD = 0.62
+NON_PRICEABLE_LINE_CLASSES = frozenset(
+    {
+        "SECTION",
+        "SUBSECTION",
+        "NOTE",
+        "SUBTOTAL",
+        "TOTAL",
+        "HEADER",
+        "NON_PRICEABLE_REFERENCE",
+    }
+)
 
 
 @dataclass
@@ -35,7 +47,9 @@ class Candidate:
 # retrieval features and selected price provenance for that connection so a
 # 2,000+ line BOQ does not repeatedly tokenize/parse the same catalog rows.
 _CATALOG_CACHE: dict[tuple[str, str, int], list[tuple[Any, str, set[str], set[str]]]] = {}
-_PRICE_CACHE: dict[tuple[str, str, int, str | None], tuple[float | None, dict[str, Any]]] = {}
+_PRICE_CACHE: dict[
+    tuple[str, str, int, str | None, str], tuple[float | None, dict[str, Any]]
+] = {}
 
 
 def clear_runtime_caches() -> None:
@@ -43,6 +57,58 @@ def clear_runtime_caches() -> None:
 
     _CATALOG_CACHE.clear()
     _PRICE_CACHE.clear()
+
+
+def _line_class_value(item: Any) -> str:
+    """Return a normalized row-audit class, if one was persisted."""
+
+    try:
+        value = item["line_class"]
+    except (KeyError, IndexError, TypeError):
+        value = None
+    return normalize_text(value).upper().replace(" ", "_") if value else ""
+
+
+def _is_non_priceable_line(item: Any) -> bool:
+    """Skip only explicit structural classes; UNKNOWN remains reviewable."""
+
+    return _line_class_value(item) in NON_PRICEABLE_LINE_CLASSES
+
+
+def _source_warnings(source: Any) -> list[str]:
+    """Return normalized warnings carried by a selected price source."""
+
+    if not isinstance(source, dict):
+        return []
+    warnings = source.get("warnings")
+    if isinstance(warnings, (list, tuple, set)):
+        values = [str(value).strip() for value in warnings if str(value).strip()]
+    else:
+        values = []
+    reason_code = str(source.get("reason_code") or "").strip()
+    if reason_code and reason_code not in values:
+        values.insert(0, reason_code)
+    if source.get("needs_review") and not values:
+        values.append("SOURCE_NEEDS_REVIEW")
+    return values
+
+
+def _pricing_status_reason(
+    status: str,
+    *,
+    material_source: dict[str, Any] | None = None,
+    labor_source: dict[str, Any] | None = None,
+) -> str:
+    for source in (material_source, labor_source):
+        if isinstance(source, dict) and source.get("reason_code"):
+            return str(source["reason_code"])
+    return {
+        "AUTO_APPROVED": "matched_and_priced",
+        "REVIEW_REQUIRED": "confidence_or_specification_review",
+        "PRICE_DRIFT_WARNING": "price_drift_warning",
+        "NO_MATCH": "no_candidate_retrieved",
+        "NO_PRICE_FOUND": "candidate_without_usable_price",
+    }.get(status, "unclassified_status")
 
 
 def _db_identity(conn) -> str:
@@ -618,7 +684,7 @@ def _provenance(conn, table: str, row_id: int | None) -> dict[str, Any]:
 
 
 def choose_product_price(conn, product_id: int, quotation_date: str | None = None) -> tuple[float | None, dict[str, Any]]:
-    cache_key = (_db_identity(conn), "product", int(product_id), quotation_date)
+    cache_key = (_db_identity(conn), "product", int(product_id), quotation_date, "")
     if cache_key in _PRICE_CACHE:
         return _PRICE_CACHE[cache_key]
     rows = conn.execute(
@@ -645,30 +711,62 @@ def choose_product_price(conn, product_id: int, quotation_date: str | None = Non
     return _PRICE_CACHE[cache_key]
 
 
-def choose_labor_rate(conn, labor_item_id: int, quotation_date: str | None = None) -> tuple[float | None, dict[str, Any]]:
-    cache_key = (_db_identity(conn), "labor", int(labor_item_id), quotation_date)
+def _labor_policy_cache_key(policy: Any) -> str:
+    """Build a stable cache key for a labor policy mapping/name."""
+
+    if policy is None:
+        return ""
+    if isinstance(policy, str):
+        return policy.strip().lower()
+    try:
+        return json.dumps(policy, ensure_ascii=False, sort_keys=True, default=str)
+    except (TypeError, ValueError):
+        return str(policy)
+
+
+def choose_labor_rate(
+    conn,
+    labor_item_id: int,
+    quotation_date: str | None = None,
+    policy: str | dict[str, Any] | None = None,
+) -> tuple[float | None, dict[str, Any]]:
+    """Select a labor rate under an explicit deterministic policy.
+
+    The query retains every eligible observation so the policy can aggregate
+    recent project rates.  ``quotation_date`` remains an upper bound, matching
+    the historical behavior of this function.
+    """
+
+    cache_key = (
+        _db_identity(conn),
+        "labor",
+        int(labor_item_id),
+        quotation_date,
+        _labor_policy_cache_key(policy),
+    )
     if cache_key in _PRICE_CACHE:
         return _PRICE_CACHE[cache_key]
     rows = conn.execute(
         """
-        SELECT lr.*
+        SELECT lr.*, sf.filename, ss.sheet_name, sr.row_no,
+               p.project_name, p.quotation_date AS project_quotation_date
         FROM labor_rates lr
+        LEFT JOIN source_files sf ON sf.id=lr.source_file_id
+        LEFT JOIN source_sheets ss ON ss.id=lr.source_sheet_id
+        LEFT JOIN source_rows sr ON sr.id=lr.source_row_id
+        LEFT JOIN projects p ON p.id=lr.source_project_id
         WHERE lr.labor_item_id=?
           AND (? IS NULL OR lr.effective_date IS NULL OR lr.effective_date <= ?)
-        ORDER BY
-          CASE WHEN lr.effective_date IS NULL THEN 1 ELSE 0 END,
-          lr.effective_date DESC, lr.id DESC
+        ORDER BY lr.effective_date DESC, lr.id DESC
         """,
         (labor_item_id, quotation_date, quotation_date),
     ).fetchall()
-    if not rows:
-        _PRICE_CACHE[cache_key] = (None, {})
-        return _PRICE_CACHE[cache_key]
-    row = rows[0]
-    _PRICE_CACHE[cache_key] = (
-        _safe_float(row["rate"]),
-        _provenance(conn, "labor_rates", int(row["id"])),
+    selected_rate, source = select_labor_rate(
+        rows,
+        policy,
+        as_of=quotation_date,
     )
+    _PRICE_CACHE[cache_key] = (selected_rate, source)
     return _PRICE_CACHE[cache_key]
 
 
@@ -744,6 +842,9 @@ def _status_for(
     labor_candidate: Candidate | None,
     labor_price: float | None,
     quantity: float | None,
+    *,
+    material_source: dict[str, Any] | None = None,
+    labor_source: dict[str, Any] | None = None,
 ) -> tuple[str, str, str]:
     if not material_candidate and not labor_candidate:
         return "NO_MATCH", "HIGH", "Không tìm thấy ứng viên vật tư hoặc nhân công."
@@ -755,6 +856,26 @@ def _status_for(
     )
     if missing_price and not hard_uncertain:
         return "NO_PRICE_FOUND", "HIGH", "Có ứng viên nhưng chưa có đơn giá có nguồn."
+    material_warnings = _source_warnings(material_source)
+    labor_warnings = _source_warnings(labor_source)
+    # Keep a numerically usable value available for review, but never present a
+    # source with explicit statistical/commercial warnings as an automatic
+    # approval. Material drift gets its own route; labor spread/CV remains a
+    # review item because the rate is still an observed historical value.
+    if material_warnings:
+        return (
+            "PRICE_DRIFT_WARNING",
+            "HIGH",
+            "Giá vật tư có cảnh báo nguồn/độ lệch: "
+            + ", ".join(material_warnings),
+        )
+    if labor_warnings:
+        return (
+            "REVIEW_REQUIRED",
+            "MEDIUM",
+            "Đơn giá nhân công có cảnh báo thống kê: "
+            + ", ".join(labor_warnings),
+        )
     # A row with only one side matched is not safe to auto-approve: the
     # platform is expected to surface the missing material/labor side for
     # human confirmation rather than implying a complete quotation.
@@ -913,6 +1034,41 @@ def _record_model_usage(usage: dict[str, Any], result: RerankResult) -> None:
             aggregate[normalized_key] = aggregate.get(normalized_key, 0) + value
 
 
+def _labor_run_policy(policy: dict[str, Any]) -> dict[str, Any] | str | None:
+    """Extract and normalize a labor policy from a pricing-run mapping.
+
+    Callers may use the compact ``{"labor": "median_last_3"}`` form or
+    expanded top-level keys such as ``labor_adjustment_pct``.  The adapter
+    keeps the policy module independent from the API/CLI payload shape.
+    """
+
+    value = policy.get("labor")
+    if isinstance(value, dict):
+        result = dict(value)
+    elif value not in (None, ""):
+        result = {"strategy": value}
+    else:
+        result = {"strategy": "latest_historical_rate"}
+    aliases = {
+        "labor_adjustment": "adjustment",
+        "labor_adjustment_pct": "adjustment_pct",
+        "labor_escalation_factor": "escalation_factor",
+        "labor_max_spread_ratio": "max_spread_ratio",
+        "labor_max_cv": "max_cv",
+        "labor_min_observations": "min_observations",
+        "labor_window": "window",
+        "labor_prefer_master": "prefer_master",
+    }
+    for source_key, target_key in aliases.items():
+        if source_key in policy and target_key not in result:
+            result[target_key] = policy[source_key]
+    config = normalise_labor_policy(result)
+    config["requested_strategy"] = (
+        result.get("strategy") or result.get("policy") or "latest_historical_rate"
+    )
+    return config
+
+
 def run_pricing(
     project_id: int,
     *,
@@ -928,6 +1084,7 @@ def run_pricing(
         "auto_threshold": AUTO_THRESHOLD,
         "review_threshold": REVIEW_THRESHOLD,
     })
+    labor_policy = _labor_run_policy(policy)
     semantic_provider = llm_provider or ai_provider
     llm_requested = _policy_bool(
         policy.get("llm_enabled"),
@@ -977,8 +1134,12 @@ def run_pricing(
         ).fetchall()
         counts = {
             "total_items": len(items),
+            "priceable_items": 0,
+            "non_priceable_items": 0,
+            "uncertain_items": 0,
             "auto_approved": 0,
             "review_required": 0,
+            "price_drift_warning": 0,
             "no_match": 0,
             "no_price_found": 0,
             "material_matched": 0,
@@ -988,6 +1149,47 @@ def run_pricing(
         }
         quotation_date = project["quotation_date"]
         for item in items:
+            line_class = _line_class_value(item)
+            if _is_non_priceable_line(item):
+                # Keep the row in the project for layout/provenance and make
+                # the deliberate exclusion visible to API/export consumers.
+                # Rows classified UNKNOWN are not skipped: uncertain data must
+                # remain available for matching/review.
+                counts["non_priceable_items"] += 1
+                classification_reason = str(item["status_reason"] or "").strip()
+                status_reason = (
+                    f"row_class:{line_class.lower()}"
+                    + (f":{classification_reason}" if classification_reason else "")
+                )
+                conn.execute(
+                    """
+                    UPDATE boq_items
+                    SET pricing_run_id=?, matched_product_id=NULL,
+                        matched_labor_item_id=NULL, material_price=NULL,
+                        labor_price=NULL, material_total=NULL, labor_total=NULL,
+                        material_confidence=NULL, labor_confidence=NULL,
+                        material_source_json='{}', labor_source_json='{}',
+                        status='IGNORED', risk='LOW',
+                        explanation=?, status_reason=?,
+                        alternatives_json='[]'
+                    WHERE id=?
+                    """,
+                    (
+                        run_id,
+                        f"Bỏ qua dòng không cần áp giá ({line_class or 'STRUCTURAL'}).",
+                        status_reason,
+                        item["id"],
+                    ),
+                )
+                continue
+            is_metric_priceable = line_class == "PRICEABLE_LINE_ITEM"
+            if is_metric_priceable:
+                counts["priceable_items"] += 1
+            else:
+                # UNKNOWN rows are deliberately still processed so a human
+                # can inspect candidate evidence, but they are excluded from
+                # pricing KPI denominators and capture-rate numerators.
+                counts["uncertain_items"] += 1
             description = item["raw_description"] or item["normalized_description"]
             product_candidates = find_product_candidates(
                 conn, description, item["product_code"], item["unit"], limit=10
@@ -998,7 +1200,16 @@ def run_pricing(
             product_rerank_applied = False
             labor_rerank_applied = False
             if llm_enabled:
-                if _llm_ambiguous(product_candidates, margin=llm_margin):
+                # Once the provider budget is exhausted, do not invoke the
+                # safe fallback repeatedly for every remaining ambiguous row.
+                # This keeps telemetry honest and avoids pointless attempts
+                # after the bounded experiment reaches its cap.
+                provider_has_budget = (
+                    getattr(semantic_provider, "remaining_calls", 1) > 0
+                )
+                if provider_has_budget and _llm_ambiguous(
+                    product_candidates, margin=llm_margin
+                ):
                     try:
                         product_rerank = safe_rerank_sync(
                             description,
@@ -1028,7 +1239,12 @@ def run_pricing(
                     model_usage["rerank_skipped"] = int(
                         model_usage.get("rerank_skipped", 0)
                     ) + 1
-                if _llm_ambiguous(labor_candidates, margin=llm_margin):
+                provider_has_budget = (
+                    getattr(semantic_provider, "remaining_calls", 1) > 0
+                )
+                if provider_has_budget and _llm_ambiguous(
+                    labor_candidates, margin=llm_margin
+                ):
                     try:
                         labor_rerank = safe_rerank_sync(
                             description,
@@ -1078,7 +1294,14 @@ def run_pricing(
                 choose_product_price(conn, product.entity_id, quotation_date) if product else (None, {})
             )
             labor_price, labor_source = (
-                choose_labor_rate(conn, labor.entity_id, quotation_date) if labor else (None, {})
+                choose_labor_rate(
+                    conn,
+                    labor.entity_id,
+                    quotation_date,
+                    labor_policy,
+                )
+                if labor
+                else (None, {})
             )
             material_multiplier = _price_multiplier(description, product)
             labor_multiplier = _price_multiplier(description, labor)
@@ -1097,7 +1320,13 @@ def run_pricing(
                     "multiplier": labor_multiplier,
                 }
             status, risk, explanation = _status_for(
-                product, material_price, labor, labor_price, _safe_float(item["quantity"])
+                product,
+                material_price,
+                labor,
+                labor_price,
+                _safe_float(item["quantity"]),
+                material_source=material_source,
+                labor_source=labor_source,
             )
             material_conf = product.score if product else None
             labor_conf = labor.score if labor else None
@@ -1119,7 +1348,10 @@ def run_pricing(
             labor_alternatives: list[dict[str, Any]] = []
             for candidate in labor_candidates:
                 candidate_rate, candidate_source = choose_labor_rate(
-                    conn, candidate.entity_id, quotation_date
+                    conn,
+                    candidate.entity_id,
+                    quotation_date,
+                    labor_policy,
                 )
                 if candidate_rate is not None:
                     candidate_rate = _round_money(
@@ -1140,6 +1372,7 @@ def run_pricing(
                     material_confidence=?, labor_confidence=?,
                     material_source_json=?, labor_source_json=?,
                     status=?, risk=?, explanation=?, alternatives_json=?
+                    ,status_reason=?
                 WHERE id=?
                 """,
                 (
@@ -1158,6 +1391,11 @@ def run_pricing(
                     risk,
                     explanation,
                     dumps(alternatives),
+                    _pricing_status_reason(
+                        status,
+                        material_source=material_source,
+                        labor_source=labor_source,
+                    ),
                     item["id"],
                 ),
             )
@@ -1181,15 +1419,18 @@ def run_pricing(
                     """,
                     (run_id, item["id"], candidate.entity_id, rank, candidate.score, dumps(candidate.components), candidate.explanation),
                 )
-            counts["material_matched"] += int(product is not None)
-            counts["labor_matched"] += int(labor is not None)
-            counts["material_priced"] += int(material_price is not None)
-            counts["labor_priced"] += int(labor_price is not None)
+            if is_metric_priceable:
+                counts["material_matched"] += int(product is not None)
+                counts["labor_matched"] += int(labor is not None)
+                counts["material_priced"] += int(material_price is not None)
+                counts["labor_priced"] += int(labor_price is not None)
             key = {
                 "AUTO_APPROVED": "auto_approved",
                 "REVIEW_REQUIRED": "review_required",
+                "PRICE_DRIFT_WARNING": "price_drift_warning",
                 "NO_MATCH": "no_match",
                 "NO_PRICE_FOUND": "no_price_found",
+                "IGNORED": "non_priceable_items",
             }.get(status)
             if key:
                 counts[key] += 1
@@ -1199,6 +1440,22 @@ def run_pricing(
             counts["labor_coverage"] = round(counts["labor_priced"] / counts["total_items"], 4)
         else:
             counts.update(auto_coverage=0.0, material_coverage=0.0, labor_coverage=0.0)
+        if counts["priceable_items"]:
+            counts["priceable_auto_coverage"] = round(
+                counts["auto_approved"] / counts["priceable_items"], 4
+            )
+            counts["priceable_material_coverage"] = round(
+                counts["material_priced"] / counts["priceable_items"], 4
+            )
+            counts["priceable_labor_coverage"] = round(
+                counts["labor_priced"] / counts["priceable_items"], 4
+            )
+        else:
+            counts.update(
+                priceable_auto_coverage=0.0,
+                priceable_material_coverage=0.0,
+                priceable_labor_coverage=0.0,
+            )
         # Persist only aggregate semantic telemetry. No prompt, API key,
         # candidate prices, or provenance are stored in model_usage_json.
         try:

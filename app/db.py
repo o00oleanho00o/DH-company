@@ -92,6 +92,36 @@ CREATE TABLE IF NOT EXISTS product_prices (
 
 CREATE INDEX IF NOT EXISTS idx_prices_product_date ON product_prices(product_id, effective_date DESC);
 
+-- Immutable source observations.  ``product_prices`` is the operational
+-- selection used by the pricing engine; this table retains every supplier
+-- list/VAT/discount-tier observation without overwriting history.
+CREATE TABLE IF NOT EXISTS price_observations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    source_file_id INTEGER REFERENCES source_files(id) ON DELETE SET NULL,
+    source_sheet_id INTEGER REFERENCES source_sheets(id) ON DELETE SET NULL,
+    source_row_id INTEGER REFERENCES source_rows(id) ON DELETE SET NULL,
+    source_project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+    supplier TEXT,
+    observation_type TEXT NOT NULL DEFAULT 'supplier_list',
+    list_price REAL,
+    discount REAL,
+    net_price REAL NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'VND',
+    tax_mode TEXT NOT NULL DEFAULT 'ex_vat',
+    price_basis TEXT NOT NULL DEFAULT 'net',
+    effective_date TEXT,
+    valid_to TEXT,
+    confidence REAL NOT NULL DEFAULT 1.0,
+    context_json TEXT NOT NULL DEFAULT '{}',
+    calc_json TEXT NOT NULL DEFAULT '{}',
+    is_approved INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_price_observations_product_date
+    ON price_observations(product_id, effective_date DESC);
+
 CREATE TABLE IF NOT EXISTS labor_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     canonical_key TEXT NOT NULL UNIQUE,
@@ -168,6 +198,11 @@ CREATE TABLE IF NOT EXISTS boq_items (
     material_source_json TEXT NOT NULL DEFAULT '{}',
     labor_source_json TEXT NOT NULL DEFAULT '{}',
     status TEXT NOT NULL DEFAULT 'PENDING',
+    -- Audit classification is separate from pricing status.  A row may be
+    -- structurally non-priceable, require review, or remain unknown without
+    -- losing the engine's actionable status.
+    line_class TEXT,
+    status_reason TEXT,
     risk TEXT,
     explanation TEXT,
     alternatives_json TEXT NOT NULL DEFAULT '[]',
@@ -246,6 +281,17 @@ def connect() -> sqlite3.Connection:
 def init_db() -> None:
     with connect() as conn:
         conn.executescript(SCHEMA_SQL)
+        # Keep existing developer databases usable after the Round 2 schema
+        # extension.  SQLite cannot add a column through CREATE IF NOT EXISTS,
+        # so inspect and ALTER only when a legacy database is missing it.
+        columns = {
+            str(row["name"])
+            for row in conn.execute("PRAGMA table_info(boq_items)").fetchall()
+        }
+        if "line_class" not in columns:
+            conn.execute("ALTER TABLE boq_items ADD COLUMN line_class TEXT")
+        if "status_reason" not in columns:
+            conn.execute("ALTER TABLE boq_items ADD COLUMN status_reason TEXT")
         conn.commit()
 
 

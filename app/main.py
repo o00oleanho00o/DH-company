@@ -447,7 +447,7 @@ def quotation_review(project_id: int) -> list[dict[str, Any]]:
         # Return all rows so the UI can switch between risky/approved/no-price
         # filters without another endpoint.
         rows = conn.execute(
-            "SELECT * FROM boq_items WHERE project_id=? ORDER BY CASE status WHEN 'REVIEW_REQUIRED' THEN 0 WHEN 'NO_MATCH' THEN 1 WHEN 'NO_PRICE_FOUND' THEN 2 ELSE 3 END, id",
+            "SELECT * FROM boq_items WHERE project_id=? ORDER BY CASE status WHEN 'PRICE_DRIFT_WARNING' THEN 0 WHEN 'REVIEW_REQUIRED' THEN 1 WHEN 'NO_MATCH' THEN 2 WHEN 'NO_PRICE_FOUND' THEN 3 ELSE 4 END, id",
             (project_id,),
         ).fetchall()
         return [serialize_boq_item(conn, row) for row in rows]

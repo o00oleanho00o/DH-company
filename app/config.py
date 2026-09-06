@@ -40,6 +40,7 @@ def _load_loose_env() -> None:
                 "CLAUDE_API_KEY",
                 "CLAUDE_MODEL",
                 "ENABLE_LLM",
+                "MANUAL_PRICING_RULES_JSON",
                 "LLM_TIMEOUT_SECONDS",
                 "LLM_MAX_CALLS",
                 "LLM_MAX_CANDIDATES",

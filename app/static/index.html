@@ -141,31 +141,31 @@
             <div class="brand-name">Pricing Hub</div>
             <div class="brand-subtitle">M&amp;E • Nội bộ</div>
           </div>
-          <button class="icon-button sidebar-close" id="sidebar-close" aria-label="Đóng menu">
+          <button type="button" class="icon-button sidebar-close" id="sidebar-close" aria-label="Đóng menu">
             <svg><use href="#i-x"></use></svg>
           </button>
         </div>
 
         <div class="sidebar-section-label">Không gian làm việc</div>
         <nav class="primary-nav">
-          <button class="nav-item is-active" data-route="dashboard">
+          <button type="button" class="nav-item is-active" data-route="dashboard">
             <svg><use href="#i-grid"></use></svg>
             <span>Tổng quan</span>
           </button>
-          <button class="nav-item" data-route="import">
+          <button type="button" class="nav-item" data-route="import">
             <svg><use href="#i-upload"></use></svg>
             <span>Kho dữ liệu</span>
             <span class="nav-count" id="nav-source-count"></span>
           </button>
-          <button class="nav-item" data-route="quotations">
+          <button type="button" class="nav-item" data-route="quotations">
             <svg><use href="#i-file"></use></svg>
             <span>Báo giá</span>
           </button>
-          <button class="nav-item" data-route="catalog">
+          <button type="button" class="nav-item" data-route="catalog">
             <svg><use href="#i-database"></use></svg>
             <span>Danh mục &amp; giá</span>
           </button>
-          <button class="nav-item" data-route="benchmark">
+          <button type="button" class="nav-item" data-route="benchmark">
             <svg><use href="#i-layers"></use></svg>
             <span>Đánh giá độ phủ</span>
           </button>
@@ -173,7 +173,7 @@
 
         <div class="sidebar-divider"></div>
         <div class="sidebar-section-label">Trợ giúp</div>
-        <button class="nav-item nav-item-muted" id="open-guide">
+        <button type="button" class="nav-item nav-item-muted" id="open-guide">
           <svg><use href="#i-info"></use></svg>
           <span>Hướng dẫn nhanh</span>
         </button>
@@ -182,6 +182,10 @@
           <div class="api-health" id="api-health">
             <span class="health-dot" aria-hidden="true"></span>
             <span class="api-health-label">Đang kiểm tra kết nối…</span>
+          </div>
+          <div class="ai-health" id="ai-health" role="status" aria-live="polite" title="Trạng thái semantic assistance">
+            <span class="health-dot" aria-hidden="true"></span>
+            <span class="ai-health-label">AI semantic: đang kiểm tra…</span>
           </div>
           <div class="privacy-note">
             <svg><use href="#i-check-circle"></use></svg>
@@ -195,7 +199,7 @@
       <main class="main-content">
         <header class="topbar">
           <div class="topbar-left">
-            <button class="icon-button menu-toggle" id="menu-toggle" aria-label="Mở menu">
+            <button type="button" class="icon-button menu-toggle" id="menu-toggle" aria-label="Mở menu">
               <svg><use href="#i-menu"></use></svg>
             </button>
             <div class="breadcrumb" id="breadcrumb">
@@ -205,11 +209,11 @@
             </div>
           </div>
           <div class="topbar-actions">
-            <button class="button button-secondary button-small" id="global-refresh">
+            <button type="button" class="button button-secondary button-small" id="global-refresh">
               <svg><use href="#i-refresh"></use></svg>
               <span>Làm mới</span>
             </button>
-            <button class="avatar" aria-label="Tài khoản người dùng">DH</button>
+            <button type="button" class="avatar" aria-label="Tài khoản người dùng">DH</button>
           </div>
         </header>
 

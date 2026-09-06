@@ -1,0 +1,215 @@
+{
+  "schema_version": "1.0",
+  "report": "round2_before_after",
+  "generated_at": "2026-09-06T01:53:55.276131+00:00",
+  "holdout_file": "BOQ-HỆ THỐNG ĐIỆN TRẠI LƠN HẢI HÀ-DH290124.xlsx",
+  "baseline_path": "benchmarks/baseline-round1.json",
+  "current_path": "benchmarks/holdout-report.json",
+  "round1": {
+    "source": "git:HEAD benchmarks/holdout-report.json",
+    "generated_at": "2026-09-05T16:41:14.472083+00:00",
+    "holdout_file": "BOQ-HỆ THỐNG ĐIỆN TRẠI LƠN HẢI HÀ-DH290124.xlsx",
+    "llm_enabled": false,
+    "total_boq_items": 2473,
+    "priceable_rows_audit": 2388,
+    "material_ground_truth_items": 1072,
+    "material_priced_items": 106,
+    "material_priced_coverage": 0.0989,
+    "labor_ground_truth_items": 1095,
+    "labor_priced_items": 90,
+    "labor_priced_coverage": 0.0822,
+    "source_supported_material_items": null,
+    "source_supported_labor_items": null,
+    "material_capture_rate": null,
+    "labor_capture_rate": null,
+    "auto_approved": 4,
+    "review_required": 87,
+    "missing_source_data": null,
+    "match_failure": null,
+    "high_confidence_wrong_match": 0,
+    "provenance_complete": true,
+    "runtime_seconds": 188.143,
+    "notes": [
+      "Round 1 report predates explicit source-coverage and row-class metrics.",
+      "Source-supported and engine-capture rates are therefore not available for Round 1."
+    ]
+  },
+  "round2": {
+    "source": "benchmarks/holdout-report.json",
+    "generated_at": "2026-09-06T01:52:51.693131+00:00",
+    "holdout_file": "BOQ-HỆ THỐNG ĐIỆN TRẠI LƠN HẢI HÀ-DH290124.xlsx",
+    "llm_enabled": false,
+    "total_boq_items": 2473,
+    "priceable_rows_audit": 2388,
+    "priceable_rows_engine": 2388,
+    "non_priceable_rows_engine": 50,
+    "material_ground_truth_items": 1072,
+    "material_priced_items": 133,
+    "material_priced_coverage": 0.1241,
+    "labor_ground_truth_items": 1095,
+    "labor_priced_items": 89,
+    "labor_priced_coverage": 0.0813,
+    "source_supported_material_items": 2077,
+    "source_supported_labor_items": 2273,
+    "material_capture_rate": 0.064,
+    "labor_capture_rate": 0.0889,
+    "auto_approved": 4,
+    "review_required": 214,
+    "missing_source_data": 115,
+    "match_failure": 2019,
+    "high_confidence_wrong_match": 0,
+    "provenance_complete": true,
+    "runtime_seconds": 291.333,
+    "data_gap_main_counts": {
+      "MATCH_FAILURE": 14,
+      "MISSING_SOURCE_DATA": 2,
+      "NO_PRICE_FOUND": 1
+    },
+    "notes": [
+      "Source-supported is a theoretical category/catalog upper bound.",
+      "Capture rate is measured over source-supported rows and does not prove identity correctness.",
+      "Failure counts are diagnostic routing counts from the detailed failure analysis artifact."
+    ]
+  },
+  "metrics": [
+    {
+      "metric": "BOQ items (total)",
+      "kind": "count",
+      "round1": 2473,
+      "round2": 2473,
+      "delta": 0
+    },
+    {
+      "metric": "Priceable rows (audit)",
+      "kind": "count",
+      "round1": 2388,
+      "round2": 2388,
+      "delta": 0
+    },
+    {
+      "metric": "Material ground-truth items",
+      "kind": "count",
+      "round1": 1072,
+      "round2": 1072,
+      "delta": 0
+    },
+    {
+      "metric": "Material priced items",
+      "kind": "count",
+      "round1": 106,
+      "round2": 133,
+      "delta": 27
+    },
+    {
+      "metric": "Material priced coverage",
+      "kind": "ratio",
+      "round1": 0.0989,
+      "round2": 0.1241,
+      "delta": 0.0252
+    },
+    {
+      "metric": "Material source-supported items",
+      "kind": "count",
+      "round1": null,
+      "round2": 2077,
+      "delta": null
+    },
+    {
+      "metric": "Material engine capture rate",
+      "kind": "ratio",
+      "round1": null,
+      "round2": 0.064,
+      "delta": null
+    },
+    {
+      "metric": "Labor ground-truth items",
+      "kind": "count",
+      "round1": 1095,
+      "round2": 1095,
+      "delta": 0
+    },
+    {
+      "metric": "Labor priced items",
+      "kind": "count",
+      "round1": 90,
+      "round2": 89,
+      "delta": -1
+    },
+    {
+      "metric": "Labor priced coverage",
+      "kind": "ratio",
+      "round1": 0.0822,
+      "round2": 0.0813,
+      "delta": -0.000899999999999998
+    },
+    {
+      "metric": "Labor source-supported items",
+      "kind": "count",
+      "round1": null,
+      "round2": 2273,
+      "delta": null
+    },
+    {
+      "metric": "Labor engine capture rate",
+      "kind": "ratio",
+      "round1": null,
+      "round2": 0.0889,
+      "delta": null
+    },
+    {
+      "metric": "AUTO_APPROVED",
+      "kind": "count",
+      "round1": 4,
+      "round2": 4,
+      "delta": 0
+    },
+    {
+      "metric": "REVIEW_REQUIRED",
+      "kind": "count",
+      "round1": 87,
+      "round2": 214,
+      "delta": 127
+    },
+    {
+      "metric": "MISSING_SOURCE_DATA failures",
+      "kind": "count",
+      "round1": null,
+      "round2": 115,
+      "delta": null
+    },
+    {
+      "metric": "MATCH_FAILURE failures",
+      "kind": "count",
+      "round1": null,
+      "round2": 2019,
+      "delta": null
+    },
+    {
+      "metric": "High-confidence wrong matches",
+      "kind": "count",
+      "round1": 0,
+      "round2": 0,
+      "delta": 0
+    },
+    {
+      "metric": "Provenance complete",
+      "kind": "bool",
+      "round1": true,
+      "round2": true,
+      "delta": false
+    },
+    {
+      "metric": "Runtime (seconds)",
+      "kind": "seconds",
+      "round1": 188.143,
+      "round2": 291.333,
+      "delta": 103.19000000000003
+    }
+  ],
+  "interpretation": [
+    "Round 1 metrics are the immutable baseline snapshot from the previous report.",
+    "Round 2 adds explicit row classification, source-supported coverage and capture-rate metrics.",
+    "A missing Round 1 value means that metric was not measured, not zero.",
+    "Price exact-match remains 0 in both snapshots; current supplier repricing and historical project prices are separate temporal questions."
+  ]
+}

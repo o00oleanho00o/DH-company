@@ -247,6 +247,7 @@ svg {
 }
 
 .api-health,
+.ai-health,
 .privacy-note {
   display: flex;
   align-items: center;
@@ -257,6 +258,12 @@ svg {
 }
 
 .api-health-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-health-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -276,6 +283,21 @@ svg {
 }
 
 .api-health.is-error .health-dot {
+  background: var(--red);
+  box-shadow: 0 0 0 3px var(--red-soft);
+}
+
+.ai-health.is-online .health-dot {
+  background: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.ai-health.is-warning .health-dot {
+  background: var(--amber);
+  box-shadow: 0 0 0 3px var(--amber-soft);
+}
+
+.ai-health.is-error .health-dot {
   background: var(--red);
   box-shadow: 0 0 0 3px var(--red-soft);
 }

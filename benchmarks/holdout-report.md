@@ -1,11 +1,11 @@
 # Holdout pricing benchmark
 
-- Generated: `2026-09-05T16:41:14.472083+00:00`
-- Input directory: `F:\BUL_Product\DH-company\input`
+- Generated: `2026-09-06T01:52:51.693131+00:00`
+- Input directory: `input`
 - Holdout: `BOQ-HỆ THỐNG ĐIỆN TRẠI LƠN HẢI HÀ-DH290124.xlsx`
-- Database: `C:\Users\email\AppData\Local\Temp\dh-holdout-54jjwv2c\pricing.db`
+- Database: `None`
 - Database persisted: **no (temporary)**
-- Runtime: **188.143s** (ingest 29.403s, pricing 129.403s, evaluation 0.107s)
+- Runtime: **291.333s** (ingest 61.351s, pricing 198.970s, evaluation 7.853s)
 
 ## Leakage guard
 
@@ -22,13 +22,32 @@
 - Descriptions present: 2480
 - Quantities present: 2358
 
+## BOQ row classification audit
+
+- Parsed BOQ/PANEL rows included: 2829
+- Priceable line items (audit view): 2388
+- Non-priceable/uncertain rows: 441
+- Rows on excluded `OTHER` sheets: 20
+
+| Classification | Rows |
+| --- | ---: |
+| `PRICEABLE_LINE_ITEM` | 2388 |
+| `SECTION` | 68 |
+| `SUBSECTION` | 151 |
+| `NOTE` | 0 |
+| `SUBTOTAL` | 56 |
+| `TOTAL` | 6 |
+| `HEADER` | 6 |
+| `NON_PRICEABLE_REFERENCE` | 0 |
+| `UNKNOWN` | 154 |
+
 ## Material
 
 - Ground-truth items: 1072
-- Predicted/priced: 106 (9.9%)
+- Predicted/priced: 133 (12.4%)
 - Exact price matches: 0 (0.0%)
-- Mean relative error: 102.9%
-- Median relative error: 104.5%
+- Mean relative error: 90.7%
+- Median relative error: 97.0%
 - Technical/name match accuracy (proxy): 100.0%
 - High-confidence price-error rate: 100.0%
 - High-confidence wrong-match rate (proxy): 0.0%
@@ -36,9 +55,9 @@
 ## Labor
 
 - Ground-truth items: 1095
-- Predicted/priced: 90 (8.2%)
+- Predicted/priced: 89 (8.1%)
 - Exact price matches: 0 (0.0%)
-- Mean relative error: 51.6%
+- Mean relative error: 52.0%
 - Median relative error: 35.5%
 - Technical/name match accuracy (proxy): 100.0%
 - High-confidence price-error rate: 100.0%
@@ -56,9 +75,23 @@
 | Status | Rows |
 | --- | ---: |
 | `AUTO_APPROVED` | 4 |
-| `NO_MATCH` | 2269 |
-| `NO_PRICE_FOUND` | 113 |
-| `REVIEW_REQUIRED` | 87 |
+| `IGNORED` | 50 |
+| `NO_MATCH` | 2169 |
+| `NO_PRICE_FOUND` | 36 |
+| `REVIEW_REQUIRED` | 214 |
+
+## Persisted row classes
+
+- Priceable BOQ rows: 2388
+- Non-priceable BOQ rows: 85
+
+| Row class | Rows |
+| --- | ---: |
+| `PRICEABLE_LINE_ITEM` | 2388 |
+| `SECTION` | 4 |
+| `SUBSECTION` | 6 |
+| `SUBTOTAL` | 40 |
+| `UNKNOWN` | 35 |
 
 ## Interpretation
 

@@ -88,6 +88,7 @@ def cmd_benchmark(args: argparse.Namespace) -> None:
         input_dir=Path(args.input_dir),
         holdout_filename=args.holdout,
         output_dir=Path(args.output_dir),
+        llm_enabled=args.enable_llm,
     )
     _print(result)
 
@@ -128,6 +129,11 @@ def build_parser() -> argparse.ArgumentParser:
     benchmark.add_argument("--input-dir", default=str(ROOT_DIR / "input"))
     benchmark.add_argument("--holdout", default=DEFAULT_HOLDOUT)
     benchmark.add_argument("--output-dir", default=str(ROOT_DIR / "benchmarks"))
+    benchmark.add_argument(
+        "--enable-llm",
+        action="store_true",
+        help="Opt in to the bounded semantic reranking experiment.",
+    )
     benchmark.set_defaults(func=cmd_benchmark)
     return parser
 

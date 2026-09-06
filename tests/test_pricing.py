@@ -17,6 +17,7 @@ from app.pricing import (
     find_product_candidates,
     get_project_result,
     _price_multiplier,
+    _status_for,
     run_pricing,
 )
 
@@ -376,3 +377,35 @@ def test_parallel_bundle_scales_matching_multi_core_catalog_item() -> None:
     )
 
     assert _price_multiplier("Cáp LV ABC 2x(4x185mm2)", candidate) == 2
+
+
+def test_price_drift_warning_is_actionable_and_not_auto_approved() -> None:
+    candidate = Candidate(
+        entity_id=1,
+        name="cáp cxv 1x240",
+        code=None,
+        unit="m",
+        brand=None,
+        origin=None,
+        attrs={"category": "cable", "cable_family": "cxv"},
+        score=0.98,
+        components={},
+        explanation="exact identity",
+    )
+
+    status, risk, explanation = _status_for(
+        candidate,
+        125000.0,
+        None,
+        None,
+        10.0,
+        material_source={
+            "source_type": "historical_exact",
+            "warnings": ["PRICE_DRIFT_HIGH"],
+            "reason_code": "PRICE_DRIFT_HIGH",
+        },
+    )
+
+    assert status == "PRICE_DRIFT_WARNING"
+    assert risk == "HIGH"
+    assert "PRICE_DRIFT_HIGH" in explanation

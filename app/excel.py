@@ -36,6 +36,11 @@ class ParsedSheet:
     mapping: dict[str, int]
     rows: list[dict[str, Any]]
     warnings: list[str] = field(default_factory=list)
+    # Context extracted from the title/header area.  Supplier workbooks often
+    # keep construction, voltage and price-tier semantics outside the leaf
+    # table columns; retaining it here prevents ingestion from losing those
+    # facts while keeping the parser generic.
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 HEADER_SYNONYMS: dict[str, tuple[str, ...]] = {
@@ -298,6 +303,197 @@ def map_columns(snapshot: SheetSnapshot, header_row: int | None, sheet_type: str
     return mapping
 
 
+def _header_number(value: Any) -> float | None:
+    """Return a normalized percentage header, or ``None``.
+
+    Supplier ``TONG`` sheets encode discount headers as either numeric
+    fractions (``0.10``) or human-readable percentages (``10%``).  Treating
+    arbitrary numeric cells as discounts would misclassify ordinary price
+    columns, so values outside the practical 0..100% range are ignored.
+    """
+
+    number = parse_number(value)
+    if number is None:
+        return None
+    if number > 1.0:
+        number /= 100.0
+    if 0.0 <= number <= 1.0:
+        return round(number, 8)
+    return None
+
+
+def detect_price_columns(
+    snapshot: SheetSnapshot,
+    header_row: int | None,
+    sheet_type: str,
+) -> dict[str, Any]:
+    """Infer base and tiered price columns from multi-row headers.
+
+    The result uses zero-based column indexes (matching ``mapping``) and is
+    deliberately descriptive rather than selecting a business policy.  For
+    example, a ``TONG`` sheet exposes the base ex-VAT/VAT pair plus all
+    discount tiers; the pricing policy can later choose one without losing
+    observations.
+    """
+
+    if header_row is None or sheet_type != "SUPPLIER_PRICE":
+        return {}
+    idx = header_row - 1
+    rows = snapshot.rows
+    if idx < 0 or idx >= len(rows):
+        return {}
+    width = min(snapshot.max_col, 120)
+    base: dict[str, int] = {}
+    discount_tiers: list[dict[str, Any]] = []
+
+    # Most supplier sheets use the row immediately below the first header row
+    # for tax labels.  Scan a small window so shifted/merged headers continue
+    # to work.
+    tax_row_indexes = range(idx, min(idx + 4, len(rows)))
+    for col in range(width):
+        labels = " ".join(
+            normalize_text(rows[r][col])
+            for r in tax_row_indexes
+            if col < len(rows[r]) and rows[r][col] not in (None, "")
+        )
+        if not labels:
+            continue
+        is_ex = (
+            "chua vat" in labels
+            or "ex vat" in labels
+            or "without vat" in labels
+        )
+        is_inc = (
+            "co vat" in labels
+            or "inc vat" in labels
+            or "vat included" in labels
+        )
+        if is_ex and "ex_vat" not in base:
+            base["ex_vat"] = col
+        if is_inc and "inc_vat" not in base:
+            base["inc_vat"] = col
+
+    # A discount marker is normally in the row immediately beneath the
+    # ``Chiết khấu`` group heading.  Search the first three header rows and
+    # pair the marker column with its adjacent VAT column.
+    for discount_row in range(idx, min(idx + 3, len(rows))):
+        for col in range(width):
+            value = rows[discount_row][col] if col < len(rows[discount_row]) else None
+            rate = _header_number(value)
+            if rate is None:
+                continue
+            # Avoid interpreting a quantity/price in a normal leaf header as a
+            # tier: the same column must have an ex-VAT/VAT tax label nearby.
+            pair: dict[str, Any] = {"discount_rate": rate}
+            for candidate_col in (col, col + 1):
+                if candidate_col >= width:
+                    continue
+                labels = " ".join(
+                    normalize_text(rows[r][candidate_col])
+                    for r in range(idx, min(idx + 4, len(rows)))
+                    if candidate_col < len(rows[r]) and rows[r][candidate_col] not in (None, "")
+                )
+                if "chua vat" in labels or "ex vat" in labels:
+                    pair["ex_vat"] = candidate_col
+                if "co vat" in labels or "inc vat" in labels or "vat included" in labels:
+                    pair["inc_vat"] = candidate_col
+            if "ex_vat" in pair or "inc_vat" in pair:
+                # Numeric markers can appear in both a merged cell and a leaf
+                # cell.  De-duplicate by rate/column pair.
+                signature = (
+                    pair["discount_rate"],
+                    pair.get("ex_vat"),
+                    pair.get("inc_vat"),
+                )
+                if not any(
+                    (
+                        tier["discount_rate"],
+                        tier.get("ex_vat"),
+                        tier.get("inc_vat"),
+                    )
+                    == signature
+                    for tier in discount_tiers
+                ):
+                    discount_tiers.append(pair)
+    discount_tiers.sort(key=lambda tier: tier["discount_rate"])
+    result: dict[str, Any] = {}
+    if base:
+        result["base"] = base
+    if discount_tiers:
+        result["discount_tiers"] = discount_tiers
+    return result
+
+
+def _context_value(rows: list[list[Any]], labels: tuple[str, ...]) -> str | None:
+    """Find a value following a key label in title/context rows."""
+
+    normalized_labels = tuple(normalize_text(label) for label in labels)
+    for row in rows:
+        cells = [str(value).strip() for value in row if value not in (None, "")]
+        for index, cell in enumerate(cells):
+            normalized = normalize_text(cell)
+            if any(label in normalized for label in normalized_labels):
+                # ``Cấp điện áp: 0.6/1kV`` and ``Cấp điện áp:`` + next cell
+                # are both common in the source files.
+                if ":" in cell:
+                    value = cell.split(":", 1)[1].strip()
+                    if value:
+                        return value
+                if index + 1 < len(cells):
+                    return cells[index + 1]
+    return None
+
+
+def detect_sheet_metadata(
+    snapshot: SheetSnapshot,
+    header_row: int | None,
+    sheet_type: str,
+) -> dict[str, Any]:
+    """Extract stable sheet context and price-column semantics."""
+
+    context_rows = (
+        snapshot.rows[: max(0, (header_row or 1) - 1)]
+        if header_row is not None
+        else snapshot.rows[:20]
+    )
+    metadata: dict[str, Any] = {
+        "price_columns": detect_price_columns(snapshot, header_row, sheet_type),
+    }
+    standard = _context_value(
+        context_rows,
+        ("tieu chuan ap dung", "standard", "specification"),
+    )
+    construction = _context_value(
+        context_rows,
+        ("quy cach san pham", "construction", "cable construction"),
+    )
+    voltage = _context_value(
+        context_rows,
+        ("cap dien ap", "dien ap", "voltage"),
+    )
+    if standard:
+        metadata["standard"] = standard
+    if construction:
+        metadata["construction"] = construction
+    if voltage:
+        metadata["voltage"] = voltage
+    # Keep the first non-empty title as a human-readable family context.  Do
+    # not treat generic company/banner text as a product name.
+    for row in context_rows:
+        values = [str(value).strip() for value in row if value not in (None, "")]
+        if not values:
+            continue
+        candidate = " ".join(values)
+        normalized = normalize_text(candidate)
+        if any(
+            token in normalized
+            for token in ("bang gia", "cap ", "day ", "cable", "san pham")
+        ):
+            metadata.setdefault("title", candidate)
+            break
+    return metadata
+
+
 def _cell_at(row: list[Any], col: int | None) -> Any:
     if col is None or col < 0 or col >= len(row):
         return None
@@ -330,9 +526,19 @@ def classify_row(row: list[Any], fields: dict[str, Any], sheet_type: str) -> str
     return "section"
 
 
-def extract_rows(snapshot: SheetSnapshot, sheet_type: str, header_row: int | None, mapping: dict[str, int]) -> list[dict[str, Any]]:
+def extract_rows(
+    snapshot: SheetSnapshot,
+    sheet_type: str,
+    header_row: int | None,
+    mapping: dict[str, int],
+    metadata: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
     if header_row is None:
         return []
+    metadata = metadata or {}
+    price_columns = metadata.get("price_columns") or {}
+    base_price_columns = price_columns.get("base") or {}
+    discount_tiers = price_columns.get("discount_tiers") or []
     result: list[dict[str, Any]] = []
     for row_no in range(header_row + 1, len(snapshot.rows) + 1):
         row = snapshot.rows[row_no - 1]
@@ -353,6 +559,68 @@ def extract_rows(snapshot: SheetSnapshot, sheet_type: str, header_row: int | Non
             "discount": parse_number(_cell_at(row, mapping.get("discount"))),
             "note": _cell_at(row, mapping.get("note")),
         }
+        # ``TONG`` discount columns are a matrix of observations, not a
+        # single scalar discount.  Preserve every ex-VAT/VAT amount and leave
+        # selection to an explicit pricing policy.  The legacy ``discount``
+        # mapping points at the first tier's amount; exposing that as a scalar
+        # would silently mislabel a price as a percentage.
+        price_observations: list[dict[str, Any]] = []
+        base_ex_col = base_price_columns.get("ex_vat", mapping.get("list_price"))
+        base_inc_col = base_price_columns.get("inc_vat", mapping.get("vat_price"))
+        base_ex = parse_number(_cell_at(row, base_ex_col))
+        base_inc = parse_number(_cell_at(row, base_inc_col))
+        if base_ex is not None:
+            price_observations.append(
+                {
+                    "price_type": "supplier_list",
+                    "tax_mode": "ex_vat",
+                    "amount": base_ex,
+                    "discount_rate": 0.0,
+                    "column": base_ex_col + 1 if base_ex_col is not None else None,
+                }
+            )
+        if base_inc is not None:
+            price_observations.append(
+                {
+                    "price_type": "supplier_list",
+                    "tax_mode": "inc_vat",
+                    "amount": base_inc,
+                    "discount_rate": 0.0,
+                    "column": base_inc_col + 1 if base_inc_col is not None else None,
+                }
+            )
+        for tier in discount_tiers:
+            rate = tier.get("discount_rate")
+            ex_col = tier.get("ex_vat")
+            inc_col = tier.get("inc_vat")
+            ex_amount = parse_number(_cell_at(row, ex_col))
+            inc_amount = parse_number(_cell_at(row, inc_col))
+            if ex_amount is not None:
+                price_observations.append(
+                    {
+                        "price_type": "supplier_discounted",
+                        "tax_mode": "ex_vat",
+                        "amount": ex_amount,
+                        "discount_rate": rate,
+                        "column": ex_col + 1 if ex_col is not None else None,
+                    }
+                )
+            if inc_amount is not None:
+                price_observations.append(
+                    {
+                        "price_type": "supplier_discounted",
+                        "tax_mode": "inc_vat",
+                        "amount": inc_amount,
+                        "discount_rate": rate,
+                        "column": inc_col + 1 if inc_col is not None else None,
+                    }
+                )
+        if price_observations:
+            # Explicitly represent an unknown/unspecified tier as ``None``.
+            # This is safer than carrying the first discounted amount from the
+            # old ``discount`` column mapping.
+            fields["discount"] = None
+        fields["price_observations"] = price_observations
         # For price tables the list price is usually mapped from "Đơn giá";
         # for BOQs material_price may be inferred from a generic price column.
         if sheet_type in {"BOQ", "HISTORICAL_BOQ"} and fields["material_price"] is None:
@@ -395,7 +663,8 @@ def parse_workbook(path: Path) -> dict[str, Any]:
         sheet_type = detect_sheet_type(snapshot, workbook_type)
         header_row = find_header_row(snapshot, sheet_type)
         mapping = map_columns(snapshot, header_row, sheet_type)
-        rows = extract_rows(snapshot, sheet_type, header_row, mapping)
+        metadata = detect_sheet_metadata(snapshot, header_row, sheet_type)
+        rows = extract_rows(snapshot, sheet_type, header_row, mapping, metadata)
         total_data += sum(1 for row in rows if row["row_kind"] == "data")
         if snapshot.max_row and header_row is None and any(_row_text(r) for r in snapshot.rows[:20]):
             warnings.append(f"{snapshot.name}:HEADER_NOT_FOUND")
@@ -407,6 +676,7 @@ def parse_workbook(path: Path) -> dict[str, Any]:
                 mapping=mapping,
                 rows=rows,
                 warnings=[],
+                metadata=metadata,
             )
         )
     effective_date, inferred = infer_effective_date(path.name)

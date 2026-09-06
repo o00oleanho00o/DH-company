@@ -1,0 +1,686 @@
+{
+  "schema_version": "1.0",
+  "workbook": "BOQ-HỆ THỐNG ĐIỆN TRẠI LƠN HẢI HÀ-DH290124.xlsx",
+  "workbook_type": "HISTORICAL_BOQ",
+  "included_sheet_types": [
+    "BOQ",
+    "HISTORICAL_BOQ",
+    "PANEL_BOM"
+  ],
+  "included_rows": 2829,
+  "excluded_other_sheet_rows": 20,
+  "priceable_rows": 2388,
+  "non_priceable_rows": 441,
+  "parser_data_rows": 2473,
+  "parser_data_priceable_rows": 2388,
+  "parser_data_non_priceable_rows": 85,
+  "parser_data_classification_counts": {
+    "PRICEABLE_LINE_ITEM": 2388,
+    "SECTION": 10,
+    "SUBSECTION": 0,
+    "NOTE": 0,
+    "SUBTOTAL": 40,
+    "TOTAL": 0,
+    "HEADER": 0,
+    "NON_PRICEABLE_REFERENCE": 0,
+    "UNKNOWN": 35
+  },
+  "counts": {
+    "PRICEABLE_LINE_ITEM": 2388,
+    "SECTION": 68,
+    "SUBSECTION": 151,
+    "NOTE": 0,
+    "SUBTOTAL": 56,
+    "TOTAL": 6,
+    "HEADER": 6,
+    "NON_PRICEABLE_REFERENCE": 0,
+    "UNKNOWN": 154
+  },
+  "reason_counts": {
+    "ambiguous_description_or_missing_operational_fields": 36,
+    "amount_without_item_unit_or_quantity": 48,
+    "blank_or_parser_section_without_description": 4,
+    "blank_row": 114,
+    "item_signal_unit_or_price_but_quantity_missing": 37,
+    "item_signal_with_operational_fields": 2087,
+    "item_signal_zero_quantity": 52,
+    "operational_unit_and_quantity_or_price": 212,
+    "repeated_header_labels": 6,
+    "structural_description_without_pricing_fields": 10,
+    "structural_heading": 209,
+    "total_label:tong cong a": 4,
+    "total_label:tong cong a+b": 6,
+    "total_label:tong cong b": 4
+  },
+  "parser_row_kind_counts": {
+    "data": 2473,
+    "empty": 114,
+    "section": 242
+  },
+  "by_sheet": {
+    "01.CẤP NGUỒN TỔNG THỂ": {
+      "sheet_type": "HISTORICAL_BOQ",
+      "rows": 244,
+      "priceable_rows": 212,
+      "counts": {
+        "HEADER": 1,
+        "PRICEABLE_LINE_ITEM": 212,
+        "SECTION": 1,
+        "SUBTOTAL": 17,
+        "TOTAL": 1,
+        "UNKNOWN": 12
+      }
+    },
+    "02.HỆ THỐNG CHIẾU SÁNG NGOÀI": {
+      "sheet_type": "HISTORICAL_BOQ",
+      "rows": 79,
+      "priceable_rows": 61,
+      "counts": {
+        "HEADER": 1,
+        "PRICEABLE_LINE_ITEM": 61,
+        "SECTION": 7,
+        "SUBTOTAL": 5,
+        "TOTAL": 1,
+        "UNKNOWN": 4
+      }
+    },
+    "03.HỆ THỐNG TIẾP ĐỊA": {
+      "sheet_type": "HISTORICAL_BOQ",
+      "rows": 268,
+      "priceable_rows": 146,
+      "counts": {
+        "HEADER": 1,
+        "PRICEABLE_LINE_ITEM": 146,
+        "SUBTOTAL": 24,
+        "TOTAL": 1,
+        "UNKNOWN": 96
+      }
+    },
+    "04.HỆ THỐNG CHỐNG SÉT": {
+      "sheet_type": "HISTORICAL_BOQ",
+      "rows": 28,
+      "priceable_rows": 20,
+      "counts": {
+        "HEADER": 1,
+        "PRICEABLE_LINE_ITEM": 20,
+        "SECTION": 1,
+        "SUBTOTAL": 2,
+        "TOTAL": 1,
+        "UNKNOWN": 3
+      }
+    },
+    "05.TỦ ĐIỆN": {
+      "sheet_type": "PANEL_BOM",
+      "rows": 103,
+      "priceable_rows": 88,
+      "counts": {
+        "HEADER": 1,
+        "PRICEABLE_LINE_ITEM": 88,
+        "SUBTOTAL": 6,
+        "TOTAL": 1,
+        "UNKNOWN": 7
+      }
+    },
+    "06.HỆ THỐNG CHIẾU SÁNG BÊN TRON": {
+      "sheet_type": "HISTORICAL_BOQ",
+      "rows": 622,
+      "priceable_rows": 584,
+      "counts": {
+        "HEADER": 1,
+        "PRICEABLE_LINE_ITEM": 584,
+        "SECTION": 2,
+        "SUBTOTAL": 2,
+        "TOTAL": 1,
+        "UNKNOWN": 32
+      }
+    },
+    "05. TỦ ĐIỆN CHI TIẾT": {
+      "sheet_type": "PANEL_BOM",
+      "rows": 1485,
+      "priceable_rows": 1277,
+      "counts": {
+        "PRICEABLE_LINE_ITEM": 1277,
+        "SECTION": 57,
+        "SUBSECTION": 151
+      }
+    }
+  },
+  "samples": {
+    "PRICEABLE_LINE_ITEM": [
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 10,
+        "description": "Cáp CXV 12x1C-240mm2 từ máy phát điện tới ngăn ATS của MSB",
+        "unit": "m",
+        "quantity": 0.0,
+        "material_price": 6572300.0,
+        "labor_price": 390600.0,
+        "reason": "item_signal_zero_quantity"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 11,
+        "description": "Cáp CXV 8x1C-185mm2 từ máy phát điện tới ngăn ATS của MSB-A.1",
+        "unit": "m",
+        "quantity": 21.0,
+        "material_price": 3331200.0,
+        "labor_price": 223200.0,
+        "reason": "item_signal_with_operational_fields"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 12,
+        "description": "Cáp CV 1C-120mm2 từ máy phát điện tới ngăn ATS của MSB-A.1",
+        "unit": "m",
+        "quantity": 21.0,
+        "material_price": 266500.0,
+        "labor_price": 21300.0,
+        "reason": "item_signal_with_operational_fields"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 13,
+        "description": "Cáp CXV 8x1C-185mm2 từ máy phát điện tới ngăn ATS của MSB-A.2",
+        "unit": "m",
+        "quantity": 27.0,
+        "material_price": 3331200.0,
+        "labor_price": 223200.0,
+        "reason": "item_signal_with_operational_fields"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 14,
+        "description": "Cáp CV 1C-120mm2 từ máy phát điện tới ngăn ATS của MSB-A.2",
+        "unit": "m",
+        "quantity": 27.0,
+        "material_price": 266500.0,
+        "labor_price": 21300.0,
+        "reason": "item_signal_with_operational_fields"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 15,
+        "description": "Cáp CXV 2x1C-300mm2 từ máy phát điện tới ngăn ATS của MSB",
+        "unit": "m",
+        "quantity": 0.0,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "item_signal_zero_quantity"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 16,
+        "description": "Cáp CXV 11x1C-300mm² từ máy phát điện tới ngăn ATS của MSB-B.1",
+        "unit": "m",
+        "quantity": 22.0,
+        "material_price": 7528400.0,
+        "labor_price": 409200.0,
+        "reason": "item_signal_with_operational_fields"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 17,
+        "description": "Cáp CV 1C-120mm2 từ máy phát điện tới ngăn ATS của MSB-B.1",
+        "unit": "m",
+        "quantity": 22.0,
+        "material_price": 266500.0,
+        "labor_price": 21300.0,
+        "reason": "item_signal_with_operational_fields"
+      }
+    ],
+    "SECTION": [
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 68,
+        "description": "VẬT TƯ KHÁC",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "structural_description_without_pricing_fields"
+      },
+      {
+        "sheet": "02.HỆ THỐNG CHIẾU SÁNG NGOÀI",
+        "row_no": 34,
+        "description": "CHUỒNG HEO THỊT",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "structural_description_without_pricing_fields"
+      },
+      {
+        "sheet": "02.HỆ THỐNG CHIẾU SÁNG NGOÀI",
+        "row_no": 39,
+        "description": "CHUỒNG HEO CAI SỮA ",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "structural_description_without_pricing_fields"
+      },
+      {
+        "sheet": "02.HỆ THỐNG CHIẾU SÁNG NGOÀI",
+        "row_no": 44,
+        "description": "CHUỒNG HEO MANG THAI",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "structural_description_without_pricing_fields"
+      },
+      {
+        "sheet": "02.HỆ THỐNG CHIẾU SÁNG NGOÀI",
+        "row_no": 49,
+        "description": "CHUỒNG HEO NÁI ĐẺ",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "structural_description_without_pricing_fields"
+      },
+      {
+        "sheet": "02.HỆ THỐNG CHIẾU SÁNG NGOÀI",
+        "row_no": 59,
+        "description": "CHUỒNG HEO NỌC",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "structural_description_without_pricing_fields"
+      },
+      {
+        "sheet": "02.HỆ THỐNG CHIẾU SÁNG NGOÀI",
+        "row_no": 73,
+        "description": "Khu cổng chính",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "structural_description_without_pricing_fields"
+      },
+      {
+        "sheet": "02.HỆ THỐNG CHIẾU SÁNG NGOÀI",
+        "row_no": 78,
+        "description": "Khu xuất bán",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "structural_description_without_pricing_fields"
+      }
+    ],
+    "SUBSECTION": [
+      {
+        "sheet": "05. TỦ ĐIỆN CHI TIẾT",
+        "row_no": 23,
+        "description": "Đầu ra",
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "structural_heading"
+      },
+      {
+        "sheet": "05. TỦ ĐIỆN CHI TIẾT",
+        "row_no": 26,
+        "description": "Khoang tụ bù",
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "structural_heading"
+      },
+      {
+        "sheet": "05. TỦ ĐIỆN CHI TIẾT",
+        "row_no": 60,
+        "description": "Khoang MSB-A.1",
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "structural_heading"
+      },
+      {
+        "sheet": "05. TỦ ĐIỆN CHI TIẾT",
+        "row_no": 90,
+        "description": "Khoang MSB-A.2",
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "structural_heading"
+      },
+      {
+        "sheet": "05. TỦ ĐIỆN CHI TIẾT",
+        "row_no": 118,
+        "description": "Đầu ra",
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "structural_heading"
+      },
+      {
+        "sheet": "05. TỦ ĐIỆN CHI TIẾT",
+        "row_no": 120,
+        "description": "Khoang tụ bù",
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "structural_heading"
+      },
+      {
+        "sheet": "05. TỦ ĐIỆN CHI TIẾT",
+        "row_no": 154,
+        "description": "Khoang MSB-B.1",
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "structural_heading"
+      },
+      {
+        "sheet": "05. TỦ ĐIỆN CHI TIẾT",
+        "row_no": 184,
+        "description": "Khoang MSB-B.2",
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "structural_heading"
+      }
+    ],
+    "NOTE": [],
+    "SUBTOTAL": [
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 9,
+        "description": "DÂY NGUỒN TỪ TRẠM BIẾN ÁP ĐẾN NHÀ MÁY PHÁT",
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "amount_without_item_unit_or_quantity"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 45,
+        "description": "TỦ ĐIỆN PHÂN PHỐI CHÍNH MSB",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "amount_without_item_unit_or_quantity"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 77,
+        "description": "TỦ ĐIỆN PHÂN PHỐI MDB-1A",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "amount_without_item_unit_or_quantity"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 99,
+        "description": "TỦ ĐIỆN PHÂN PHỐI MDB-2A",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "amount_without_item_unit_or_quantity"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 111,
+        "description": "TỦ ĐIỆN PHÂN PHỐI MDB-3A",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "amount_without_item_unit_or_quantity"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 123,
+        "description": "TỦ ĐIỆN PHÂN PHỐI MDB-1B",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "amount_without_item_unit_or_quantity"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 145,
+        "description": "TỦ ĐIỆN PHÂN PHỐI MDB-2B",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "amount_without_item_unit_or_quantity"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 158,
+        "description": "TỦ ĐIỆN PHÂN PHỐI MDB-3B",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "amount_without_item_unit_or_quantity"
+      }
+    ],
+    "TOTAL": [
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 246,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "total_label:tong cong a+b"
+      },
+      {
+        "sheet": "02.HỆ THỐNG CHIẾU SÁNG NGOÀI",
+        "row_no": 86,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "total_label:tong cong a+b"
+      },
+      {
+        "sheet": "03.HỆ THỐNG TIẾP ĐỊA",
+        "row_no": 182,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "total_label:tong cong a+b"
+      },
+      {
+        "sheet": "04.HỆ THỐNG CHỐNG SÉT",
+        "row_no": 33,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "total_label:tong cong a+b"
+      },
+      {
+        "sheet": "05.TỦ ĐIỆN",
+        "row_no": 106,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "total_label:tong cong a+b"
+      },
+      {
+        "sheet": "06.HỆ THỐNG CHIẾU SÁNG BÊN TRON",
+        "row_no": 628,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "total_label:tong cong a+b"
+      }
+    ],
+    "HEADER": [
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 8,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "repeated_header_labels"
+      },
+      {
+        "sheet": "02.HỆ THỐNG CHIẾU SÁNG NGOÀI",
+        "row_no": 8,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "repeated_header_labels"
+      },
+      {
+        "sheet": "03.HỆ THỐNG TIẾP ĐỊA",
+        "row_no": 8,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "repeated_header_labels"
+      },
+      {
+        "sheet": "04.HỆ THỐNG CHỐNG SÉT",
+        "row_no": 8,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "repeated_header_labels"
+      },
+      {
+        "sheet": "05.TỦ ĐIỆN",
+        "row_no": 8,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "repeated_header_labels"
+      },
+      {
+        "sheet": "06.HỆ THỐNG CHIẾU SÁNG BÊN TRON",
+        "row_no": 8,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "repeated_header_labels"
+      }
+    ],
+    "NON_PRICEABLE_REFERENCE": [],
+    "UNKNOWN": [
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 46,
+        "description": "MSB-A",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "ambiguous_description_or_missing_operational_fields"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 56,
+        "description": "MSB-B",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "ambiguous_description_or_missing_operational_fields"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 221,
+        "description": "Ổ CẮM ĐƯỜNG LÙA HEO",
+        "unit": "",
+        "quantity": null,
+        "material_price": 0.0,
+        "labor_price": 0.0,
+        "reason": "ambiguous_description_or_missing_operational_fields"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 241,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "blank_or_parser_section_without_description"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 242,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "blank_row"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 243,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "blank_row"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 244,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "blank_row"
+      },
+      {
+        "sheet": "01.CẤP NGUỒN TỔNG THỂ",
+        "row_no": 247,
+        "description": null,
+        "unit": "",
+        "quantity": null,
+        "material_price": null,
+        "labor_price": null,
+        "reason": "blank_row"
+      }
+    ]
+  }
+}

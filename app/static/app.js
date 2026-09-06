@@ -58,6 +58,7 @@
     importPreviewBusy: false,
     quotationBusy: false,
     lastError: "",
+    aiStatus: null,
   };
 
   const $ = (selector, root = document) => root.querySelector(selector);
@@ -285,7 +286,7 @@
     if (["running", "processing", "queued"].includes(value)) {
       return { label: "Đang chạy", className: "badge-blue" };
     }
-    if (["review", "review_required", "needs_review"].includes(value)) {
+    if (["review", "review_required", "needs_review", "price_drift_warning"].includes(value)) {
       return { label: "Cần rà soát", className: "badge-warning" };
     }
     if (["failed", "error"].includes(value)) {
@@ -321,6 +322,18 @@
     if (status === "error") element.classList.add("is-error");
     const labelElement = $(".api-health-label", element);
     if (labelElement) labelElement.textContent = label;
+  }
+
+  function setAIHealth(status, label, details = "") {
+    const element = $("#ai-health");
+    if (!element) return;
+    element.classList.remove("is-online", "is-warning", "is-error");
+    if (status === "online") element.classList.add("is-online");
+    if (status === "warning") element.classList.add("is-warning");
+    if (status === "error") element.classList.add("is-error");
+    const labelElement = $(".ai-health-label", element);
+    if (labelElement) labelElement.textContent = label;
+    if (details) element.title = details;
   }
 
   function toast(message, type = "info", title = "") {
@@ -381,6 +394,9 @@
   }
 
   const api = {
+    async health() {
+      return request("/api/health");
+    },
     async sources() {
       return rawArray(await request("/api/sources"), ["sources", "items", "data"]);
     },
@@ -443,6 +459,47 @@
       return request("/api/benchmark");
     },
   };
+
+  function describeAIStatus(payload) {
+    const ai = payload?.ai || {};
+    const calls = Number(ai.calls_made);
+    const maxCalls = Number(ai.max_calls);
+    const usage =
+      Number.isFinite(calls) && Number.isFinite(maxCalls) && maxCalls > 0
+        ? ` • ${calls}/${maxCalls} lượt trong batch`
+        : "";
+    if (ai.enabled && ai.configured) {
+      return {
+        status: "online",
+        label: `AI semantic: bật${usage}`,
+        details: `LLM chỉ rerank candidate mơ hồ; không tạo giá hoặc provenance.${usage}`,
+      };
+    }
+    if (ai.enabled && !ai.configured) {
+      return {
+        status: "warning",
+        label: "AI semantic: thiếu cấu hình",
+        details: "LLM được yêu cầu nhưng chưa đủ base URL, model hoặc API key; engine giữ deterministic.",
+      };
+    }
+    return {
+      status: "warning",
+      label: "AI semantic: tắt • deterministic",
+      details: "Pricing engine đang chạy deterministic; AI chỉ là lớp semantic tùy chọn.",
+    };
+  }
+
+  async function loadAIHealth() {
+    try {
+      const payload = await api.health();
+      state.aiStatus = payload?.ai || {};
+      const description = describeAIStatus(payload);
+      setAIHealth(description.status, description.label, description.details);
+    } catch (error) {
+      state.aiStatus = null;
+      setAIHealth("error", "AI semantic: chưa xác định", "Không đọc được trạng thái AI từ API.");
+    }
+  }
 
   function routeFromHash() {
     const hash = window.location.hash.replace(/^#\/?/, "") || "dashboard";
@@ -1227,6 +1284,10 @@
       state.activeQuotation = { ...(state.activeQuotation || {}), ...quotation, raw: payload };
       if (notify) toast("Pipeline đã hoàn tất hoặc đang được xử lý ở máy chủ.", "success", "Đã gửi yêu cầu định giá");
       await loadReviewItems(id, false);
+      // Refresh the server-side semantic budget counter after a pricing run.
+      // The API returns aggregate usage only; no key, prompt, or candidate
+      // provenance is exposed to the browser.
+      await loadAIHealth();
     } catch (error) {
       toast(error.message, "error", "Không chạy được định giá");
     } finally {
@@ -1770,6 +1831,7 @@
   }
 
   function showGuide() {
+    const aiDescription = describeAIStatus({ ai: state.aiStatus || {} });
     modalRoot.innerHTML = `
       <div class="modal-backdrop" data-modal-dismiss>
         <section class="modal" role="dialog" aria-modal="true" aria-labelledby="guide-title">
@@ -1780,6 +1842,7 @@
               <li><strong>Tạo báo giá:</strong> upload BOQ mới; engine đọc workbook, match vật tư và áp giá deterministic.</li>
               <li><strong>Rà soát:</strong> xử lý dòng ambiguity, lưu correction, rồi xuất Excel có sheet AI Audit.</li>
             </ol>
+            <div class="callout ${aiDescription.status === "online" ? "callout-success" : "callout-warning"}" style="margin-bottom:12px">${icon("spark")}<span><strong>${escapeHtml(aiDescription.label)}.</strong> AI chỉ hỗ trợ phân loại / rerank candidate đã có khi dòng mơ hồ; giá, khối lượng và provenance luôn do pipeline deterministic lấy từ database.</span></div>
             <div class="callout callout-warning">${icon("alert")}<span>Nếu không có provenance, hệ thống không tự sinh giá. Dòng đó sẽ được đánh dấu cần review hoặc chưa có giá.</span></div>
           </div>
           <div class="modal-footer"><button class="button button-primary" data-modal-dismiss>Đã hiểu</button></div>
@@ -1831,7 +1894,7 @@
       const matchesFilter =
         filter === "all" ||
         (filter === "completed" && ["completed", "complete", "priced", "done", "exported"].includes(status)) ||
-        (filter === "review" && ["review", "review_required", "needs_review"].includes(status)) ||
+        (filter === "review" && ["review", "review_required", "needs_review", "price_drift_warning"].includes(status)) ||
         (filter === "running" && ["running", "processing", "queued"].includes(status)) ||
         (filter === "draft" && ["draft", "new"].includes(status));
       return matchesFilter && (!query || haystack.includes(query));
@@ -1941,13 +2004,8 @@
   $("#sidebar-backdrop")?.addEventListener("click", closeSidebar);
   $("#open-guide")?.addEventListener("click", showGuide);
   $("#global-refresh")?.addEventListener("click", () => renderRoute());
-  $$(".nav-item[data-route]").forEach((item) => {
-    item.addEventListener("click", () => {
-      const route = item.dataset.route;
-      if (route) navigate(`#${route}`);
-    });
-  });
   window.addEventListener("hashchange", renderRoute);
 
+  loadAIHealth();
   renderRoute();
 })();

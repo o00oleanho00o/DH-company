@@ -1,4 +1,5 @@
 .env
+.audit-diff.txt
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -10,3 +11,24 @@ storage/
 *.sqlite3
 dist/
 build/
+*.log
+*.tmp
+*.temp
+*.cache
+*.swp
+coverage/
+.nyc_output/
+test-results/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Benchmark scratch runs; canonical reports live directly under benchmarks/.
+benchmarks/*experiment*/
+benchmarks/round1-reproduce/
+benchmarks/round2-deterministic/
+benchmarks/round2-generated/
+benchmarks/docs/
+
+# Local diff snapshots produced during review.
+.tmp-*

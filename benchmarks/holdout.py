@@ -40,17 +40,154 @@ from app.excel import parse_workbook
 from app.ingest import ingest_workbook
 from app.normalize import canonical_key, normalize_text, technical_attributes
 from app.pricing import AUTO_THRESHOLD, run_pricing
+from benchmarks.row_audit import classify_parsed_workbook, markdown_report as _row_audit_markdown
+from benchmarks.modes import evaluate_db_modes, write_temporal_report
+from benchmarks.reports import (
+    build_data_gap_report,
+    build_data_requirements,
+    build_failure_analysis,
+    write_report_files,
+)
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT_DIR = ROOT_DIR / "input"
 DEFAULT_OUTPUT_DIR = ROOT_DIR / "benchmarks"
 
+def _portable_report_path(value: str | Path) -> str:
+    """Prefer repository-relative paths in committed benchmark artifacts."""
+
+    path = Path(value).resolve()
+    try:
+        return path.relative_to(ROOT_DIR).as_posix()
+    except ValueError:
+        return str(path)
+
 
 def _json_default(value: Any) -> Any:
     if isinstance(value, Path):
         return str(value)
     raise TypeError(f"not JSON serializable: {type(value)!r}")
+
+
+def _compact_data_gap(data_gap: dict[str, Any] | None) -> dict[str, Any]:
+    """Keep primary benchmark JSON small while preserving source-gap metrics.
+
+    The detailed row records are already written to ``data-gap-report.json``.
+    Embedding those records in ``holdout-report.json`` made the primary report
+    several megabytes and encouraged consumers to parse the wrong artifact.
+    Keep category/source summaries here and expose the omitted-row count.
+    """
+
+    if not isinstance(data_gap, dict):
+        return {}
+    compact = dict(data_gap)
+    rows = compact.pop("rows", None)
+    if isinstance(rows, list):
+        compact["row_detail_count"] = len(rows)
+        compact["row_details_omitted"] = True
+    return compact
+
+
+def _compact_failure_analysis(
+    failure_analysis: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Retain failure counts and a pointer-friendly sample summary."""
+
+    if not isinstance(failure_analysis, dict):
+        return {}
+    compact = dict(failure_analysis)
+    failures = compact.pop("failures", None)
+    material_failures = compact.pop("material_failures", None)
+    labor_failures = compact.pop("labor_failures", None)
+    pricing_errors = compact.pop("pricing_errors", None)
+    if isinstance(failures, list):
+        compact["failure_sample_count"] = len(failures)
+        compact["failure_samples_omitted"] = True
+        compact["failure_sample_ids"] = [
+            item.get("id")
+            for item in failures[:10]
+            if isinstance(item, dict) and item.get("id") is not None
+        ]
+    if isinstance(material_failures, list):
+        compact["material_failure_sample_count"] = len(material_failures)
+        compact["material_failure_samples_omitted"] = True
+        compact["material_failure_sample_ids"] = [
+            item.get("id")
+            for item in material_failures[:10]
+            if isinstance(item, dict) and item.get("id") is not None
+        ]
+    if isinstance(labor_failures, list):
+        compact["labor_failure_sample_count"] = len(labor_failures)
+        compact["labor_failure_samples_omitted"] = True
+        compact["labor_failure_sample_ids"] = [
+            item.get("id")
+            for item in labor_failures[:10]
+            if isinstance(item, dict) and item.get("id") is not None
+        ]
+    if isinstance(pricing_errors, list):
+        compact["pricing_error_sample_count"] = len(pricing_errors)
+        compact["pricing_error_samples_omitted"] = True
+        compact["pricing_error_sample_ids"] = [
+            item.get("id")
+            for item in pricing_errors[:10]
+            if isinstance(item, dict) and item.get("id") is not None
+        ]
+    if isinstance(compact.get("data_gap"), dict):
+        compact["data_gap"] = _compact_data_gap(compact["data_gap"])
+    return compact
+
+
+def _compact_temporal_modes(
+    temporal_modes: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Keep temporal mode metrics while omitting repeated row error details."""
+
+    if not isinstance(temporal_modes, dict):
+        return {}
+    compact = dict(temporal_modes)
+    for mode_name in ("historical_reproduction", "current_repricing"):
+        mode = compact.get(mode_name)
+        if not isinstance(mode, dict):
+            continue
+        mode_copy = dict(mode)
+        mode_errors = mode_copy.pop("pricing_errors", None)
+        if isinstance(mode_errors, list):
+            mode_copy["pricing_error_count"] = len(mode_errors)
+            mode_copy["pricing_errors_omitted"] = True
+        for side in ("material", "labor"):
+            side_data = mode_copy.get(side)
+            if not isinstance(side_data, dict):
+                continue
+            side_copy = dict(side_data)
+            side_errors = side_copy.pop("pricing_errors", None)
+            if isinstance(side_errors, list):
+                side_copy["pricing_error_count"] = len(side_errors)
+                side_copy["pricing_errors_omitted"] = True
+            mode_copy[side] = side_copy
+        compact[mode_name] = mode_copy
+    return compact
+
+
+def _compact_report_for_disk(report: dict[str, Any]) -> dict[str, Any]:
+    """Build the compact, machine-readable primary report representation."""
+
+    compact = dict(report)
+    compact["report_schema"] = "round2-compact-v1"
+    compact["data_gap"] = _compact_data_gap(report.get("data_gap"))
+    compact["failure_analysis"] = _compact_failure_analysis(
+        report.get("failure_analysis")
+    )
+    compact["temporal_modes"] = _compact_temporal_modes(
+        report.get("temporal_modes")
+    )
+    compact["detail_artifacts"] = {
+        "data_gap": "artifact_paths.data_gap_json",
+        "failure_analysis": "artifact_paths.failure_analysis_markdown",
+        "temporal_modes": "artifact_paths.temporal_json",
+        "row_classification": "row_classification_json",
+    }
+    return compact
 
 
 def _utc_now() -> str:
@@ -350,6 +487,7 @@ def _evaluate(
         """
         SELECT b.id, b.raw_description, b.quantity, b.material_price, b.labor_price,
                b.material_confidence, b.labor_confidence, b.status,
+               b.line_class, b.status_reason,
                material_source_json, labor_source_json,
                p.normalized_name AS product_name,
                p.technical_attributes_json AS product_attributes_json,
@@ -389,6 +527,9 @@ def _evaluate(
     provenance_material_missing = 0
     provenance_labor_missing = 0
     statuses: dict[str, int] = {}
+    line_classes: dict[str, int] = {}
+    priceable_rows = 0
+    non_priceable_rows = 0
 
     for row in rows:
         item_id = int(row["id"])
@@ -401,8 +542,19 @@ def _evaluate(
         labor_conf = _safe_float(row["labor_confidence"])
         status = str(row["status"] or "UNKNOWN")
         statuses[status] = statuses.get(status, 0) + 1
+        line_class = str(row["line_class"] or "UNKNOWN").upper()
+        line_classes[line_class] = line_classes.get(line_class, 0) + 1
+        # Accuracy metrics are intentionally evaluated only on rows positively
+        # classified as actual priceable line items. ``UNKNOWN`` rows remain
+        # persisted and reviewable, but mixing unresolved parser ambiguity into
+        # pricing KPIs would make the benchmark semantics misleading.
+        is_metric_priceable = line_class == "PRICEABLE_LINE_ITEM"
+        if not is_metric_priceable:
+            non_priceable_rows += 1
+        else:
+            priceable_rows += 1
 
-        if gt_material is not None and gt_material > 0:
+        if is_metric_priceable and gt_material is not None and gt_material > 0:
             material_evaluable += 1
             if pred_material is not None:
                 material_predicted += 1
@@ -435,7 +587,7 @@ def _evaluate(
                 if not source or source in {"{}", "null"}:
                     provenance_material_missing += 1
 
-        if gt_labor is not None and gt_labor > 0:
+        if is_metric_priceable and gt_labor is not None and gt_labor > 0:
             labor_evaluable += 1
             if pred_labor is not None:
                 labor_predicted += 1
@@ -531,6 +683,9 @@ def _evaluate(
         "run": run_result,
         "rows": len(rows),
         "statuses": statuses,
+        "line_classes": line_classes,
+        "priceable_rows": priceable_rows,
+        "non_priceable_rows": non_priceable_rows,
         "material": summary(
             material_evaluable,
             material_predicted,
@@ -572,6 +727,7 @@ def _evaluate(
 def _markdown_report(report: dict[str, Any]) -> str:
     parsing = report["parsing"]
     evaluation = report["evaluation"]
+    row_classification = report.get("row_classification") or {}
     material = evaluation["material"]
     labor = evaluation["labor"]
     leakage = evaluation["leakage"]
@@ -612,6 +768,23 @@ def _markdown_report(report: dict[str, Any]) -> str:
         f"- Descriptions present: {parsing['descriptions_present']}",
         f"- Quantities present: {parsing['quantities_present']}",
         "",
+        "## BOQ row classification audit",
+        "",
+        f"- Parsed BOQ/PANEL rows included: {row_classification.get('included_rows', 0)}",
+        f"- Priceable line items (audit view): {row_classification.get('priceable_rows', 0)}",
+        f"- Non-priceable/uncertain rows: {row_classification.get('non_priceable_rows', 0)}",
+        f"- Rows on excluded `OTHER` sheets: {row_classification.get('excluded_other_sheet_rows', 0)}",
+        "",
+        "| Classification | Rows |",
+        "| --- | ---: |",
+    ]
+    lines.extend(
+        f"| `{classification}` | {count} |"
+        for classification, count in (row_classification.get("counts") or {}).items()
+    )
+    lines.extend(
+        [
+            "",
         "## Material",
         "",
         f"- Ground-truth items: {material['evaluable_items']}",
@@ -646,9 +819,28 @@ def _markdown_report(report: dict[str, Any]) -> str:
         "| Status | Rows |",
         "| --- | ---: |",
     ]
+    )
     lines.extend(
         f"| `{status}` | {count} |"
         for status, count in sorted(evaluation["statuses"].items())
+    )
+    lines.extend(
+        [
+            "",
+            "## Persisted row classes",
+            "",
+            f"- Priceable BOQ rows: {evaluation.get('priceable_rows', 0)}",
+            f"- Non-priceable BOQ rows: {evaluation.get('non_priceable_rows', 0)}",
+            "",
+            "| Row class | Rows |",
+            "| --- | ---: |",
+        ]
+    )
+    lines.extend(
+        f"| `{line_class}` | {count} |"
+        for line_class, count in sorted(
+            (evaluation.get("line_classes") or {}).items()
+        )
     )
     lines.extend(
         [
@@ -678,6 +870,7 @@ def run_benchmark(
     holdout_filename: str | None = None,
     db_path: Path | None = None,
     keep_storage: bool = False,
+    llm_enabled: bool = False,
 ) -> dict[str, Any]:
     benchmark_started = time.perf_counter()
     input_dir = input_dir.resolve()
@@ -728,9 +921,24 @@ def run_benchmark(
             # Historical holdout rows are intentionally skipped by default in
             # run_pricing; force=True makes this explicit benchmark behavior.
             pricing_started = time.perf_counter()
-            run_result = run_pricing(int(project_id), force=True)
+            # Benchmarks are deterministic by default.  Semantic reranking is
+            # an explicit opt-in experiment so a configured API key can never
+            # silently change the baseline or incur external calls.
+            run_policy = {
+                "llm_enabled": bool(llm_enabled),
+                "auto_threshold": AUTO_THRESHOLD,
+            }
+            run_result = run_pricing(
+                int(project_id),
+                policy=run_policy,
+                force=True,
+            )
             pricing_runtime = time.perf_counter() - pricing_started
             evaluation_started = time.perf_counter()
+            data_gap: dict[str, Any]
+            failure_analysis: dict[str, Any]
+            data_requirements: dict[str, Any]
+            temporal_modes: dict[str, Any]
             with db.db_session() as conn:
                 evaluation = _evaluate(
                     conn,
@@ -749,9 +957,40 @@ def run_benchmark(
                     "labor_rates": _count(conn, "labor_rates"),
                     "projects": _count(conn, "projects"),
                 }
+                data_gap = build_data_gap_report(
+                    conn,
+                    int(project_id),
+                    run_id=int(run_result["run_id"]),
+                )
+                failure_analysis = build_failure_analysis(
+                    conn,
+                    int(project_id),
+                    run_id=int(run_result["run_id"]),
+                    ground_truth=ground_truth,
+                    limit=50,
+                )
+                data_requirements = build_data_requirements(
+                    data_gap,
+                    failure_analysis=failure_analysis,
+                )
+                temporal_modes = evaluate_db_modes(
+                    conn,
+                    int(project_id),
+                    run_id=int(run_result["run_id"]),
+                    ground_truth=ground_truth,
+                    # The holdout filename contains a compact project code
+                    # rather than an unambiguous date.  Keep historical
+                    # uncertainty explicit instead of guessing.
+                    historical_as_of=None,
+                    current_date=datetime.now(timezone.utc).date().isoformat(),
+                    strict_historical_dates=False,
+                    allow_undated=True,
+                    auto_threshold=AUTO_THRESHOLD,
+                )
             evaluation_runtime = time.perf_counter() - evaluation_started
 
             parsed_holdout = parse_workbook(holdout_path)
+            row_classification = classify_parsed_workbook(parsed_holdout)
             parsing = {
                 "workbooks_ingested": len(import_stats) + 1,
                 "training_workbooks": len(training_paths),
@@ -791,27 +1030,104 @@ def run_benchmark(
                     "evaluation": round(evaluation_runtime, 3),
                     "total": round(time.perf_counter() - benchmark_started, 3),
                 },
-                "input_dir": str(input_dir),
+                "input_dir": _portable_report_path(input_dir),
                 "holdout_file": holdout_path.name,
                 "training_files": [path.name for path in training_paths],
-                "database_path": str(db_path),
+                "database_path": (
+                    _portable_report_path(db_path)
+                    if database_persisted
+                    else None
+                ),
                 "database_persisted": database_persisted,
                 "parsing": parsing,
                 "catalog": catalog,
                 "imports": import_stats,
                 "holdout_import": holdout_stats,
+                "row_classification": row_classification,
                 "evaluation": evaluation,
+                "llm_experiment": {
+                    "requested": bool(llm_enabled),
+                    "enabled": bool(run_result.get("metrics", {}).get("llm_enabled")),
+                    "model_usage": run_result.get("model_usage", {}),
+                },
+                "data_gap": data_gap,
+                "failure_analysis": failure_analysis,
+                "data_requirements": data_requirements,
+                "temporal_modes": temporal_modes,
             }
 
         json_path = output_dir / "holdout-report.json"
         markdown_path = output_dir / "holdout-report.md"
         json_path.write_text(
-            json.dumps(report, ensure_ascii=False, indent=2, default=_json_default),
+            json.dumps(
+                _compact_report_for_disk(report),
+                ensure_ascii=False,
+                indent=2,
+                default=_json_default,
+            ),
             encoding="utf-8",
         )
         markdown_path.write_text(_markdown_report(report), encoding="utf-8")
-        report["report_json"] = str(json_path)
-        report["report_markdown"] = str(markdown_path)
+        # Keep the classification audit as standalone, reviewable artifacts as
+        # well as embedding it in the machine-readable benchmark report.  The
+        # files are written under the caller-selected output directory, so a
+        # persistent benchmark run cannot accidentally overwrite operational
+        # data or another run's database.
+        row_classification_json = output_dir / "row-classification.json"
+        row_classification_markdown = output_dir / "row-classification.md"
+        row_classification_json.write_text(
+            json.dumps(
+                report["row_classification"],
+                ensure_ascii=False,
+                indent=2,
+                default=_json_default,
+            ),
+            encoding="utf-8",
+        )
+        row_classification_markdown.write_text(
+            _row_audit_markdown(report["row_classification"]),
+            encoding="utf-8",
+        )
+        report["report_json"] = _portable_report_path(json_path)
+        report["report_markdown"] = _portable_report_path(markdown_path)
+        report["row_classification_json"] = _portable_report_path(
+            row_classification_json
+        )
+        report["row_classification_markdown"] = _portable_report_path(
+            row_classification_markdown
+        )
+        report_paths = write_report_files(
+            output_dir,
+            data_gap=report["data_gap"],
+            failure_analysis=report["failure_analysis"],
+            data_requirements=report["data_requirements"],
+        )
+        temporal_paths = write_temporal_report(
+            output_dir,
+            report["temporal_modes"],
+        )
+        report["artifact_paths"] = {
+            **{
+                key: _portable_report_path(path)
+                for key, path in report_paths.items()
+            },
+            "temporal_json": _portable_report_path(temporal_paths["json"]),
+            "temporal_markdown": _portable_report_path(
+                temporal_paths["markdown"]
+            ),
+        }
+        # Persist a second copy with the final report's machine-readable
+        # metadata after artifact paths are known.  This keeps the ordinary
+        # holdout report backward-compatible while exposing Round 2 artifacts.
+        json_path.write_text(
+            json.dumps(
+                _compact_report_for_disk(report),
+                ensure_ascii=False,
+                indent=2,
+                default=_json_default,
+            ),
+            encoding="utf-8",
+        )
         return report
     finally:
         if temporary is not None:
@@ -846,6 +1162,11 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Keep a persistent --db-path's raw storage files after completion.",
     )
+    parser.add_argument(
+        "--enable-llm",
+        action="store_true",
+        help="Opt in to the bounded semantic reranking experiment.",
+    )
     return parser
 
 
@@ -868,6 +1189,7 @@ def main(argv: list[str] | None = None) -> int:
         holdout=args.holdout,
         db_path=args.db_path,
         keep_storage=args.keep_storage,
+        llm_enabled=args.enable_llm,
     )
     material = report["evaluation"]["material"]
     labor = report["evaluation"]["labor"]
