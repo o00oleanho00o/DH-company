@@ -196,6 +196,17 @@ def _recalculate_formula_caches(output_path: Path) -> None:
         wb = load_workbook(output_path, data_only=False)
     except (OSError, ValueError):
         return
+    # Rewriting worksheet XML to inject cached values is only needed for the
+    # compact single-BOQ template whose grand totals otherwise retain a zero
+    # cache. Large multi-sheet workbooks contain shared formulas, extension
+    # metadata and cross-sheet calculations that Excel validates strictly.
+    # Leave those formulas to Excel's native recalculation engine instead of
+    # serializing every worksheet through ElementTree.
+    business_sheets = [
+        ws for ws in wb.worksheets if ws.title != "AI Audit"
+    ]
+    if len(business_sheets) != 1:
+        return
 
     memo: dict[tuple[int, str], float | None] = {}
     active: set[tuple[int, str]] = set()
