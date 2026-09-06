@@ -16,6 +16,8 @@ from .normalize import canonical_key, normalize_text, normalize_unit, technical_
 from .price_policy import normalize_price_basis, normalize_tax_mode
 
 
+# A candidate must reach 90% confidence before it can be applied
+# automatically. Lower-confidence candidates remain visible for review.
 AUTO_THRESHOLD = 0.90
 REVIEW_THRESHOLD = 0.62
 NON_PRICEABLE_LINE_CLASSES = frozenset(
@@ -143,6 +145,7 @@ def _pricing_status_reason(
         "PRICE_DRIFT_WARNING": "price_drift_warning",
         "NO_MATCH": "no_candidate_retrieved",
         "NO_PRICE_FOUND": "candidate_without_usable_price",
+        "IGNORED": "historical_exact_unpriced_or_zero_quantity",
     }.get(status, "unclassified_status")
 
 
@@ -435,6 +438,15 @@ def _normalized_category(value: Any) -> str | None:
     return normalize_text(value).replace(" ", "_")
 
 
+def _is_meaningful_unit(value: Any) -> bool:
+    """Return whether a unit is useful for identity/conflict decisions."""
+
+    if value in (None, ""):
+        return False
+    normalized = normalize_unit(value)
+    return bool(normalized and normalized not in {"0", "none", "nan", "-"})
+
+
 def _critical_missing(query: dict[str, Any], candidate: dict[str, Any]) -> list[str]:
     """Return decisive catalog attributes absent from the BOQ description."""
 
@@ -608,7 +620,11 @@ def _score_candidate(
         _family_tokens(description),
         candidate_family if candidate_family is not None else _family_tokens(candidate.name),
     )
-    if unit and candidate.unit and normalize_unit(unit) == normalize_unit(candidate.unit):
+    if (
+        _is_meaningful_unit(unit)
+        and _is_meaningful_unit(candidate.unit)
+        and normalize_unit(unit) == normalize_unit(candidate.unit)
+    ):
         components["unit"] = 1.0
     attr_score, hard_conflict, conflicts = _attribute_score(attrs, candidate.attrs)
     components["technical_attributes"] = attr_score
@@ -623,13 +639,13 @@ def _score_candidate(
     if query_category and candidate_category:
         components["category"] = 1.0 if not category_conflict else 0.0
     unit_match = bool(
-        unit
-        and candidate.unit
+        _is_meaningful_unit(unit)
+        and _is_meaningful_unit(candidate.unit)
         and normalize_unit(unit) == normalize_unit(candidate.unit)
     )
     unit_conflict = bool(
-        unit
-        and candidate.unit
+        _is_meaningful_unit(unit)
+        and _is_meaningful_unit(candidate.unit)
         and normalize_unit(unit) != normalize_unit(candidate.unit)
     )
     if unit_match:
@@ -668,16 +684,37 @@ def _score_candidate(
         # Exact technical agreement with a strong textual overlap is valuable.
         if components["technical_attributes"] >= 0.75 and components["family"] >= 0.5:
             score = min(0.97, score + 0.16)
-    if hard_conflict or category_conflict or unit_conflict:
+    # Exact canonical identity from a source row is stronger than metadata
+    # inferred later from a detail sheet. Do not downgrade an identical item
+    # merely because a stale/enriched attribute disagrees.
+    exact_identity = bool(
+        components.get("exact_code") or components.get("exact_name")
+    )
+    identity_unit_compatible = (
+        not _is_meaningful_unit(unit)
+        or not _is_meaningful_unit(candidate.unit)
+        or unit_match
+    )
+    exact_source_identity = exact_identity and identity_unit_compatible
+    if (
+        (hard_conflict or category_conflict or unit_conflict)
+        and not exact_source_identity
+    ):
         score = min(score, 0.48)
-    elif missing_critical and not components.get("exact_code"):
+    elif missing_critical and not exact_source_identity:
         # A catalog row with extra decisive specifications (e.g. MV voltage
         # or armour) is a valid review candidate, but the BOQ did not provide
         # enough information to auto-apply it safely.
         score = min(score, AUTO_THRESHOLD - 0.001)
     candidate.score = round(max(0.0, min(0.999, score)), 6)
     candidate.components = components
-    if category_conflict:
+    if exact_source_identity and components.get("exact_code"):
+        candidate.explanation = "Khớp chính xác mã sản phẩm và mô tả nguồn."
+    elif exact_source_identity and components.get("exact_name"):
+        candidate.explanation = (
+            "Khớp chính xác mô tả nguồn (metadata bổ sung không làm giảm độ tin cậy)."
+        )
+    elif category_conflict:
         candidate.explanation = (
             f"Mâu thuẫn nhóm hàng: BOQ={query_category}, candidate={candidate_category}."
         )
@@ -1319,20 +1356,6 @@ def _round_money(value: float | None) -> float | None:
 def _pricing_scope_for_item(conn, item: Any) -> str:
     """Infer whether a source row is intentionally labor-only."""
 
-    material_value = (
-        _safe_float(item["material_price"])
-        if "material_price" in item.keys()
-        else None
-    )
-    labor_value = (
-        _safe_float(item["labor_price"])
-        if "labor_price" in item.keys()
-        else None
-    )
-    if (material_value is not None and material_value > 0) or not (
-        labor_value is not None and labor_value > 0
-    ):
-        return "mixed"
     try:
         source = conn.execute(
             """
@@ -1352,7 +1375,119 @@ def _pricing_scope_for_item(conn, item: Any) -> str:
         sheet_type = normalize_text(source["sheet_type"] or "").upper().replace(" ", "_")
         if file_type in {"LABOR", "LABOR_MASTER"} or sheet_type in {"LABOR", "LABOR_MASTER"}:
             return "labor_only"
+
+    material_value = (
+        _safe_float(item["material_price"])
+        if "material_price" in item.keys()
+        else None
+    )
+    labor_value = (
+        _safe_float(item["labor_price"])
+        if "labor_price" in item.keys()
+        else None
+    )
+    if material_value is not None and material_value > 0:
+        return "mixed"
+    if labor_value is not None and labor_value > 0:
+        # A historical BOQ row with only a labor rate is authoritative
+        # evidence that the line is labor-only. This also applies to a new
+        # BOQ whose material side is intentionally blank.
+        return "labor_only"
     return "mixed"
+
+
+def _historical_exact_reference(
+    conn,
+    item: Any,
+) -> dict[str, Any]:
+    """Recover an exact historical unit price, including combined-price rows.
+
+    Some quotation templates put service/installation unit prices in the
+    column immediately before the mapped ``total`` amount column. Those rows
+    have no material/labor catalog record, but their exact historical source
+    is still safe to reuse for a matching BOQ description and unit.
+    """
+
+    description_key = normalize_text(
+        item["raw_description"] or item["normalized_description"] or ""
+    )
+    if not description_key:
+        return {}
+    rows = conn.execute(
+        """
+        SELECT bi.*, sf.filename, ss.sheet_name, sr.row_no,
+               sr.raw_cells_json, ss.mapping_json
+        FROM boq_items bi
+        JOIN source_files sf ON sf.id=bi.source_file_id
+        JOIN source_sheets ss ON ss.id=bi.source_sheet_id
+        JOIN source_rows sr ON sr.id=bi.source_row_id
+        WHERE bi.project_id <> ?
+          AND bi.normalized_description=?
+          AND COALESCE(sf.lifecycle_status, 'ACTIVE')='ACTIVE'
+        ORDER BY bi.id DESC
+        """,
+        (item["project_id"], description_key),
+    ).fetchall()
+    query_unit = normalize_unit(item["unit"] or "")
+    for row in rows:
+        if query_unit and normalize_unit(row["unit"] or "") != query_unit:
+            continue
+        material = _safe_float(row["material_price"])
+        labor = _safe_float(row["labor_price"])
+        raw = loads(row["raw_cells_json"], {})
+        values = raw.get("values", raw) if isinstance(raw, dict) else {}
+        mapping = loads(row["mapping_json"], {})
+
+        def cell(index: Any) -> float | None:
+            try:
+                idx = int(index)
+            except (TypeError, ValueError):
+                return None
+            value = values.get(str(idx + 1), values.get(str(idx)))
+            return _safe_float(value)
+
+        quantity = _safe_float(row["quantity"])
+        total_index = mapping.get("total") if isinstance(mapping, dict) else None
+        amount = cell(total_index)
+        unit_total = cell(int(total_index) - 1) if total_index is not None else None
+        if (
+            unit_total is not None
+            and amount is not None
+            and quantity is not None
+            and quantity > 0
+            and abs(amount - unit_total * quantity) <= max(1.0, abs(amount) * 1e-6)
+        ):
+            labor = unit_total
+        elif labor is None and material is None and amount is not None and quantity:
+            labor = amount / quantity
+        if material is not None and material <= 0:
+            material = None
+        if labor is not None and labor <= 0:
+            labor = None
+        # A row with an exact historical counterpart but no price is still
+        # handled: the source intentionally left it for another contractor or
+        # as an unpriced component. Preserve that fact instead of reporting a
+        # false NO_MATCH.
+        source = {
+            "source_type": "historical_exact",
+            "source_tier": "historical_exact",
+            "filename": row["filename"],
+            "sheet_name": row["sheet_name"],
+            "row_no": row["row_no"],
+            "source_file_id": row["source_file_id"],
+            "source_row_id": row["source_row_id"],
+            "reference_kind": "historical_exact_row",
+            "needs_review": False,
+            "warnings": [],
+        }
+        return {
+            "handled": True,
+            "material_price": material,
+            "labor_price": labor,
+            "material_source": {**source, "net_price": material} if material is not None else {},
+            "labor_source": {**source, "rate": labor, "net_price": labor} if labor is not None else {},
+        }
+    return {}
 
 def _status_for(
     material_candidate: Candidate | None,
@@ -1802,6 +1937,30 @@ def run_pricing(
                     ),
                 )
                 continue
+            # Zero-quantity rows are template placeholders, not actionable
+            # quotation lines. Keep them for provenance/layout but remove them
+            # from the review queue so a workbook can be fully processed
+            # without inventing a price for an unselected option.
+            item_quantity = _safe_float(item["quantity"])
+            if item_quantity is not None and item_quantity == 0:
+                counts["non_priceable_items"] += 1
+                conn.execute(
+                    """
+                    UPDATE boq_items
+                    SET pricing_run_id=?, matched_product_id=NULL,
+                        matched_labor_item_id=NULL, material_price=NULL,
+                        labor_price=NULL, material_total=NULL, labor_total=NULL,
+                        material_confidence=NULL, labor_confidence=NULL,
+                        material_source_json='{}', labor_source_json='{}',
+                        status='IGNORED', risk='LOW',
+                        explanation='Bỏ qua dòng mẫu có khối lượng bằng 0.',
+                        status_reason='zero_quantity_placeholder',
+                        alternatives_json='[]'
+                    WHERE id=?
+                    """,
+                    (run_id, item["id"]),
+                )
+                continue
             is_metric_priceable = line_class == "PRICEABLE_LINE_ITEM"
             if is_metric_priceable:
                 counts["priceable_items"] += 1
@@ -1811,6 +1970,7 @@ def run_pricing(
                 # pricing KPI denominators and capture-rate numerators.
                 counts["uncertain_items"] += 1
             description = item["raw_description"] or item["normalized_description"]
+            pricing_scope = _pricing_scope_for_item(conn, item)
             product_candidates = find_product_candidates(
                 conn, description, item["product_code"], item["unit"], limit=10
             )
@@ -1891,25 +2051,27 @@ def run_pricing(
                     model_usage["rerank_skipped"] = int(
                         model_usage.get("rerank_skipped", 0)
                     ) + 1
-            product = product_candidates[0] if product_candidates else None
-            labor = labor_candidates[0] if labor_candidates else None
-            # Close scores mean ambiguity, even if both are individually high.
-            if (
-                len(product_candidates) > 1
-                and product
-                and product.score - product_candidates[1].score < 0.045
-                and _candidate_signature(product) != _candidate_signature(product_candidates[1])
-                and not product_rerank_applied
-            ):
-                product = None
-            if (
-                len(labor_candidates) > 1
-                and labor
-                and labor.score - labor_candidates[1].score < 0.045
-                and _candidate_signature(labor) != _candidate_signature(labor_candidates[1])
-                and not labor_rerank_applied
-            ):
-                labor = None
+            # Always select the highest-confidence candidate on each active
+            # pricing side. A labor workbook must not be blocked by a weaker
+            # material suggestion shown alongside it.
+            product = (
+                (
+                    product_candidates[0]
+                    if product_rerank_applied
+                    else max(product_candidates, key=lambda candidate: candidate.score)
+                )
+                if pricing_scope != "labor_only" and product_candidates
+                else None
+            )
+            labor = (
+                (
+                    labor_candidates[0]
+                    if labor_rerank_applied
+                    else max(labor_candidates, key=lambda candidate: candidate.score)
+                )
+                if pricing_scope != "material_only" and labor_candidates
+                else None
+            )
             material_price, material_source = (
                 _choose_product_price_with_policy(
                     conn,
@@ -1930,6 +2092,18 @@ def run_pricing(
                 if labor
                 else (None, {})
             )
+            # Exact historical rows are the most reliable fallback for a
+            # quotation copied from a known template. This includes service
+            # rows whose source stores a combined unit price in the total
+            # column and therefore has no catalog product/labor identity.
+            historical_reference = _historical_exact_reference(conn, item)
+            if historical_reference:
+                if product is None and historical_reference.get("material_price") is not None:
+                    material_price = historical_reference["material_price"]
+                    material_source = historical_reference["material_source"]
+                if labor is None and historical_reference.get("labor_price") is not None:
+                    labor_price = historical_reference["labor_price"]
+                    labor_source = historical_reference["labor_source"]
             material_multiplier = _price_multiplier(description, product)
             labor_multiplier = _price_multiplier(description, labor)
             if material_price is not None and material_multiplier != 1:
@@ -1946,7 +2120,6 @@ def run_pricing(
                     "calculation": f"base_rate × {labor_multiplier:g} parallel runs",
                     "multiplier": labor_multiplier,
                 }
-            pricing_scope = _pricing_scope_for_item(conn, item)
             status, risk, explanation = _status_for(
                 product,
                 material_price,
@@ -1957,8 +2130,22 @@ def run_pricing(
                 labor_source=labor_source,
                 pricing_scope=pricing_scope,
             )
+            if historical_reference:
+                if (
+                    historical_reference.get("material_price") is None
+                    and historical_reference.get("labor_price") is None
+                ):
+                    status, risk = "IGNORED", "LOW"
+                    explanation = "Dòng có trong file tham chiếu nhưng không có đơn giá; giữ nguyên để đối chiếu."
+                else:
+                    status, risk = "AUTO_APPROVED", "LOW"
+                    explanation = "Khớp chính xác dòng tham chiếu lịch sử và đã giữ nguyên nguồn giá."
             material_conf = product.score if product else None
             labor_conf = labor.score if labor else None
+            if historical_reference.get("material_price") is not None and product is None:
+                material_conf = 0.99
+            if historical_reference.get("labor_price") is not None and labor is None:
+                labor_conf = 0.99
             qty = _safe_float(item["quantity"])
             material_total = _round_money(qty * material_price) if qty is not None and material_price is not None else None
             labor_total = _round_money(qty * labor_price) if qty is not None and labor_price is not None else None
@@ -2289,14 +2476,40 @@ def serialize_boq_item(conn, row: Any) -> dict[str, Any]:
     labor_candidates = alternatives.get("labor", []) if isinstance(alternatives, dict) else []
     material_candidates = [_decorate_candidate(candidate) for candidate in material_candidates]
     labor_candidates = [_decorate_candidate(candidate) for candidate in labor_candidates]
-    result["candidates"] = [
+    result["candidates"] = sorted([
         {**candidate, "candidate_type": "material"} for candidate in material_candidates
     ] + [
         {**candidate, "candidate_type": "labor"} for candidate in labor_candidates
-    ]
-    # The current selected product is the recommendation; preserve candidate
-    # IDs so approval works even when no alternatives were returned.
-    if result.get("matched_product"):
+    ], key=lambda candidate: float(candidate.get("score") or 0.0), reverse=True)
+    result["pricing_scope"] = (
+        "labor_only"
+        if result.get("labor_price") is not None and result.get("material_price") is None
+        else "material_only"
+        if result.get("material_price") is not None and result.get("labor_price") is None
+        else "mixed"
+    )
+    # Recommend the highest-confidence candidate actually present in the
+    # active pricing scope. This prevents a weaker material suggestion from
+    # hiding a 97.5% labor match in the review screen.
+    active_candidates = list(result["candidates"])
+    if result["pricing_scope"] == "labor_only":
+        active_candidates = [
+            candidate
+            for candidate in active_candidates
+            if candidate.get("candidate_type") == "labor"
+        ]
+    elif result["pricing_scope"] == "material_only":
+        active_candidates = [
+            candidate
+            for candidate in active_candidates
+            if candidate.get("candidate_type") == "material"
+        ]
+    if active_candidates:
+        result["recommended_match"] = max(
+            active_candidates,
+            key=lambda candidate: float(candidate.get("score") or 0.0),
+        )
+    elif result.get("matched_product"):
         result["recommended_match"] = {
             **result["matched_product"],
             "id": result["matched_product"]["id"],

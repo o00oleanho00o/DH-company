@@ -1,7 +1,11 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
+import tempfile
+import zipfile
+from xml.etree import ElementTree as ET
 from pathlib import Path
 from typing import Any
 
@@ -87,6 +91,93 @@ def _style_audit(ws) -> None:
         ws.column_dimensions[col].width = width
 
 
+_XLSX_MAIN_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+_XLSX_NS = {"x": _XLSX_MAIN_NS}
+
+
+def _formula_cache_map(path: Path) -> dict[str, dict[str, tuple[str | None, str | None]]]:
+    """Read formula + cached-value pairs directly from the source XML.
+
+    openpyxl intentionally does not preserve cached formula results when a
+    workbook is rewritten. Reading the original package lets us restore those
+    values after adding the audit sheet and deterministic prices.
+    """
+
+    result: dict[str, dict[str, tuple[str | None, str | None]]] = {}
+    try:
+        with zipfile.ZipFile(path) as archive:
+            for name in archive.namelist():
+                if not (name.startswith("xl/worksheets/") and name.endswith(".xml")):
+                    continue
+                root = ET.fromstring(archive.read(name))
+                cells: dict[str, tuple[str | None, str | None]] = {}
+                for cell in root.findall(".//x:c", _XLSX_NS):
+                    coordinate = cell.attrib.get("r")
+                    formula = cell.find("x:f", _XLSX_NS)
+                    cached = cell.find("x:v", _XLSX_NS)
+                    if coordinate and formula is not None and cached is not None:
+                        cells[coordinate] = (
+                            formula.text,
+                            cached.text,
+                        )
+                if cells:
+                    result[name] = cells
+    except (OSError, ET.ParseError, zipfile.BadZipFile):
+        return {}
+    return result
+
+
+def _restore_formula_caches(source_path: Path, output_path: Path) -> None:
+    """Restore cached values for formula cells that survived export edits."""
+
+    cache_map = _formula_cache_map(source_path)
+    if not cache_map:
+        return
+    fd, temp_name = tempfile.mkstemp(
+        prefix=f"{output_path.stem}-cache-",
+        suffix=".xlsx",
+        dir=str(output_path.parent),
+    )
+    os.close(fd)
+    temp_path = Path(temp_name)
+    try:
+        with zipfile.ZipFile(output_path, "r") as source_zip, zipfile.ZipFile(
+            temp_path, "w", compression=zipfile.ZIP_DEFLATED
+        ) as target_zip:
+            for info in source_zip.infolist():
+                payload = source_zip.read(info.filename)
+                cells = cache_map.get(info.filename)
+                if cells:
+                    try:
+                        root = ET.fromstring(payload)
+                    except ET.ParseError:
+                        root = None
+                    if root is not None:
+                        for cell in root.findall(".//x:c", _XLSX_NS):
+                            coordinate = cell.attrib.get("r")
+                            cached = cells.get(coordinate or "")
+                            formula = cell.find("x:f", _XLSX_NS)
+                            if cached and formula is not None:
+                                source_formula, source_value = cached
+                                # Only restore a cache when the formula itself
+                                # remains unchanged. Exported total/amount
+                                # cells may have intentionally become values.
+                                if source_formula == formula.text and source_value is not None:
+                                    target = cell.find("x:v", _XLSX_NS)
+                                    if target is None:
+                                        target = ET.SubElement(
+                                            cell,
+                                            f"{{{_XLSX_MAIN_NS}}}v",
+                                        )
+                                    target.text = source_value
+                        payload = ET.tostring(root, encoding="utf-8", xml_declaration=True)
+                target_zip.writestr(info, payload)
+        os.replace(temp_path, output_path)
+    finally:
+        if temp_path.exists():
+            temp_path.unlink()
+
+
 def export_project(project_id: int, run_id: int | None = None) -> Path:
     """Create a usable XLSX result and append a provenance-rich AI Audit sheet."""
 
@@ -102,7 +193,12 @@ def export_project(project_id: int, run_id: int | None = None) -> Path:
         source_path = Path(source["storage_key"]) if source and source["storage_key"] else None
         output_path = EXPORT_DIR / f"quotation-{project_id}-{run_id or 'latest'}.xlsx"
 
-        if source_path and source_path.exists() and source_path.suffix.lower() == ".xlsx":
+        preserve_formula_source = (
+            source_path
+            if source_path and source_path.exists() and source_path.suffix.lower() == ".xlsx"
+            else None
+        )
+        if preserve_formula_source:
             shutil.copy2(source_path, output_path)
             wb = load_workbook(output_path)
             # Source sheet metadata stores the deterministic mapping selected at
@@ -166,5 +262,6 @@ def export_project(project_id: int, run_id: int | None = None) -> Path:
             audit.append(row)
         _style_audit(audit)
         wb.save(output_path)
+        if preserve_formula_source:
+            _restore_formula_caches(preserve_formula_source, output_path)
         return output_path
-

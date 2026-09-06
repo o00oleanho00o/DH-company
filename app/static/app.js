@@ -403,6 +403,9 @@
       laborPrice: pick(item, ["labor_price", "laborPrice", "unit_labor_price"], null),
       materialConfidence: pick(item, ["material_confidence", "materialConfidence"], null),
       laborConfidence: pick(item, ["labor_confidence", "laborConfidence"], null),
+      matchedProductId: pick(item, ["matched_product_id", "matchedProductId"], null),
+      matchedLaborItemId: pick(item, ["matched_labor_item_id", "matchedLaborItemId"], null),
+      pricingScope: pick(item, ["pricing_scope", "pricingScope"], ""),
       status: pick(item, ["status", "review_status"], "review_required"),
       explanation: pick(item, ["explanation", "match_explanation", "warning"], ""),
       recommendation: fallbackRecommendation,
@@ -1773,7 +1776,11 @@
     const status = reviewStatus(item.status);
     const isNoMatch = ["no_match", "no_price_found", "unmatched"].includes(String(item.status).toLowerCase());
     const isOk = ["approved", "auto_approved", "matched"].includes(String(item.status).toLowerCase());
-    const confidence = item.materialConfidence ?? item.laborConfidence;
+    const confidences = [item.materialConfidence, item.laborConfidence]
+      .filter((value) => value !== null && value !== undefined)
+      .map(Number)
+      .filter((value) => Number.isFinite(value));
+    const confidence = confidences.length ? Math.max(...confidences) : null;
     return `
       <button class="review-item ${String(item.id) === String(selectedId) ? "is-selected" : ""} ${isNoMatch ? "is-no-match" : ""} ${isOk ? "is-ok" : ""}" data-action="select-review" data-id="${escapeHtml(item.id)}">
         <span class="review-risk">${icon(isNoMatch ? "x" : isOk ? "check" : "alert")}</span>
@@ -1874,10 +1881,19 @@
     if (action === "approve") {
       const selected = item.recommendation || {};
       const candidateType = candidateKind(selected);
-      payload =
-        candidateType === "labor"
-          ? { action: "approve", selected_labor_item_id: selected.id || selected.labor_item_id || null }
-          : { action: "approve", selected_product_id: selected.id || selected.product_id || null };
+      payload = { action: "approve" };
+      // Approval of the current recommendation keeps both sides of a mixed
+      // quotation. The material and labor candidates are independent and
+      // should be combined when both are already matched.
+      if (item.matchedProductId) payload.selected_product_id = item.matchedProductId;
+      if (item.matchedLaborItemId) payload.selected_labor_item_id = item.matchedLaborItemId;
+      if (!item.matchedProductId && !item.matchedLaborItemId) {
+        if (candidateType === "labor") {
+          payload.selected_labor_item_id = selected.id || selected.labor_item_id || null;
+        } else {
+          payload.selected_product_id = selected.id || selected.product_id || null;
+        }
+      }
     } else if (action === "ignore") {
       payload = { action: "ignore" };
     } else if (action === "supplier_quote") {
