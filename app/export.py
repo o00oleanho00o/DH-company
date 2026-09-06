@@ -226,6 +226,27 @@ def export_project(project_id: int, run_id: int | None = None) -> Path:
                     total = (item.get("material_total") or 0) + (item.get("labor_total") or 0)
                 _write_cell(ws, row_no, _column(mapping, "total"), total)
                 _write_cell(ws, row_no, _column(mapping, "amount"), total)
+                # In the supplied BOQ template the column immediately before
+                # the amount/total column is the combined unit price (I),
+                # while G/H hold the material/labor split. Rebuild that
+                # deterministic value when the mapping identifies such a
+                # column, so the exported workbook remains usable in Excel
+                # even when the input holdout intentionally omitted prices.
+                total_col = _column(mapping, "total")
+                material_col = _column(mapping, "material_price")
+                labor_col = _column(mapping, "labor_price")
+                if total_col and total_col > 1:
+                    combined_col = total_col - 1
+                    if combined_col not in {
+                        value for value in (material_col, labor_col, _column(mapping, "quantity"))
+                        if value
+                    }:
+                        combined_unit = None
+                        if item.get("material_price") is not None or item.get("labor_price") is not None:
+                            combined_unit = (item.get("material_price") or 0) + (
+                                item.get("labor_price") or 0
+                            )
+                        _write_cell(ws, row_no, combined_col, combined_unit)
         else:
             # Legacy .xls cannot be safely edited with openpyxl. Produce a
             # normalized, fully usable workbook instead of silently failing.

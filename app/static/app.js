@@ -1632,7 +1632,7 @@
           </div>
           <div class="card-body">
             <dl class="quotation-summary">
-              <div class="summary-row"><dt>Độ phủ tự động</dt><dd>${percentage(item.coverage)}</dd></div>
+              <div class="summary-row"><dt>Độ phủ xử lý</dt><dd>${percentage(item.coverage)}</dd></div>
               <div class="summary-row"><dt>Giá trị dự kiến</dt><dd>${formatCurrency(item.totalValue)}</dd></div>
               <div class="summary-row"><dt>Chính sách giá</dt><dd>${escapeHtml(pick(item.raw || {}, ["pricing_policy", "policy"], "Theo cấu hình hệ thống"))}</dd></div>
               <div class="summary-row"><dt>Cập nhật lần cuối</dt><dd>${formatDateTime(item.updatedAt || item.raw?.completed_at)}</dd></div>

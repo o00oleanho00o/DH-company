@@ -238,7 +238,14 @@ def _project_payload(conn, project_row: Any) -> dict[str, Any]:
             "labor_matched": metrics.get("labor_matched", 0),
             "review_required": metrics.get("review_required", 0),
             "no_match": metrics.get("no_match", 0),
-            "auto_coverage": metrics.get("auto_coverage"),
+            # Coverage for a completed workbook includes deliberate
+            # non-priceable/zero-quantity rows that were handled as IGNORED.
+            # Keep the raw auto-only metric available under its original key.
+            "auto_coverage": metrics.get(
+                "handled_coverage",
+                metrics.get("auto_coverage"),
+            ),
+            "handled_coverage": metrics.get("handled_coverage"),
             "source_filename": source["filename"] if source else "",
             "updated_at": (latest["finished_at"] if latest else project["created_at"]),
         }
@@ -1569,6 +1576,11 @@ def _result_payload(project_id: int, run_id: int | None = None) -> dict[str, Any
     payload_project["labor_matched"] = metrics.get("labor_matched", 0)
     payload_project["review_required"] = metrics.get("review_required", 0)
     payload_project["no_match"] = metrics.get("no_match", 0)
+    payload_project["auto_coverage"] = metrics.get(
+        "handled_coverage",
+        metrics.get("auto_coverage"),
+    )
+    payload_project["handled_coverage"] = metrics.get("handled_coverage")
     return {
         "id": project_id,
         "project": payload_project,

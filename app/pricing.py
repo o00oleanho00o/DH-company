@@ -1424,7 +1424,17 @@ def _historical_exact_reference(
         WHERE bi.project_id <> ?
           AND bi.normalized_description=?
           AND COALESCE(sf.lifecycle_status, 'ACTIVE')='ACTIVE'
-        ORDER BY bi.id DESC
+          AND COALESCE(sf.confirmed_type, sf.detected_type) <> 'NEW_BOQ'
+          AND COALESCE(
+                json_extract(sf.metadata_json, '$.excluded_from_knowledge'),
+                0
+              ) = 0
+        ORDER BY
+          CASE
+            WHEN bi.material_price > 0 OR bi.labor_price > 0 THEN 0
+            ELSE 1
+          END,
+          bi.id DESC
         """,
         (item["project_id"], description_key),
     ).fetchall()
@@ -1451,7 +1461,9 @@ def _historical_exact_reference(
         amount = cell(total_index)
         unit_total = cell(int(total_index) - 1) if total_index is not None else None
         if (
-            unit_total is not None
+            material is None
+            and labor is None
+            and unit_total is not None
             and amount is not None
             and quantity is not None
             and quantity > 0
@@ -2273,10 +2285,23 @@ def run_pricing(
                 counts[key] += 1
         if counts["total_items"]:
             counts["auto_coverage"] = round(counts["auto_approved"] / counts["total_items"], 4)
+            counts["handled_items"] = (
+                counts["auto_approved"] + counts["non_priceable_items"]
+            )
+            counts["handled_coverage"] = round(
+                counts["handled_items"] / counts["total_items"],
+                4,
+            )
             counts["material_coverage"] = round(counts["material_priced"] / counts["total_items"], 4)
             counts["labor_coverage"] = round(counts["labor_priced"] / counts["total_items"], 4)
         else:
-            counts.update(auto_coverage=0.0, material_coverage=0.0, labor_coverage=0.0)
+            counts.update(
+                auto_coverage=0.0,
+                handled_items=0,
+                handled_coverage=0.0,
+                material_coverage=0.0,
+                labor_coverage=0.0,
+            )
         if counts["priceable_items"]:
             counts["priceable_auto_coverage"] = round(
                 counts["auto_approved"] / counts["priceable_items"], 4
