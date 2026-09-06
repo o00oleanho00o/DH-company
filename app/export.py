@@ -96,7 +96,9 @@ _XLSX_MAIN_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 _XLSX_NS = {"x": _XLSX_MAIN_NS}
 
 
-def _formula_cache_map(path: Path) -> dict[str, dict[str, tuple[str | None, str | None]]]:
+def _formula_cache_map(
+    path: Path,
+) -> dict[str, dict[str, tuple[str | None, str | None, str | None]]]:
     """Read formula + cached-value pairs directly from the source XML.
 
     openpyxl intentionally does not preserve cached formula results when a
@@ -104,14 +106,14 @@ def _formula_cache_map(path: Path) -> dict[str, dict[str, tuple[str | None, str 
     values after adding the audit sheet and deterministic prices.
     """
 
-    result: dict[str, dict[str, tuple[str | None, str | None]]] = {}
+    result: dict[str, dict[str, tuple[str | None, str | None, str | None]]] = {}
     try:
         with zipfile.ZipFile(path) as archive:
             for name in archive.namelist():
                 if not (name.startswith("xl/worksheets/") and name.endswith(".xml")):
                     continue
                 root = ET.fromstring(archive.read(name))
-                cells: dict[str, tuple[str | None, str | None]] = {}
+                cells: dict[str, tuple[str | None, str | None, str | None]] = {}
                 for cell in root.findall(".//x:c", _XLSX_NS):
                     coordinate = cell.attrib.get("r")
                     formula = cell.find("x:f", _XLSX_NS)
@@ -120,6 +122,7 @@ def _formula_cache_map(path: Path) -> dict[str, dict[str, tuple[str | None, str 
                         cells[coordinate] = (
                             formula.text,
                             cached.text,
+                            cell.attrib.get("t"),
                         )
                 if cells:
                     result[name] = cells
@@ -159,7 +162,7 @@ def _restore_formula_caches(source_path: Path, output_path: Path) -> None:
                             cached = cells.get(coordinate or "")
                             formula = cell.find("x:f", _XLSX_NS)
                             if cached and formula is not None:
-                                source_formula, source_value = cached
+                                source_formula, source_value, source_type = cached
                                 # Only restore a cache when the formula itself
                                 # remains unchanged. Exported total/amount
                                 # cells may have intentionally become values.
@@ -171,6 +174,16 @@ def _restore_formula_caches(source_path: Path, output_path: Path) -> None:
                                             f"{{{_XLSX_MAIN_NS}}}v",
                                         )
                                     target.text = source_value
+                                    # Formula results can be strings (for
+                                    # example BIA!B14/B15/B16), errors, or
+                                    # numbers.  openpyxl writes formula cells
+                                    # with ``t="n"`` by default; retaining a
+                                    # string cache under that type produces an
+                                    # invalid workbook that Excel repairs.
+                                    if source_type:
+                                        cell.set("t", source_type)
+                                    else:
+                                        cell.attrib.pop("t", None)
                         payload = ET.tostring(root, encoding="utf-8", xml_declaration=True)
                 target_zip.writestr(info, payload)
         os.replace(temp_path, output_path)
@@ -383,36 +396,19 @@ def export_project(project_id: int, run_id: int | None = None) -> Path:
                 ws = wb[ss["sheet_name"]]
                 mapping = loads(ss["mapping_json"], {})
                 row_no = int(sr["row_no"])
-                _write_cell(ws, row_no, _column(mapping, "material_price"), item.get("material_price"))
-                _write_cell(ws, row_no, _column(mapping, "labor_price"), item.get("labor_price"))
-                # Generic total columns are only written when the mapping is
-                # unambiguous; formulas are replaced by deterministic values.
-                total = None
-                if item.get("material_total") is not None or item.get("labor_total") is not None:
-                    total = (item.get("material_total") or 0) + (item.get("labor_total") or 0)
-                _write_cell(ws, row_no, _column(mapping, "total"), total)
-                _write_cell(ws, row_no, _column(mapping, "amount"), total)
-                # In the supplied BOQ template the column immediately before
-                # the amount/total column is the combined unit price (I),
-                # while G/H hold the material/labor split. Rebuild that
-                # deterministic value when the mapping identifies such a
-                # column, so the exported workbook remains usable in Excel
-                # even when the input holdout intentionally omitted prices.
-                total_col = _column(mapping, "total")
+                # The input workbook is the calculation template.  Only write
+                # the two unit-price columns; leave amount/subtotal/total and
+                # any combined-price columns untouched so their original
+                # formulas continue to calculate material and labor amounts
+                # independently.  Earlier exports wrote a combined amount
+                # into the first ``total`` column, overwriting the material
+                # amount formula and effectively double-counting labor.
                 material_col = _column(mapping, "material_price")
                 labor_col = _column(mapping, "labor_price")
-                if total_col and total_col > 1:
-                    combined_col = total_col - 1
-                    if combined_col not in {
-                        value for value in (material_col, labor_col, _column(mapping, "quantity"))
-                        if value
-                    }:
-                        combined_unit = None
-                        if item.get("material_price") is not None or item.get("labor_price") is not None:
-                            combined_unit = (item.get("material_price") or 0) + (
-                                item.get("labor_price") or 0
-                            )
-                        _write_cell(ws, row_no, combined_col, combined_unit)
+                if material_col and item.get("material_price") is not None:
+                    _write_cell(ws, row_no, material_col, item.get("material_price"))
+                if labor_col and item.get("labor_price") is not None:
+                    _write_cell(ws, row_no, labor_col, item.get("labor_price"))
         else:
             # Legacy .xls cannot be safely edited with openpyxl. Produce a
             # normalized, fully usable workbook instead of silently failing.
@@ -448,8 +444,23 @@ def export_project(project_id: int, run_id: int | None = None) -> Path:
         for row in _audit_rows(result):
             audit.append(row)
         _style_audit(audit)
+        # Unit prices are updated after the source workbook's cached formula
+        # values were generated. Ask Excel to recalculate all formulas on open
+        # so multi-sheet totals never display stale source values.
+        wb.calculation.calcMode = "auto"
+        wb.calculation.fullCalcOnLoad = True
+        wb.calculation.forceFullCalc = True
         wb.save(output_path)
         if preserve_formula_source:
-            _restore_formula_caches(preserve_formula_source, output_path)
-            _recalculate_formula_caches(output_path)
+            business_sheet_count = sum(
+                1 for ws in wb.worksheets if ws.title != "AI Audit"
+            )
+            # Formula-cache XML rewriting is intentionally limited to the
+            # compact single-sheet BOQ template. Multi-sheet workbooks use
+            # shared formulas and cross-sheet references; preserving their
+            # stale caches is less useful than leaving native recalculation to
+            # Excel and avoiding any XML normalization risk.
+            if business_sheet_count == 1:
+                _restore_formula_caches(preserve_formula_source, output_path)
+                _recalculate_formula_caches(output_path)
         return output_path
