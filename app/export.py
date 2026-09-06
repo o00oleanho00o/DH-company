@@ -185,6 +185,8 @@ _SUM_RE = re.compile(
     r"\s*:\s*(?:'[^']+'!)?\$?([A-Z]{1,3})\$?(\d+)\s*\)",
     re.IGNORECASE,
 )
+_SUM_ARGS_RE = re.compile(r"SUM\(([^()]*)\)", re.IGNORECASE)
+_ROUND_RE = re.compile(r"ROUND\(([^(),]+),\s*(-?\d+)\)", re.IGNORECASE)
 
 
 def _recalculate_formula_caches(output_path: Path) -> None:
@@ -221,6 +223,18 @@ def _recalculate_formula_caches(output_path: Path) -> None:
 
         expression = _SUM_RE.sub(replace_sum, expression)
 
+        def replace_sum_args(match: re.Match[str]) -> str:
+            values = []
+            for token in match.group(1).split(","):
+                token = token.strip()
+                try:
+                    values.append(float(token))
+                except ValueError:
+                    return match.group(0)
+            return str(sum(values))
+
+        expression = _SUM_ARGS_RE.sub(replace_sum_args, expression)
+
         def replace_ref(match: re.Match[str]) -> str:
             token = match.group(0)
             if "!" in token:
@@ -230,6 +244,13 @@ def _recalculate_formula_caches(output_path: Path) -> None:
             return str(value) if value is not None else token
 
         expression = _CELL_REF_RE.sub(replace_ref, expression)
+        def replace_round(match: re.Match[str]) -> str:
+            try:
+                return str(round(float(match.group(1)), int(match.group(2))))
+            except (TypeError, ValueError):
+                return match.group(0)
+
+        expression = _ROUND_RE.sub(replace_round, expression)
         if _CELL_REF_RE.search(expression):
             return None
         if not re.fullmatch(r"[0-9eE+\-*/().\s]+", expression):
