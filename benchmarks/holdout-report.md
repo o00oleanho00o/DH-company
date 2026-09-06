@@ -1,11 +1,11 @@
 # Holdout pricing benchmark
 
-- Generated: `2026-09-06T01:52:51.693131+00:00`
+- Generated: `2026-09-06T07:46:00.435201+00:00`
 - Input directory: `input`
 - Holdout: `BOQ-HỆ THỐNG ĐIỆN TRẠI LƠN HẢI HÀ-DH290124.xlsx`
 - Database: `None`
 - Database persisted: **no (temporary)**
-- Runtime: **291.333s** (ingest 61.351s, pricing 198.970s, evaluation 7.853s)
+- Runtime: **194.931s** (ingest 38.770s, pricing 129.559s, evaluation 6.587s)
 
 ## Leakage guard
 

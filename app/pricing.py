@@ -9,9 +9,11 @@ from difflib import SequenceMatcher
 from typing import Any, Iterable
 
 from .ai import AIProvider, RerankResult, ai_provider, safe_rerank_sync
+from .config import settings
 from .db import db_session, dumps, loads, utc_now, row_dict
 from .labor_policy import normalise_labor_policy, select_labor_rate
 from .normalize import canonical_key, normalize_text, normalize_unit, technical_attributes
+from .price_policy import normalize_price_basis, normalize_tax_mode
 
 
 AUTO_THRESHOLD = 0.90
@@ -50,6 +52,39 @@ _CATALOG_CACHE: dict[tuple[str, str, int], list[tuple[Any, str, set[str], set[st
 _PRICE_CACHE: dict[
     tuple[str, str, int, str | None, str], tuple[float | None, dict[str, Any]]
 ] = {}
+
+_PRICE_SOURCE_TIER_RANK = {
+    "current_supplier_net": 0,
+    "approved_internal": 1,
+    "historical_exact": 2,
+    "manual": 3,
+    "unknown": 4,
+}
+_HISTORICAL_PRICE_SOURCE_TYPES = frozenset(
+    {
+        "historical",
+        "historical_boq",
+        "historical_quotation",
+        "project_quotation",
+        "historical_exact",
+    }
+)
+_INTERNAL_PRICE_SOURCE_TYPES = frozenset(
+    {
+        "approved_internal",
+        "internal_master",
+        "internal_approved",
+        "manual_approved",
+    }
+)
+_MANUAL_PRICE_SOURCE_TYPES = frozenset(
+    {
+        "manual",
+        "manual_review",
+        "manual_quote",
+        "manual_approved",
+    }
+)
 
 
 def clear_runtime_caches() -> None:
@@ -111,10 +146,192 @@ def _pricing_status_reason(
     }.get(status, "unclassified_status")
 
 
+def _normalise_drift_threshold(value: Any = None) -> float:
+    """Return a bounded fractional material price-drift threshold.
+
+    Both ``0.25`` and the user-facing ``25``/``"25%"`` forms are accepted.
+    A non-finite or omitted value falls back to the environment-configured
+    default. The value is bounded so malformed configuration cannot disable
+    review by creating an unreasonably large threshold.
+    """
+
+    if isinstance(value, dict):
+        # Do not use ``or`` here: an explicit zero is a valid policy (every
+        # non-zero difference should be reviewed) and must not silently fall
+        # back to the environment default.
+        selected = None
+        for key in (
+            "drift_threshold",
+            "price_drift_warning_threshold",
+            "material_price_drift_threshold",
+        ):
+            if key in value and value[key] is not None:
+                selected = value[key]
+                break
+        value = selected
+    if isinstance(value, str):
+        text = value.strip().replace(",", ".")
+        if text.endswith("%"):
+            try:
+                parsed = float(text[:-1]) / 100.0
+            except (TypeError, ValueError):
+                parsed = float(settings.price_drift_warning_threshold)
+            return max(0.0, min(10.0, parsed))
+        value = text
+    try:
+        parsed = float(value) if value is not None else float(
+            settings.price_drift_warning_threshold
+        )
+    except (TypeError, ValueError):
+        parsed = float(settings.price_drift_warning_threshold)
+    if parsed > 1.0 and parsed <= 100.0:
+        parsed /= 100.0
+    if not math.isfinite(parsed):
+        parsed = float(settings.price_drift_warning_threshold)
+    return max(0.0, min(10.0, parsed))
+
+
+def _price_source_type(source: dict[str, Any]) -> str:
+    """Infer a stable source type from provenance and legacy rows."""
+
+    calc = source.get("calc")
+    if not isinstance(calc, dict):
+        calc = {}
+    context = source.get("context")
+    if not isinstance(context, dict):
+        context = {}
+    raw = (
+        source.get("source_type")
+        or source.get("observation_type")
+        or calc.get("source_type")
+        or context.get("source_type")
+    )
+    normalized = normalize_text(raw).replace(" ", "_") if raw else ""
+    if normalized in _HISTORICAL_PRICE_SOURCE_TYPES:
+        return normalized
+    if normalized in _INTERNAL_PRICE_SOURCE_TYPES:
+        return normalized
+    supplier = normalize_text(source.get("supplier") or "").replace(" ", "_")
+    if supplier in {"historical_quotation", "historical"}:
+        return "historical_boq"
+    if supplier:
+        return "supplier_price"
+    return normalized or "unknown"
+
+
+def _price_source_tier(source: dict[str, Any]) -> str:
+    source_type = _price_source_type(source)
+    if source_type in _HISTORICAL_PRICE_SOURCE_TYPES:
+        return "historical_exact"
+    if source_type in _INTERNAL_PRICE_SOURCE_TYPES:
+        return "approved_internal"
+    if source_type in _MANUAL_PRICE_SOURCE_TYPES:
+        return "manual"
+    if source_type == "supplier_price" or source.get("supplier"):
+        return "current_supplier_net"
+    return "unknown"
+
+
+def _price_source_rank(source: dict[str, Any]) -> int:
+    return _PRICE_SOURCE_TIER_RANK.get(_price_source_tier(source), 4)
+
+
+def _price_source_was_explicitly_selected(source: dict[str, Any]) -> bool:
+    """Return whether ingestion/policy marked this observation as selected.
+
+    A supplier workbook can contain a base price, VAT price and many
+    discount-tier observations for one row.  They all share the same source
+    tier, so falling back to the newest database ID would accidentally choose
+    whichever tier happened to be inserted last.  Ingestion stores the
+    authoritative choice in ``context.selected`` and/or ``calc.selection``;
+    legacy rows without that marker remain eligible through the normal
+    deterministic fallback.
+    """
+
+    if source.get("selected") is True or source.get("is_selected") is True:
+        return True
+    for field in ("context", "calc"):
+        value = source.get(field)
+        if not isinstance(value, dict):
+            continue
+        if value.get("selected") is True or value.get("is_selected") is True:
+            return True
+        # ``calc.selection`` is emitted for the selected observation only.
+        # Keep this permissive for future policy names while avoiding an empty
+        # or boolean-false marker.
+        selection = value.get("selection")
+        if isinstance(selection, str) and selection.strip():
+            return True
+    return bool(source.get("calculated") is True)
+
+
+def _compact_price_source(source: dict[str, Any]) -> dict[str, Any]:
+    """Keep a historical comparison small while retaining audit coordinates."""
+
+    keys = (
+        "id",
+        "net_price",
+        "list_price",
+        "discount",
+        "tax_mode",
+        "supplier",
+        "source_type",
+        "source_tier",
+        "effective_date",
+        "filename",
+        "sheet_name",
+        "row_no",
+    )
+    return {key: source[key] for key in keys if source.get(key) not in (None, "")}
+
+
+def _price_source_explanation(source: dict[str, Any]) -> str:
+    amount = _safe_float(source.get("net_price"))
+    amount_text = f"{amount:,.0f}" if amount is not None else "n/a"
+    effective = source.get("effective_date") or "không rõ ngày hiệu lực"
+    origin = (
+        source.get("supplier")
+        or source.get("filename")
+        or source.get("source_type")
+        or "nguồn giá"
+    )
+    tier = source.get("source_tier")
+    if tier == "current_supplier_net":
+        return (
+            f"Dùng giá NCC hiện hành {amount_text} từ {origin} "
+            f"(tax={source.get('tax_mode') or 'unknown'}, hiệu lực {effective})."
+        )
+    if tier == "approved_internal":
+        return f"Dùng giá nội bộ đã duyệt {amount_text} từ {origin} (hiệu lực {effective})."
+    if tier == "historical_exact":
+        return (
+            f"Không có giá NCC hiện hành; dùng giá lịch sử khớp exact-item "
+            f"{amount_text} từ {origin} (ngày {effective})."
+        )
+    return f"Dùng giá {amount_text} từ {origin} (hiệu lực {effective})."
+
+
+def _decorate_price_source(source: dict[str, Any]) -> dict[str, Any]:
+    """Normalize source-tier metadata shared by selection and API output."""
+
+    source = dict(source)
+    source["source_type"] = _price_source_type(source)
+    source["source_tier"] = _price_source_tier(source)
+    source["selection_explicit"] = _price_source_was_explicitly_selected(source)
+    if "net_price" not in source and source.get("price") is not None:
+        source["net_price"] = source.get("price")
+    source.setdefault("explanation", _price_source_explanation(source))
+    return source
+
+
 def _db_identity(conn) -> str:
     try:
         row = conn.execute("PRAGMA database_list").fetchone()
         if row is not None and row[2]:
+            # Keep the identity stable for the lifetime of a pricing run.
+            # Including the WAL mtime here would rebuild the catalog cache
+            # after every BOQ-row update because SQLite appends each update to
+            # that WAL. Mutation endpoints explicitly clear the caches.
             return str(row[2])
     except Exception:
         pass
@@ -493,16 +710,33 @@ def _alias_matches(conn, description: str) -> set[str]:
 
 
 def _product_catalog(conn) -> list[Any]:
-    return conn.execute("SELECT * FROM products").fetchall()
+    return conn.execute(
+        """
+        SELECT * FROM products
+        WHERE COALESCE(lifecycle_status, 'ACTIVE')='ACTIVE'
+        """
+    ).fetchall()
 
 
 def _labor_catalog(conn) -> list[Any]:
-    return conn.execute("SELECT * FROM labor_items").fetchall()
+    return conn.execute(
+        """
+        SELECT * FROM labor_items
+        WHERE COALESCE(lifecycle_status, 'ACTIVE')='ACTIVE'
+        """
+    ).fetchall()
 
 
 def _prepared_catalog(conn, kind: str) -> list[tuple[Any, str, set[str], set[str]]]:
     table = "products" if kind == "product" else "labor_items"
-    row_count = int(conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
+    row_count = int(
+        conn.execute(
+            f"""
+            SELECT COUNT(*) FROM {table}
+            WHERE COALESCE(lifecycle_status, 'ACTIVE')='ACTIVE'
+            """
+        ).fetchone()[0]
+    )
     key = (_db_identity(conn), kind, row_count)
     cached = _CATALOG_CACHE.get(key)
     if cached is not None:
@@ -653,7 +887,8 @@ def _provenance(conn, table: str, row_id: int | None) -> dict[str, Any]:
     if table == "product_prices":
         row = conn.execute(
             """
-            SELECT pp.*, sf.filename, ss.sheet_name, sr.row_no
+            SELECT pp.*, sf.filename, sf.lifecycle_status AS source_lifecycle_status,
+                   ss.sheet_name, sr.row_no
             FROM product_prices pp
             LEFT JOIN source_files sf ON sf.id=pp.source_file_id
             LEFT JOIN source_sheets ss ON ss.id=pp.source_sheet_id
@@ -665,7 +900,8 @@ def _provenance(conn, table: str, row_id: int | None) -> dict[str, Any]:
     else:
         row = conn.execute(
             """
-            SELECT lr.*, sf.filename, ss.sheet_name, sr.row_no
+            SELECT lr.*, sf.filename, sf.lifecycle_status AS source_lifecycle_status,
+                   ss.sheet_name, sr.row_no
             FROM labor_rates lr
             LEFT JOIN source_files sf ON sf.id=lr.source_file_id
             LEFT JOIN source_sheets ss ON ss.id=lr.source_sheet_id
@@ -683,32 +919,271 @@ def _provenance(conn, table: str, row_id: int | None) -> dict[str, Any]:
     return result
 
 
-def choose_product_price(conn, product_id: int, quotation_date: str | None = None) -> tuple[float | None, dict[str, Any]]:
-    cache_key = (_db_identity(conn), "product", int(product_id), quotation_date, "")
+def _observation_provenance(conn, row_id: int | None) -> dict[str, Any]:
+    """Return a price-observation row in the same shape as operational prices."""
+
+    if not row_id:
+        return {}
+    row = conn.execute(
+        """
+        SELECT po.*, sf.filename, sf.lifecycle_status AS source_lifecycle_status,
+               ss.sheet_name, sr.row_no
+        FROM price_observations po
+        LEFT JOIN source_files sf ON sf.id=po.source_file_id
+        LEFT JOIN source_sheets ss ON ss.id=po.source_sheet_id
+        LEFT JOIN source_rows sr ON sr.id=po.source_row_id
+        WHERE po.id=?
+        """,
+        (row_id,),
+    ).fetchone()
+    if not row:
+        return {}
+    result = dict(row)
+    for key in ("context_json", "calc_json"):
+        if key in result:
+            result[key.removesuffix("_json")] = loads(result.pop(key), {})
+    return result
+
+
+def choose_product_price(
+    conn,
+    product_id: int,
+    quotation_date: str | None = None,
+    drift_threshold: Any = None,
+) -> tuple[float | None, dict[str, Any]]:
+    """Select an explainable product price and flag material price drift.
+
+    The operational source order is current supplier net, approved internal,
+    exact historical, then manual/unknown. When a current supplier source is
+    selected and an exact historical observation exists for the same canonical
+    product, the relative difference is recorded. A difference above the
+    configured threshold remains numerically usable but routes the BOQ row to
+    ``PRICE_DRIFT_WARNING`` for engineer review.
+    """
+
+    threshold = _normalise_drift_threshold(drift_threshold)
+    cache_key = (
+        _db_identity(conn),
+        "product",
+        int(product_id),
+        quotation_date,
+        f"{threshold:.8f}",
+    )
     if cache_key in _PRICE_CACHE:
         return _PRICE_CACHE[cache_key]
-    rows = conn.execute(
+    def _observation_sources() -> list[dict[str, Any]]:
+        """Load eligible immutable observations for this product.
+
+        ``price_observations`` is the source-of-truth history.  The
+        ``product_prices`` table is only an operational compatibility view for
+        databases created before observations were introduced.
         """
-        SELECT pp.*
-        FROM product_prices pp
-        WHERE pp.product_id=? AND pp.is_approved=1
-          AND (? IS NULL OR pp.effective_date IS NULL OR pp.effective_date <= ?)
-        ORDER BY
-          CASE WHEN pp.supplier IS NOT NULL AND pp.supplier <> 'Historical quotation' THEN 0 ELSE 1 END,
-          CASE WHEN pp.effective_date IS NULL THEN 1 ELSE 0 END,
-          pp.effective_date DESC, pp.id DESC
-        """,
-        (product_id, quotation_date, quotation_date),
-    ).fetchall()
-    if not rows:
+
+        observation_rows = conn.execute(
+            """
+            SELECT po.id
+            FROM price_observations po
+            JOIN products p ON p.id=po.product_id
+            LEFT JOIN source_files sf ON sf.id=po.source_file_id
+            WHERE po.product_id=?
+              AND COALESCE(p.lifecycle_status, 'ACTIVE')='ACTIVE'
+              AND (po.source_file_id IS NULL
+                   OR COALESCE(sf.lifecycle_status, 'ACTIVE')='ACTIVE')
+              AND po.is_approved=1
+              AND (? IS NULL OR po.effective_date IS NULL OR po.effective_date <= ?)
+            ORDER BY COALESCE(po.effective_date, po.created_at) DESC, po.id DESC
+            """,
+            (product_id, quotation_date, quotation_date),
+        ).fetchall()
+        loaded = [
+            _decorate_price_source(_observation_provenance(conn, int(row["id"])))
+            for row in observation_rows
+        ]
+        loaded = [
+            source
+            for source in loaded
+            if _safe_float(source.get("net_price")) is not None
+        ]
+        if not loaded:
+            return []
+        # Tax basis is part of the identity of a price observation. Prefer
+        # ex-VAT/net observations whenever they exist, and only accept a
+        # gross-only workbook as an explicit review fallback.
+        ex_vat = [
+            source
+            for source in loaded
+            if normalize_tax_mode(source.get("tax_mode")) == "ex_vat"
+            and normalize_price_basis(source.get("price_basis")) == "net"
+        ]
+        if ex_vat:
+            return ex_vat
+        for source in loaded:
+            source.setdefault("warnings", []).append("TAX_BASIS_FALLBACK")
+            source.setdefault("reason_code", "TAX_BASIS_FALLBACK")
+            source["needs_review"] = True
+        return loaded
+
+    def _operational_price_sources() -> list[dict[str, Any]]:
+        """Load legacy operational prices only when observations are absent."""
+
+        rows = conn.execute(
+            """
+            SELECT pp.*, sf.filename, sf.lifecycle_status AS source_lifecycle_status,
+                   ss.sheet_name, sr.row_no
+            FROM product_prices pp
+            LEFT JOIN source_files sf ON sf.id=pp.source_file_id
+            LEFT JOIN source_sheets ss ON ss.id=pp.source_sheet_id
+            LEFT JOIN source_rows sr ON sr.id=pp.source_row_id
+            JOIN products p ON p.id=pp.product_id
+            WHERE pp.product_id=?
+              AND COALESCE(p.lifecycle_status, 'ACTIVE')='ACTIVE'
+              AND (pp.source_file_id IS NULL
+                   OR COALESCE(sf.lifecycle_status, 'ACTIVE')='ACTIVE')
+              AND pp.is_approved=1
+              AND (? IS NULL OR pp.effective_date IS NULL OR pp.effective_date <= ?)
+            ORDER BY COALESCE(pp.effective_date, pp.created_at) DESC, pp.id DESC
+            """,
+            (product_id, quotation_date, quotation_date),
+        ).fetchall()
+        loaded = [
+            _decorate_price_source(_provenance(conn, "product_prices", int(row["id"])))
+            for row in rows
+        ]
+        loaded = [
+            source
+            for source in loaded
+            if _safe_float(source.get("net_price")) is not None
+        ]
+        if not loaded:
+            return []
+        ex_vat = [
+            source
+            for source in loaded
+            if normalize_tax_mode(source.get("tax_mode")) == "ex_vat"
+        ]
+        if ex_vat:
+            return ex_vat
+        for source in loaded:
+            source.setdefault("warnings", []).append("TAX_BASIS_FALLBACK")
+            source.setdefault("reason_code", "TAX_BASIS_FALLBACK")
+            source["needs_review"] = True
+        return loaded
+
+    # Immutable observations always win. This matters when an older
+    # ``product_prices`` row still exists for the same product but a newer
+    # supplier observation has arrived, and also ensures source lifecycle
+    # decisions apply consistently to current and historical values.
+    all_observations = _observation_sources()
+    sources = all_observations or _operational_price_sources()
+
+    if not sources:
         _PRICE_CACHE[cache_key] = (None, {})
         return _PRICE_CACHE[cache_key]
-    row = rows[0]
-    _PRICE_CACHE[cache_key] = (
-        _safe_float(row["net_price"]),
-        _provenance(conn, "product_prices", int(row["id"])),
-    )
+
+    def sort_key(source: dict[str, Any]) -> tuple[int, int, str, int, float, int]:
+        # ISO effective dates sort lexically; undated rows sort behind dated
+        # rows within the same source tier. An explicitly selected
+        # observation wins over an unselected discount/VAT sibling on the same
+        # date; stable IDs break any remaining ties.
+        effective = str(source.get("effective_date") or "")
+        try:
+            row_id = int(source.get("id") or 0)
+        except (TypeError, ValueError):
+            row_id = 0
+        confidence = _safe_float(source.get("confidence")) or 0.0
+        return (
+            -_price_source_rank(source),
+            1 if effective else 0,
+            effective,
+            1 if source.get("selection_explicit") else 0,
+            confidence,
+            row_id,
+        )
+
+    sources.sort(key=sort_key, reverse=True)
+    selected = sources[0]
+    # Compare against immutable observations, not merely the selected
+    # operational row. A historical row may have been superseded or removed
+    # from the operational shortlist while still being valid audit evidence.
+    # Reuse the already loaded immutable set for both selection and historical
+    # drift. If the selector fell back to legacy product_prices, loading this
+    # set here also supplies a trustworthy observation-based reference.
+    observations = all_observations
+    selected_tax_mode = normalize_tax_mode(selected.get("tax_mode"))
+    historical = [
+        source
+        for source in observations
+        if _price_source_tier(source) == "historical_exact"
+        and normalize_tax_mode(source.get("tax_mode")) == selected_tax_mode
+        and _safe_float(source.get("net_price")) is not None
+    ]
+    if not historical:
+        # Legacy databases before ``price_observations`` existed still have
+        # historical product_prices rows. Use them only as a compatibility
+        # fallback and keep the distinction visible in provenance.
+        historical = [
+            source
+            for source in sources
+            if _price_source_tier(source) == "historical_exact"
+            and normalize_tax_mode(source.get("tax_mode")) == selected_tax_mode
+        ]
+    if _price_source_tier(selected) == "current_supplier_net" and historical:
+        reference = historical[0]
+        selected_value = _safe_float(selected.get("net_price"))
+        reference_value = _safe_float(reference.get("net_price"))
+        if (
+            selected_value is not None
+            and reference_value is not None
+            and reference_value != 0
+        ):
+            drift = abs(selected_value - reference_value) / abs(reference_value)
+            selected["historical_reference"] = _compact_price_source(reference)
+            selected["historical_reference_price"] = reference_value
+            selected["price_drift_ratio"] = round(drift, 6)
+            selected["price_drift_threshold"] = threshold
+            if drift > threshold:
+                selected["warnings"] = [
+                    *list(selected.get("warnings") or []),
+                    "PRICE_DRIFT_HIGH",
+                ]
+                selected["reason_code"] = "PRICE_DRIFT_HIGH"
+                selected["needs_review"] = True
+                selected["explanation"] = (
+                    f"Giá NCC hiện hành {selected_value:,.0f} lệch "
+                    f"{drift:.1%} so với giá lịch sử exact-item "
+                    f"{reference_value:,.0f}; vượt ngưỡng {threshold:.1%}. "
+                    "Giữ giá để kỹ sư review, không tự động coi là tương đương."
+                )
+    _PRICE_CACHE[cache_key] = (_safe_float(selected.get("net_price")), selected)
     return _PRICE_CACHE[cache_key]
+
+
+def _choose_product_price_with_policy(
+    conn,
+    product_id: int,
+    quotation_date: str | None,
+    drift_threshold: Any,
+) -> tuple[float | None, dict[str, Any]]:
+    """Call the selector while preserving older test/integration seams.
+
+    A few downstream integrations monkeypatch the historical three-argument
+    selector. Retrying only when the callable rejects the new optional
+    threshold keeps those adapters compatible without hiding genuine selector
+    failures.
+    """
+
+    try:
+        return choose_product_price(
+            conn,
+            product_id,
+            quotation_date,
+            drift_threshold,
+        )
+    except TypeError as exc:
+        message = str(exc).lower()
+        if "positional" not in message and "argument" not in message:
+            raise
+        return choose_product_price(conn, product_id, quotation_date)
 
 
 def _labor_policy_cache_key(policy: Any) -> str:
@@ -748,14 +1223,19 @@ def choose_labor_rate(
         return _PRICE_CACHE[cache_key]
     rows = conn.execute(
         """
-        SELECT lr.*, sf.filename, ss.sheet_name, sr.row_no,
+        SELECT lr.*, sf.filename, sf.lifecycle_status AS source_lifecycle_status,
+               ss.sheet_name, sr.row_no,
                p.project_name, p.quotation_date AS project_quotation_date
         FROM labor_rates lr
+        JOIN labor_items li ON li.id=lr.labor_item_id
         LEFT JOIN source_files sf ON sf.id=lr.source_file_id
         LEFT JOIN source_sheets ss ON ss.id=lr.source_sheet_id
         LEFT JOIN source_rows sr ON sr.id=lr.source_row_id
         LEFT JOIN projects p ON p.id=lr.source_project_id
         WHERE lr.labor_item_id=?
+          AND COALESCE(li.lifecycle_status, 'ACTIVE')='ACTIVE'
+          AND (lr.source_file_id IS NULL
+               OR COALESCE(sf.lifecycle_status, 'ACTIVE')='ACTIVE')
           AND (? IS NULL OR lr.effective_date IS NULL OR lr.effective_date <= ?)
         ORDER BY lr.effective_date DESC, lr.id DESC
         """,
@@ -1069,6 +1549,56 @@ def _labor_run_policy(policy: dict[str, Any]) -> dict[str, Any] | str | None:
     return config
 
 
+def _preserve_reviewed_item(
+    conn,
+    *,
+    run_id: int,
+    item: Any,
+    counts: dict[str, Any],
+) -> None:
+    """Carry an engineer-reviewed row into a new run without recalculation."""
+
+    line_class = _line_class_value(item)
+    if _is_non_priceable_line(item):
+        counts["non_priceable_items"] += 1
+        counts["non_priceable_reviewed_preserved"] = int(
+            counts.get("non_priceable_reviewed_preserved", 0)
+        ) + 1
+    elif line_class == "PRICEABLE_LINE_ITEM":
+        counts["priceable_items"] += 1
+    else:
+        counts["uncertain_items"] += 1
+
+    material_price = _safe_float(item["material_price"])
+    labor_price = _safe_float(item["labor_price"])
+    if line_class == "PRICEABLE_LINE_ITEM":
+        counts["material_matched"] += int(item["matched_product_id"] is not None)
+        counts["labor_matched"] += int(item["matched_labor_item_id"] is not None)
+        counts["material_priced"] += int(material_price is not None)
+        counts["labor_priced"] += int(labor_price is not None)
+
+    status = str(item["status"] or "REVIEW_REQUIRED").upper()
+    status_key = {
+        "AUTO_APPROVED": "auto_approved",
+        "REVIEW_REQUIRED": "review_required",
+        "PRICE_DRIFT_WARNING": "price_drift_warning",
+        "NO_MATCH": "no_match",
+        "NO_PRICE_FOUND": "no_price_found",
+        "EXTERNAL_QUOTATION_REQUIRED": "external_quotation_required",
+        "NEEDS_SUPPLIER_QUOTATION": "external_quotation_required",
+        "IGNORED": "non_priceable_items",
+    }.get(status)
+    if status_key and not (
+        status_key == "non_priceable_items" and _is_non_priceable_line(item)
+    ):
+        counts[status_key] = int(counts.get(status_key, 0)) + 1
+    counts["reviewed_preserved"] = int(counts.get("reviewed_preserved", 0)) + 1
+    conn.execute(
+        "UPDATE boq_items SET pricing_run_id=? WHERE id=?",
+        (run_id, item["id"]),
+    )
+
+
 def run_pricing(
     project_id: int,
     *,
@@ -1083,7 +1613,17 @@ def run_pricing(
         "labor": "latest_historical_rate",
         "auto_threshold": AUTO_THRESHOLD,
         "review_threshold": REVIEW_THRESHOLD,
+        "price_drift_warning_threshold": settings.price_drift_warning_threshold,
     })
+    drift_threshold = _normalise_drift_threshold(
+        policy.get(
+            "price_drift_warning_threshold",
+            policy.get("price_drift_threshold"),
+        )
+    )
+    # Persist the normalized value alongside the caller's policy so a run can
+    # be reproduced even if environment configuration changes later.
+    policy.setdefault("price_drift_warning_threshold", drift_threshold)
     labor_policy = _labor_run_policy(policy)
     semantic_provider = llm_provider or ai_provider
     llm_requested = _policy_bool(
@@ -1142,14 +1682,24 @@ def run_pricing(
             "price_drift_warning": 0,
             "no_match": 0,
             "no_price_found": 0,
+            "external_quotation_required": 0,
             "material_matched": 0,
             "labor_matched": 0,
             "material_priced": 0,
             "labor_priced": 0,
+            "reviewed_preserved": 0,
         }
         quotation_date = project["quotation_date"]
         for item in items:
             line_class = _line_class_value(item)
+            if item["reviewed"] and not force:
+                _preserve_reviewed_item(
+                    conn,
+                    run_id=run_id,
+                    item=item,
+                    counts=counts,
+                )
+                continue
             if _is_non_priceable_line(item):
                 # Keep the row in the project for layout/provenance and make
                 # the deliberate exclusion visible to API/export consumers.
@@ -1291,7 +1841,14 @@ def run_pricing(
             ):
                 labor = None
             material_price, material_source = (
-                choose_product_price(conn, product.entity_id, quotation_date) if product else (None, {})
+                _choose_product_price_with_policy(
+                    conn,
+                    product.entity_id,
+                    quotation_date,
+                    drift_threshold,
+                )
+                if product
+                else (None, {})
             )
             labor_price, labor_source = (
                 choose_labor_rate(
@@ -1335,8 +1892,11 @@ def run_pricing(
             labor_total = _round_money(qty * labor_price) if qty is not None and labor_price is not None else None
             material_alternatives: list[dict[str, Any]] = []
             for candidate in product_candidates:
-                candidate_price, candidate_source = choose_product_price(
-                    conn, candidate.entity_id, quotation_date
+                candidate_price, candidate_source = _choose_product_price_with_policy(
+                    conn,
+                    candidate.entity_id,
+                    quotation_date,
+                    drift_threshold,
                 )
                 if candidate_price is not None:
                     candidate_price = _round_money(
@@ -1608,6 +2168,12 @@ def review_item(
         item = conn.execute("SELECT * FROM boq_items WHERE id=?", (item_id,)).fetchone()
         if not item:
             raise KeyError(f"boq_item:{item_id}")
+        project = conn.execute(
+            "SELECT id, quotation_date FROM projects WHERE id=?",
+            (item["project_id"],),
+        ).fetchone()
+        project_id = int(project["id"]) if project else None
+        quotation_date = project["quotation_date"] if project else None
         old_product = item["matched_product_id"]
         old_labor = item["matched_labor_item_id"]
         final_material_price = _safe_float(item["material_price"])
@@ -1623,7 +2189,24 @@ def review_item(
             final_material_price = (
                 _safe_float(material_price) if material_price is not None else price
             )
-            final_material_source = material_source or source or {}
+            # An explicit price is a manual override even when a candidate was
+            # selected at the same time.  Do not retain the candidate's
+            # automatic source metadata: doing so would make the persisted
+            # review look supplier-backed and would skip the manual
+            # ``price_observations`` audit row.
+            final_material_source = (
+                material_source
+                or (
+                    {
+                        "type": "manual",
+                        "entered_by": created_by,
+                        "entered_at": utc_now(),
+                    }
+                    if material_price is not None
+                    else source
+                )
+                or {}
+            )
         elif material_price is not None:
             final_material_price = _safe_float(material_price)
             final_material_source = material_source or {
@@ -1637,7 +2220,19 @@ def review_item(
             final_labor_price = (
                 _safe_float(labor_price) if labor_price is not None else price
             )
-            final_labor_source = labor_source or source or {}
+            final_labor_source = (
+                labor_source
+                or (
+                    {
+                        "type": "manual",
+                        "entered_by": created_by,
+                        "entered_at": utc_now(),
+                    }
+                    if labor_price is not None
+                    else source
+                )
+                or {}
+            )
         elif labor_price is not None:
             final_labor_price = _safe_float(labor_price)
             final_labor_source = labor_source or {
@@ -1667,6 +2262,13 @@ def review_item(
             if final_material_price is not None or final_labor_price is not None
             else "REVIEW_REQUIRED"
         )
+        status_aliases = {
+            "NEEDS_SUPPLIER_QUOTATION": "EXTERNAL_QUOTATION_REQUIRED",
+            "SUPPLIER_QUOTATION_REQUIRED": "EXTERNAL_QUOTATION_REQUIRED",
+        }
+        final_status = status_aliases.get(
+            str(final_status).upper(), str(final_status).upper()
+        )
         # Never let an explicit "approve" action turn a newly selected,
         # unsourced candidate into an apparently complete quotation.
         if final_status == "AUTO_APPROVED" and (
@@ -1678,14 +2280,28 @@ def review_item(
             "LOW"
             if final_status == "AUTO_APPROVED"
             else "HIGH"
-            if final_status in {"NO_MATCH", "NO_PRICE_FOUND", "NEEDS_SUPPLIER_QUOTATION"}
+            if final_status
+            in {
+                "NO_MATCH",
+                "NO_PRICE_FOUND",
+                "NEEDS_SUPPLIER_QUOTATION",
+                "EXTERNAL_QUOTATION_REQUIRED",
+            }
             else "MEDIUM"
         )
         explanation = (
             "Đã được kỹ sư review/xác nhận."
             if final_status == "AUTO_APPROVED"
+            else "Đã đánh dấu cần báo giá nhà cung cấp bên ngoài."
+            if final_status == "EXTERNAL_QUOTATION_REQUIRED"
             else "Đã review nhưng vẫn cần bổ sung candidate hoặc đơn giá có nguồn."
         )
+        status_reason = {
+            "AUTO_APPROVED": "manual_engineer_review",
+            "EXTERNAL_QUOTATION_REQUIRED": "external_supplier_quotation_required",
+            "IGNORED": "ignored_by_engineer",
+            "REVIEW_REQUIRED": "manual_review_pending_source",
+        }.get(final_status, "manual_review")
 
         # Build the update list explicitly so selecting a candidate can clear
         # stale price/provenance values while an unrelated manual action keeps
@@ -1696,6 +2312,7 @@ def review_item(
             "status=?",
             "risk=?",
             "explanation=?",
+            "status_reason=?",
             "reviewed=1",
         ]
         parameters: list[Any] = [
@@ -1704,6 +2321,7 @@ def review_item(
             final_status,
             risk,
             explanation,
+            status_reason,
         ]
         if selected_product_id is not None:
             assignments.extend(
@@ -1807,7 +2425,83 @@ def review_item(
                         utc_now(),
                     ),
                 )
+
+        # Manual prices are first-class observations. They remain linked to
+        # the BOQ/project context and can be audited or superseded later,
+        # instead of disappearing when the row is recalculated.
+        def _manual_source(source: Any) -> bool:
+            if not isinstance(source, dict):
+                return False
+            source_type = str(
+                source.get("source_type") or source.get("type") or ""
+            ).strip().lower()
+            return source_type in _MANUAL_PRICE_SOURCE_TYPES
+
+        manual_product_id = selected_product_id or old_product
+        if (
+            final_material_price is not None
+            and _manual_source(final_material_source)
+            and manual_product_id
+        ):
+            conn.execute(
+                """
+                INSERT INTO price_observations(
+                    product_id, source_project_id, supplier, observation_type,
+                    net_price, currency, tax_mode, price_basis, effective_date,
+                    confidence, context_json, calc_json, created_at
+                ) VALUES (?, ?, 'Manual review', 'manual_review', ?, 'VND',
+                          'ex_vat', 'net', ?, 1.0, ?, '{}', ?)
+                """,
+                (
+                    int(manual_product_id),
+                    project_id,
+                    final_material_price,
+                    quotation_date,
+                    dumps(
+                        {
+                            "boq_item_id": item_id,
+                            "note": final_material_source.get("note"),
+                            "entered_by": final_material_source.get("entered_by")
+                            or created_by,
+                            "entered_at": final_material_source.get("entered_at"),
+                        }
+                    ),
+                    utc_now(),
+                ),
+            )
+        manual_labor_id = selected_labor_item_id or old_labor
+        if (
+            final_labor_price is not None
+            and _manual_source(final_labor_source)
+            and manual_labor_id
+        ):
+            conn.execute(
+                """
+                INSERT INTO labor_rates(
+                    labor_item_id, source_project_id, rate, effective_date,
+                    policy_json, confidence, created_at
+                ) VALUES (?, ?, ?, ?, ?, 1.0, ?)
+                """,
+                (
+                    int(manual_labor_id),
+                    project_id,
+                    final_labor_price,
+                    quotation_date,
+                    dumps(
+                        {
+                            "source_type": "manual_review",
+                            "boq_item_id": item_id,
+                            "note": final_labor_source.get("note"),
+                            "entered_by": final_labor_source.get("entered_by")
+                            or created_by,
+                            "entered_at": final_labor_source.get("entered_at"),
+                        }
+                    ),
+                    utc_now(),
+                ),
+            )
         result = conn.execute("SELECT * FROM boq_items WHERE id=?", (item_id,)).fetchone()
+        clear_runtime_caches()
         return serialize_boq_item(conn, result)
 
 
@@ -1815,15 +2509,43 @@ def catalog_stats() -> dict[str, Any]:
     with db_session() as conn:
         products = conn.execute("SELECT COUNT(*) AS n FROM products").fetchone()["n"]
         prices = conn.execute("SELECT COUNT(*) AS n FROM product_prices").fetchone()["n"]
+        observations = conn.execute(
+            "SELECT COUNT(*) AS n FROM price_observations"
+        ).fetchone()["n"]
         labor_items = conn.execute("SELECT COUNT(*) AS n FROM labor_items").fetchone()["n"]
         labor_rates = conn.execute("SELECT COUNT(*) AS n FROM labor_rates").fetchone()["n"]
         files = conn.execute("SELECT COUNT(*) AS n FROM source_files").fetchone()["n"]
         projects = conn.execute("SELECT COUNT(*) AS n FROM projects").fetchone()["n"]
+        active_products = conn.execute(
+            "SELECT COUNT(*) AS n FROM products WHERE COALESCE(lifecycle_status,'ACTIVE')='ACTIVE'"
+        ).fetchone()["n"]
+        archived_products = conn.execute(
+            "SELECT COUNT(*) AS n FROM products WHERE COALESCE(lifecycle_status,'ACTIVE')<>'ACTIVE'"
+        ).fetchone()["n"]
+        active_labor_items = conn.execute(
+            "SELECT COUNT(*) AS n FROM labor_items WHERE COALESCE(lifecycle_status,'ACTIVE')='ACTIVE'"
+        ).fetchone()["n"]
+        archived_labor_items = conn.execute(
+            "SELECT COUNT(*) AS n FROM labor_items WHERE COALESCE(lifecycle_status,'ACTIVE')<>'ACTIVE'"
+        ).fetchone()["n"]
+        active_sources = conn.execute(
+            "SELECT COUNT(*) AS n FROM source_files WHERE COALESCE(lifecycle_status,'ACTIVE')='ACTIVE'"
+        ).fetchone()["n"]
+        archived_sources = conn.execute(
+            "SELECT COUNT(*) AS n FROM source_files WHERE COALESCE(lifecycle_status,'ACTIVE')<>'ACTIVE'"
+        ).fetchone()["n"]
         return {
             "source_files": files,
             "products": products,
             "product_prices": prices,
+            "price_observations": observations,
             "labor_items": labor_items,
             "labor_rates": labor_rates,
             "projects": projects,
+            "active_sources": active_sources,
+            "archived_sources": archived_sources,
+            "active_products": active_products,
+            "archived_products": archived_products,
+            "active_labor_items": active_labor_items,
+            "archived_labor_items": archived_labor_items,
         }

@@ -1,6 +1,6 @@
 # Round 2 benchmark report
 
-- Generated: `2026-09-06T01:53:55.276131+00:00`
+- Generated: `2026-09-06T07:50:07.619003+00:00`
 - Holdout: `BOQ-HỆ THỐNG ĐIỆN TRẠI LƠN HẢI HÀ-DH290124.xlsx`
 - Round 1 source: `benchmarks/baseline-round1.json`
 - Round 2 source: `benchmarks/holdout-report.json`
@@ -27,7 +27,7 @@
 | MATCH_FAILURE failures | `count` | n/a | 2019 | n/a |
 | High-confidence wrong matches | `count` | 0 | 0 | +0 |
 | Provenance complete | `bool` | PASS | PASS | unchanged |
-| Runtime (seconds) | `seconds` | 188.143s | 291.333s | +103.190s |
+| Runtime (seconds) | `seconds` | 188.143s | 194.931s | +6.788s |
 
 ## Round 2 interpretation
 

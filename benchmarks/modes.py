@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
 from app.normalize import normalize_text, technical_attributes
+from app.price_policy import normalize_price_basis, normalize_tax_mode
 
 HISTORICAL_REPRODUCTION = "historical_reproduction"
 CURRENT_REPRICING = "current_repricing"
@@ -298,14 +299,50 @@ def observation_date(observation: Mapping[str, Any]) -> date | None:
 
 def observation_source_type(observation: Mapping[str, Any]) -> str:
     policy = _loads(observation.get("policy_json", observation.get("policy")), {})
+    context = _loads(
+        observation.get("context_json", observation.get("context")), {}
+    )
+    calculation = _loads(
+        observation.get("calc_json", observation.get("calc")), {}
+    )
     value = (
         observation.get("source_type")
         or (policy.get("source_type") if isinstance(policy, Mapping) else None)
+        or observation.get("observation_type")
+        or (
+            context.get("source_type")
+            if isinstance(context, Mapping)
+            else None
+        )
+        or (
+            calculation.get("source_type")
+            if isinstance(calculation, Mapping)
+            else None
+        )
         or observation.get("source_tier")
         or observation.get("supplier")
         or "unknown"
     )
     return normalize_text(value).replace(" ", "_") or "unknown"
+
+
+def observation_selection_explicit(observation: Mapping[str, Any]) -> bool:
+    """Return whether ingestion/policy marked an observation as selected."""
+
+    if observation.get("selected") is True or observation.get("is_selected") is True:
+        return True
+    for field in ("context", "context_json", "calc", "calc_json"):
+        value = observation.get(field)
+        if field.endswith("_json"):
+            value = _loads(value, {})
+        if not isinstance(value, Mapping):
+            continue
+        if value.get("selected") is True or value.get("is_selected") is True:
+            return True
+        selection = value.get("selection")
+        if isinstance(selection, str) and selection.strip():
+            return True
+    return bool(observation.get("calculated") is True)
 
 
 def temporal_observation_status(
@@ -495,7 +532,7 @@ def _source_priority(observation: Mapping[str, Any], side: str) -> int:
             return 0
         if source_type in _HISTORICAL_SOURCE_TYPES:
             return 1
-        if source_type in {"manual", "manual_approved"}:
+        if source_type in {"manual", "manual_review", "manual_quote", "manual_approved"}:
             return 2
         return 3
     if source_type in {
@@ -512,7 +549,7 @@ def _source_priority(observation: Mapping[str, Any], side: str) -> int:
         return 1
     if source_type in _HISTORICAL_SOURCE_TYPES or supplier == "historical_quotation":
         return 2
-    if source_type in {"manual", "manual_approved"}:
+    if source_type in {"manual", "manual_review", "manual_quote", "manual_approved"}:
         return 3
     return 4
 
@@ -540,6 +577,7 @@ def select_mode_observation(
             -_source_priority(item, side),
             observation_date(item) is not None,
             observation_date(item) or date.min,
+            1 if observation_selection_explicit(item) else 0,
             int(_safe_float(item.get("id")) or 0),
         ),
         reverse=True,
@@ -579,7 +617,7 @@ def classify_price_error(
     ratio = predicted_value / actual_value if actual_value else None
     evidence: list[str] = [f"predicted/actual={ratio:.4f}"]
     source_type = observation_source_type(source)
-    tax_mode = normalize_text(source.get("tax_mode") or "")
+    tax_mode = normalize_tax_mode(source.get("tax_mode"), default="")
     discount = _safe_float(source.get("discount", source.get("discount_rate")))
     list_price = _safe_float(source.get("list_price"))
     source_date = _source_date_for_row(source)
@@ -619,7 +657,7 @@ def classify_price_error(
     # ex-VAT with a zero discount is stronger evidence for MISSING_DISCOUNT.
     vat_ratios = (1.08, 1.10, 1.05, 1.1 / 1.08, 1.08 / 1.1)
     near_vat = ratio is not None and any(abs(ratio - candidate) <= 0.015 for candidate in vat_ratios)
-    if near_vat or tax_mode in {"inc_vat", "vat", "including_vat"}:
+    if near_vat or tax_mode == "inc_vat":
         evidence.append(f"tax_mode={tax_mode or 'unknown'}")
         return {
             "root_cause": "VAT_BASIS_MISMATCH",
@@ -1096,7 +1134,12 @@ def _db_rows(conn: Any, project_id: int, run_id: int | None = None) -> list[Any]
 
 
 def _db_source_observations(conn: Any, rows: Sequence[Any]) -> dict[Any, list[dict[str, Any]]]:
-    """Load all material/labor observations for matched IDs in *rows*."""
+    """Load active material/labor observations for matched IDs in *rows*.
+
+    Immutable ``price_observations`` are authoritative for material pricing.
+    ``product_prices`` remains a per-product fallback for legacy databases
+    that predate the observation table (or rows with no usable observation).
+    """
 
     product_ids = {
         int(_row_get(row, "matched_product_id"))
@@ -1111,34 +1154,126 @@ def _db_source_observations(conn: Any, rows: Sequence[Any]) -> dict[Any, list[di
     result: dict[Any, list[dict[str, Any]]] = {}
     if product_ids:
         placeholders = ",".join("?" for _ in product_ids)
+        observations_by_product: dict[int, list[dict[str, Any]]] = {}
         query = f"""
-            SELECT pp.*, sf.filename, ss.sheet_name, sr.row_no
-            FROM product_prices pp
-            LEFT JOIN source_files sf ON sf.id=pp.source_file_id
-            LEFT JOIN source_sheets ss ON ss.id=pp.source_sheet_id
-            LEFT JOIN source_rows sr ON sr.id=pp.source_row_id
-            WHERE pp.product_id IN ({placeholders})
-            ORDER BY pp.product_id, pp.effective_date DESC, pp.id DESC
+            SELECT po.*, sf.filename, sf.lifecycle_status AS source_lifecycle_status,
+                   ss.sheet_name, sr.row_no
+            FROM price_observations po
+            JOIN products p ON p.id=po.product_id
+            LEFT JOIN source_files sf ON sf.id=po.source_file_id
+            LEFT JOIN source_sheets ss ON ss.id=po.source_sheet_id
+            LEFT JOIN source_rows sr ON sr.id=po.source_row_id
+            WHERE po.product_id IN ({placeholders})
+              AND COALESCE(p.lifecycle_status, 'ACTIVE')='ACTIVE'
+              AND (po.source_file_id IS NULL
+                   OR COALESCE(sf.lifecycle_status, 'ACTIVE')='ACTIVE')
+              AND po.is_approved=1
+            ORDER BY po.product_id,
+                     COALESCE(po.effective_date, po.created_at) DESC,
+                     po.id DESC
         """
         for row in conn.execute(query, tuple(sorted(product_ids))).fetchall():
             item = dict(row)
-            item["source_type"] = (
-                "historical_boq"
-                if normalize_text(item.get("supplier")) == "historical_quotation"
-                else "supplier_price"
-            )
-            result.setdefault(("material", int(row["product_id"])), []).append(item)
+            amount = _safe_float(item.get("net_price"))
+            if amount is None or amount < 0:
+                continue
+            observations_by_product.setdefault(int(row["product_id"]), []).append(item)
+
+        # Prefer observations on the common ex-VAT/net basis per product. A
+        # gross-only product remains visible, but is explicitly marked for
+        # review instead of being silently mixed with net values.
+        for product_id, observations in observations_by_product.items():
+            ex_vat = [
+                item
+                for item in observations
+                if normalize_tax_mode(item.get("tax_mode")) == "ex_vat"
+                and normalize_price_basis(item.get("price_basis")) == "net"
+            ]
+            selected = ex_vat or observations
+            if not ex_vat:
+                for item in selected:
+                    warnings = list(item.get("warnings") or [])
+                    if "TAX_BASIS_FALLBACK" not in warnings:
+                        warnings.append("TAX_BASIS_FALLBACK")
+                    item["warnings"] = warnings
+                    item["reason_code"] = "TAX_BASIS_FALLBACK"
+            for item in selected:
+                # Keep the observation type for source-tier selection. The
+                # helper also understands context/calc JSON from legacy rows.
+                item.setdefault("source_type", item.get("observation_type"))
+                result.setdefault(("material", product_id), []).append(item)
+
+        # Only products without a usable immutable observation use the
+        # operational compatibility table.
+        missing_product_ids = product_ids - set(observations_by_product)
+        if missing_product_ids:
+            placeholders = ",".join("?" for _ in missing_product_ids)
+            query = f"""
+                SELECT pp.*, sf.filename,
+                       sf.lifecycle_status AS source_lifecycle_status,
+                       ss.sheet_name, sr.row_no
+                FROM product_prices pp
+                JOIN products p ON p.id=pp.product_id
+                LEFT JOIN source_files sf ON sf.id=pp.source_file_id
+                LEFT JOIN source_sheets ss ON ss.id=pp.source_sheet_id
+                LEFT JOIN source_rows sr ON sr.id=pp.source_row_id
+                WHERE pp.product_id IN ({placeholders})
+                  AND COALESCE(p.lifecycle_status, 'ACTIVE')='ACTIVE'
+                  AND (pp.source_file_id IS NULL
+                       OR COALESCE(sf.lifecycle_status, 'ACTIVE')='ACTIVE')
+                  AND pp.is_approved=1
+                ORDER BY pp.product_id,
+                         COALESCE(pp.effective_date, pp.created_at) DESC,
+                         pp.id DESC
+            """
+            legacy_by_product: dict[int, list[dict[str, Any]]] = {}
+            for row in conn.execute(
+                query, tuple(sorted(missing_product_ids))
+            ).fetchall():
+                item = dict(row)
+                amount = _safe_float(item.get("net_price"))
+                if amount is None or amount < 0:
+                    continue
+                item["source_type"] = (
+                    "historical_boq"
+                    if normalize_text(item.get("supplier"))
+                    in {"historical_quotation", "historical"}
+                    else "supplier_price"
+                )
+                legacy_by_product.setdefault(int(row["product_id"]), []).append(item)
+            for product_id, legacy_rows in legacy_by_product.items():
+                ex_vat = [
+                    item
+                    for item in legacy_rows
+                    if normalize_tax_mode(item.get("tax_mode")) == "ex_vat"
+                ]
+                selected = ex_vat or legacy_rows
+                if not ex_vat:
+                    for item in selected:
+                        warnings = list(item.get("warnings") or [])
+                        if "TAX_BASIS_FALLBACK" not in warnings:
+                            warnings.append("TAX_BASIS_FALLBACK")
+                        item["warnings"] = warnings
+                        item["reason_code"] = "TAX_BASIS_FALLBACK"
+                for item in selected:
+                    result.setdefault(("material", product_id), []).append(item)
     if labor_ids:
         placeholders = ",".join("?" for _ in labor_ids)
         query = f"""
-            SELECT lr.*, sf.filename, ss.sheet_name, sr.row_no,
+            SELECT lr.*, sf.filename, sf.lifecycle_status AS source_lifecycle_status,
+                   ss.sheet_name, sr.row_no,
+                   li.lifecycle_status AS labor_lifecycle_status,
                    p.project_name, p.quotation_date AS project_quotation_date
             FROM labor_rates lr
+            JOIN labor_items li ON li.id=lr.labor_item_id
             LEFT JOIN source_files sf ON sf.id=lr.source_file_id
             LEFT JOIN source_sheets ss ON ss.id=lr.source_sheet_id
             LEFT JOIN source_rows sr ON sr.id=lr.source_row_id
             LEFT JOIN projects p ON p.id=lr.source_project_id
             WHERE lr.labor_item_id IN ({placeholders})
+              AND COALESCE(li.lifecycle_status, 'ACTIVE')='ACTIVE'
+              AND (lr.source_file_id IS NULL
+                   OR COALESCE(sf.lifecycle_status, 'ACTIVE')='ACTIVE')
             ORDER BY lr.labor_item_id, lr.effective_date DESC, lr.id DESC
         """
         for row in conn.execute(query, tuple(sorted(labor_ids))).fetchall():

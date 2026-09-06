@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "report": "round2_before_after",
-  "generated_at": "2026-09-06T01:53:55.276131+00:00",
+  "generated_at": "2026-09-06T07:50:07.619003+00:00",
   "holdout_file": "BOQ-HỆ THỐNG ĐIỆN TRẠI LƠN HẢI HÀ-DH290124.xlsx",
   "baseline_path": "benchmarks/baseline-round1.json",
   "current_path": "benchmarks/holdout-report.json",
@@ -36,7 +36,7 @@
   },
   "round2": {
     "source": "benchmarks/holdout-report.json",
-    "generated_at": "2026-09-06T01:52:51.693131+00:00",
+    "generated_at": "2026-09-06T07:46:00.435201+00:00",
     "holdout_file": "BOQ-HỆ THỐNG ĐIỆN TRẠI LƠN HẢI HÀ-DH290124.xlsx",
     "llm_enabled": false,
     "total_boq_items": 2473,
@@ -59,7 +59,7 @@
     "match_failure": 2019,
     "high_confidence_wrong_match": 0,
     "provenance_complete": true,
-    "runtime_seconds": 291.333,
+    "runtime_seconds": 194.931,
     "data_gap_main_counts": {
       "MATCH_FAILURE": 14,
       "MISSING_SOURCE_DATA": 2,
@@ -202,8 +202,8 @@
       "metric": "Runtime (seconds)",
       "kind": "seconds",
       "round1": 188.143,
-      "round2": 291.333,
-      "delta": 103.19000000000003
+      "round2": 194.931,
+      "delta": 6.788000000000011
     }
   ],
   "interpretation": [

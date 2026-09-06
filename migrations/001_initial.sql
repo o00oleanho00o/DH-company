@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS source_files (
     filename TEXT NOT NULL,
     storage_key TEXT NOT NULL,
     sha256 TEXT NOT NULL,
+    content_sha256 TEXT,
     extension TEXT NOT NULL,
     size_bytes INTEGER NOT NULL DEFAULT 0,
     detected_type TEXT NOT NULL DEFAULT 'UNKNOWN',
@@ -26,6 +27,12 @@ CREATE TABLE IF NOT EXISTS source_files (
     metadata_json TEXT NOT NULL DEFAULT '{}',
     parsing_version TEXT NOT NULL DEFAULT '1.0',
     processing_status TEXT NOT NULL DEFAULT 'PENDING',
+    lifecycle_status TEXT NOT NULL DEFAULT 'ACTIVE',
+    status_reason TEXT,
+    archived_at TEXT,
+    superseded_by_source_file_id INTEGER REFERENCES source_files(id) ON DELETE SET NULL,
+    supersedes_source_file_id INTEGER REFERENCES source_files(id) ON DELETE SET NULL,
+    version_no INTEGER NOT NULL DEFAULT 1,
     uploaded_at TEXT NOT NULL
 );
 
@@ -64,12 +71,17 @@ CREATE TABLE IF NOT EXISTS products (
     unit TEXT,
     technical_attributes_json TEXT NOT NULL DEFAULT '{}',
     aliases_json TEXT NOT NULL DEFAULT '[]',
+    lifecycle_status TEXT NOT NULL DEFAULT 'ACTIVE',
+    status_reason TEXT,
+    archived_at TEXT,
     created_at TEXT NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_products_code ON products(product_code);
 CREATE INDEX IF NOT EXISTS idx_products_name ON products(normalized_name);
 CREATE INDEX IF NOT EXISTS idx_source_files_sha256 ON source_files(sha256);
+CREATE INDEX IF NOT EXISTS idx_source_files_content_sha256 ON source_files(content_sha256);
+CREATE INDEX IF NOT EXISTS idx_source_files_lifecycle ON source_files(lifecycle_status);
 
 CREATE TABLE IF NOT EXISTS product_prices (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -131,10 +143,31 @@ CREATE TABLE IF NOT EXISTS labor_items (
     category TEXT,
     unit TEXT,
     technical_attributes_json TEXT NOT NULL DEFAULT '{}',
+    lifecycle_status TEXT NOT NULL DEFAULT 'ACTIVE',
+    status_reason TEXT,
+    archived_at TEXT,
     created_at TEXT NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_labor_name ON labor_items(normalized_name);
+
+CREATE TABLE IF NOT EXISTS catalog_source_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entity_type TEXT NOT NULL,
+    product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+    labor_item_id INTEGER REFERENCES labor_items(id) ON DELETE CASCADE,
+    source_file_id INTEGER REFERENCES source_files(id) ON DELETE SET NULL,
+    source_sheet_id INTEGER REFERENCES source_sheets(id) ON DELETE SET NULL,
+    source_row_id INTEGER REFERENCES source_rows(id) ON DELETE SET NULL,
+    relation_type TEXT NOT NULL DEFAULT 'ingested',
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_catalog_source_links_product
+    ON catalog_source_links(entity_type, product_id, source_file_id);
+CREATE INDEX IF NOT EXISTS idx_catalog_source_links_labor
+    ON catalog_source_links(entity_type, labor_item_id, source_file_id);
+CREATE INDEX IF NOT EXISTS idx_catalog_source_links_source
+    ON catalog_source_links(source_file_id, entity_type);
 
 CREATE TABLE IF NOT EXISTS projects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -258,4 +291,4 @@ CREATE TABLE IF NOT EXISTS audit_events (
 );
 
 -- Explicit schema version for tools that inspect SQLite metadata.
-PRAGMA user_version = 1;
+PRAGMA user_version = 2;

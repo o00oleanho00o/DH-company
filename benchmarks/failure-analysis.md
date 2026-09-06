@@ -184,12 +184,12 @@
 
 | ID | Side | Category | Predicted | Ground truth | Relative error | Root cause |
 | ---: | --- | --- | ---: | ---: | ---: | --- |
-| 3564 | material | Cable | 18886.0 | 8000.0 | 136.1% | SOURCE_OR_UNIT_MAPPING |
-| 3589 | material | Cable | 18886.0 | 8000.0 | 136.1% | SOURCE_OR_UNIT_MAPPING |
-| 3051 | material | Lighting | 25884.0 | 11100.0 | 133.2% | SOURCE_OR_UNIT_MAPPING |
-| 3567 | material | Cable | 37542.0 | 16800.0 | 123.5% | SOURCE_OR_UNIT_MAPPING |
-| 3049 | material | MCB/MCCB/Protection | 40416.0 | 18500.0 | 118.5% | SOURCE_OR_UNIT_MAPPING |
-| 3050 | material | Switch/socket | 40416.0 | 18500.0 | 118.5% | SOURCE_OR_UNIT_MAPPING |
+| 3564 | material | Cable | 18886.0 | 8000.0 | 136.1% | PRICING_POLICY_OR_TAX_BASIS |
+| 3589 | material | Cable | 18886.0 | 8000.0 | 136.1% | PRICING_POLICY_OR_TAX_BASIS |
+| 3051 | material | Lighting | 25884.0 | 11100.0 | 133.2% | PRICING_POLICY_OR_TAX_BASIS |
+| 3567 | material | Cable | 37542.0 | 16800.0 | 123.5% | PRICING_POLICY_OR_TAX_BASIS |
+| 3049 | material | MCB/MCCB/Protection | 40416.0 | 18500.0 | 118.5% | PRICING_POLICY_OR_TAX_BASIS |
+| 3050 | material | Switch/socket | 40416.0 | 18500.0 | 118.5% | PRICING_POLICY_OR_TAX_BASIS |
 | 3053 | labor | Pipe | 20000.0 | 9300.0 | 115.1% | HISTORICAL_PRICE_DRIFT |
 | 3059 | labor | Earthing | 100000.0 | 46500.0 | 115.1% | HISTORICAL_PRICE_DRIFT |
 | 3114 | labor | Pipe | 20000.0 | 9300.0 | 115.1% | HISTORICAL_PRICE_DRIFT |
@@ -216,23 +216,23 @@
 | 3269 | labor | Earthing | 100000.0 | 46500.0 | 115.1% | HISTORICAL_PRICE_DRIFT |
 | 3284 | labor | Earthing | 100000.0 | 46500.0 | 115.1% | HISTORICAL_PRICE_DRIFT |
 | 3591 | labor | Conduit | 20000.0 | 9300.0 | 115.1% | HISTORICAL_PRICE_DRIFT |
-| 3806 | material | Cable | 20104.0 | 9400.0 | 113.9% | SOURCE_OR_UNIT_MAPPING |
-| 2835 | material | Cable | 66439.0 | 31300.0 | 112.3% | SOURCE_OR_UNIT_MAPPING |
-| 2929 | material | Lighting | 66439.0 | 31300.0 | 112.3% | SOURCE_OR_UNIT_MAPPING |
-| 3016 | material | Cable | 66439.0 | 31300.0 | 112.3% | SOURCE_OR_UNIT_MAPPING |
-| 2943 | material | Lighting | 200797.0 | 97600.0 | 105.7% | SOURCE_OR_UNIT_MAPPING |
-| 2947 | material | Lighting | 200797.0 | 97600.0 | 105.7% | SOURCE_OR_UNIT_MAPPING |
-| 2903 | material | Lighting | 115893.0 | 56500.0 | 105.1% | SOURCE_OR_UNIT_MAPPING |
-| 2960 | material | Lighting | 115893.0 | 56500.0 | 105.1% | SOURCE_OR_UNIT_MAPPING |
-| 2962 | material | Lighting | 115893.0 | 56500.0 | 105.1% | SOURCE_OR_UNIT_MAPPING |
-| 2964 | material | Lighting | 115893.0 | 56500.0 | 105.1% | SOURCE_OR_UNIT_MAPPING |
-| 2966 | material | Lighting | 115893.0 | 56500.0 | 105.1% | SOURCE_OR_UNIT_MAPPING |
-| 2970 | material | Lighting | 115893.0 | 56500.0 | 105.1% | SOURCE_OR_UNIT_MAPPING |
-| 2972 | material | Lighting | 115893.0 | 56500.0 | 105.1% | SOURCE_OR_UNIT_MAPPING |
-| 2974 | material | Lighting | 115893.0 | 56500.0 | 105.1% | SOURCE_OR_UNIT_MAPPING |
-| 2976 | material | Lighting | 115893.0 | 56500.0 | 105.1% | SOURCE_OR_UNIT_MAPPING |
-| 2980 | material | Lighting | 115893.0 | 56500.0 | 105.1% | SOURCE_OR_UNIT_MAPPING |
-| 2982 | material | Lighting | 115893.0 | 56500.0 | 105.1% | SOURCE_OR_UNIT_MAPPING |
-| 2984 | material | Lighting | 115893.0 | 56500.0 | 105.1% | SOURCE_OR_UNIT_MAPPING |
+| 3806 | material | Cable | 20104.0 | 9400.0 | 113.9% | PRICING_POLICY_OR_TAX_BASIS |
+| 2835 | material | Cable | 66439.0 | 31300.0 | 112.3% | PRICING_POLICY_OR_TAX_BASIS |
+| 2929 | material | Lighting | 66439.0 | 31300.0 | 112.3% | PRICING_POLICY_OR_TAX_BASIS |
+| 3016 | material | Cable | 66439.0 | 31300.0 | 112.3% | PRICING_POLICY_OR_TAX_BASIS |
+| 2943 | material | Lighting | 200797.0 | 97600.0 | 105.7% | PRICING_POLICY_OR_TAX_BASIS |
+| 2947 | material | Lighting | 200797.0 | 97600.0 | 105.7% | PRICING_POLICY_OR_TAX_BASIS |
+| 2903 | material | Lighting | 115893.0 | 56500.0 | 105.1% | PRICING_POLICY_OR_TAX_BASIS |
+| 2960 | material | Lighting | 115893.0 | 56500.0 | 105.1% | PRICING_POLICY_OR_TAX_BASIS |
+| 2962 | material | Lighting | 115893.0 | 56500.0 | 105.1% | PRICING_POLICY_OR_TAX_BASIS |
+| 2964 | material | Lighting | 115893.0 | 56500.0 | 105.1% | PRICING_POLICY_OR_TAX_BASIS |
+| 2966 | material | Lighting | 115893.0 | 56500.0 | 105.1% | PRICING_POLICY_OR_TAX_BASIS |
+| 2970 | material | Lighting | 115893.0 | 56500.0 | 105.1% | PRICING_POLICY_OR_TAX_BASIS |
+| 2972 | material | Lighting | 115893.0 | 56500.0 | 105.1% | PRICING_POLICY_OR_TAX_BASIS |
+| 2974 | material | Lighting | 115893.0 | 56500.0 | 105.1% | PRICING_POLICY_OR_TAX_BASIS |
+| 2976 | material | Lighting | 115893.0 | 56500.0 | 105.1% | PRICING_POLICY_OR_TAX_BASIS |
+| 2980 | material | Lighting | 115893.0 | 56500.0 | 105.1% | PRICING_POLICY_OR_TAX_BASIS |
+| 2982 | material | Lighting | 115893.0 | 56500.0 | 105.1% | PRICING_POLICY_OR_TAX_BASIS |
+| 2984 | material | Lighting | 115893.0 | 56500.0 | 105.1% | PRICING_POLICY_OR_TAX_BASIS |
 
 Failure codes are diagnostic routing labels, not proof of a single root cause. Review the candidate/provenance evidence before changing a production pricing rule.

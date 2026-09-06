@@ -1,11 +1,11 @@
 {
   "benchmark": "holdout",
-  "generated_at": "2026-09-06T01:52:51.693131+00:00",
+  "generated_at": "2026-09-06T07:46:00.435201+00:00",
   "runtime_seconds": {
-    "ingest": 61.351,
-    "pricing": 198.97,
-    "evaluation": 7.853,
-    "total": 291.333
+    "ingest": 38.77,
+    "pricing": 129.559,
+    "evaluation": 6.587,
+    "total": 194.931
   },
   "input_dir": "input",
   "holdout_file": "BOQ-HỆ THỐNG ĐIỆN TRẠI LƠN HẢI HÀ-DH290124.xlsx",
@@ -94,7 +94,7 @@
       "data_rows": 250,
       "products": 117,
       "product_prices": 117,
-      "price_observations": 0,
+      "price_observations": 117,
       "manual_pricing_rules_applied": 0,
       "labor_items": 136,
       "labor_rates": 136,
@@ -898,10 +898,12 @@
         "price_drift_warning": 0,
         "no_match": 2169,
         "no_price_found": 36,
+        "external_quotation_required": 0,
         "material_matched": 133,
         "labor_matched": 202,
         "material_priced": 133,
         "labor_priced": 89,
+        "reviewed_preserved": 0,
         "auto_coverage": 0.0016,
         "material_coverage": 0.0538,
         "labor_coverage": 0.036,
@@ -919,7 +921,7 @@
       },
       "model_usage": {
         "enabled": false,
-        "provider_configured": true,
+        "provider_configured": false,
         "model": "occ/claude-opus-4-8",
         "max_calls": 20,
         "calls": 0,
@@ -1017,7 +1019,7 @@
     "enabled": false,
     "model_usage": {
       "enabled": false,
-      "provider_configured": true,
+      "provider_configured": false,
       "model": "occ/claude-opus-4-8",
       "max_calls": 20,
       "calls": 0,
@@ -2381,7 +2383,7 @@
         "undated_source_count": 0,
         "provenance_missing": 0,
         "source_status_counts": {
-          "eligible": 133
+          "eligible": 2842
         },
         "selection_origins": {
           "eligible_catalog_observation": 133,
@@ -2488,7 +2490,7 @@
         "undated_source_count": 0,
         "provenance_missing": 0,
         "source_status_counts": {
-          "eligible": 133
+          "eligible": 2842
         },
         "selection_origins": {
           "eligible_catalog_observation": 133,

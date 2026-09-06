@@ -16,11 +16,82 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 from dataclasses import dataclass
 from datetime import date
 from typing import Any, Iterable
 
 from .normalize import normalize_text
+
+
+def _normalized_label(value: Any, default: str) -> str:
+    """Return a stable lowercase token for tax/basis labels."""
+
+    text = normalize_text(value if value not in (None, "") else default)
+    return re.sub(r"[^a-z0-9]+", "_", text).strip("_")
+
+
+def normalize_tax_mode(value: Any, *, default: str = "ex_vat") -> str:
+    """Normalize a tax label to ``ex_vat``/``inc_vat`` where recognizable."""
+
+    token = _normalized_label(value, default)
+    if token in {
+        "ex_vat",
+        "exvat",
+        "exclusive_vat",
+        "excluding_vat",
+        "exclude_vat",
+        "without_vat",
+        "before_vat",
+        "net",
+        "net_price",
+        "net_amount",
+    }:
+        return "ex_vat"
+    if token in {
+        "inc_vat",
+        "incvat",
+        "inclusive_vat",
+        "including_vat",
+        "include_vat",
+        "with_vat",
+        "gross",
+        "gross_price",
+        "gross_amount",
+        "vat",
+        "vat_price",
+    }:
+        return "inc_vat"
+    return token or default
+
+
+def normalize_price_basis(value: Any, *, default: str = "net") -> str:
+    """Normalize a price-basis label to ``net``/``gross`` where recognizable."""
+
+    token = _normalized_label(value, default)
+    if token in {
+        "net",
+        "net_price",
+        "net_amount",
+        "ex_vat",
+        "exvat",
+        "exclusive_vat",
+        "excluding_vat",
+    }:
+        return "net"
+    if token in {
+        "gross",
+        "gross_price",
+        "gross_amount",
+        "inc_vat",
+        "incvat",
+        "inclusive_vat",
+        "including_vat",
+        "vat",
+        "vat_price",
+    }:
+        return "gross"
+    return token or default
 
 
 def normalize_discount_rate(value: Any) -> float | None:
@@ -111,10 +182,8 @@ def _coerce_rule(raw: Any, index: int, source: str) -> ManualPricingRule | None:
         priority = int(raw.get("priority", 0) or 0)
     except (TypeError, ValueError):
         priority = 0
-    tax_mode = normalize_text(raw.get("tax_mode") or "ex_vat").replace(" ", "_")
-    if tax_mode in {"vat", "including_vat", "incvat", "incl_vat"}:
-        tax_mode = "inc_vat"
-    elif tax_mode not in {"ex_vat", "inc_vat"}:
+    tax_mode = normalize_tax_mode(raw.get("tax_mode") or "ex_vat")
+    if tax_mode not in {"ex_vat", "inc_vat"}:
         tax_mode = "ex_vat"
     provenance = raw.get("provenance")
     if not isinstance(provenance, dict):
@@ -231,9 +300,9 @@ def find_observation(
     """Find a source observation matching tax basis and discount tier."""
 
     desired = normalize_discount_rate(discount_rate)
-    tax_mode = tax_mode or "ex_vat"
+    tax_mode = normalize_tax_mode(tax_mode or "ex_vat")
     for observation in observations:
-        if observation.get("tax_mode") != tax_mode:
+        if normalize_tax_mode(observation.get("tax_mode")) != tax_mode:
             continue
         observed = normalize_discount_rate(observation.get("discount_rate"))
         if desired is None and observed in (None, 0.0):

@@ -230,10 +230,12 @@ the call budget is exhausted.
 
 Verified before commit:
 
-- `python -m pytest -q`: **95 passed** after the final policy/benchmark tests;
+- `python -m pytest -q`: **113 passed** after the final
+  catalog/source-lifecycle, security and pricing-policy tests;
 - `python -m compileall -q app benchmarks`: PASS;
 - `node --check app/static/app.js`: PASS;
 - `git diff --check`: PASS;
+- deterministic holdout rerun (`ENABLE_LLM=false`): **194.931 s**;
 - browser smoke: all sidebar routes and API endpoints returned successfully;
 - leakage guard: PASS;
 - applied-price provenance: 100%;

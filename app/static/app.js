@@ -41,6 +41,24 @@
     sources: [],
     quotations: [],
     catalogStats: null,
+    catalogItems: [],
+    catalogTotal: 0,
+    catalogPage: 0,
+    catalogPageSize: 100,
+    catalogFacets: { categories: [], sources: [], statuses: [] },
+    catalogLoading: false,
+    catalogFilters: {
+      query: "",
+      kind: "all",
+      category: "all",
+      sourceId: "all",
+      status: "all",
+    },
+    activeSource: null,
+    sourceDetailLoading: false,
+    sourceDetailError: "",
+    activeCatalogItem: null,
+    catalogItemLoading: false,
     benchmark: null,
     activeQuotation: null,
     reviewItems: [],
@@ -78,6 +96,22 @@
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+  // API responses can contain a report URL originating from persisted
+  // benchmark metadata. Escape HTML is not enough for href attributes because
+  // schemes such as javascript: remain executable after entity decoding.
+  // Keep only ordinary HTTP(S) or same-origin relative URLs.
+  function safeHref(value) {
+    const raw = String(value ?? "").trim();
+    if (!raw || raw.startsWith("//")) return "";
+    try {
+      const parsed = new URL(raw, window.location.origin);
+      if (!["http:", "https:"].includes(parsed.protocol)) return "";
+      return escapeHtml(raw);
+    } catch (_) {
+      return "";
+    }
   }
 
   function formatNumber(value, fallback = "—") {
@@ -155,18 +189,133 @@
   }
 
   function normalizeSource(source = {}) {
+    const lifecycle = source.lifecycle || source.lifecycle_state || {};
+    const summary = source.summary || source.counts || source.catalog || {};
+    const references = source.reference_counts || source.references || source.impact?.references || {};
+    const derivedReferenceCount = pick(
+      references,
+      ["derived_references", "total", "count"],
+      Object.values(references || {}).reduce((total, value) => total + (Number.isFinite(Number(value)) ? Number(value) : 0), 0),
+    );
     return {
       id: pick(source, ["id", "source_id", "workbook_id"], ""),
       filename: pick(source, ["filename", "file_name", "name"], "Tệp không tên"),
       detectedType: pick(source, ["detected_type", "document_type", "type"], "unknown"),
       confirmedType: pick(source, ["confirmed_type", "classification"], ""),
-      status: pick(source, ["processing_status", "status"], "ready"),
-      sheets: pick(source, ["sheet_count", "sheets_count", "number_of_sheets"], source.sheets?.length || 0),
-      rows: pick(source, ["extracted_rows", "data_rows", "row_count", "rows"], 0),
+      // Lifecycle status controls whether a source participates in new
+      // pricing; processing status is retained separately for diagnostics.
+      // Prefer lifecycle here so an archived/superseded workbook is visibly
+      // different from an active one in every table.
+      status: pick(
+        source,
+        ["lifecycle_status", "source_status", "record_status"],
+        pick(lifecycle, ["status", "state"], pick(source, ["status", "processing_status"], "ready")),
+      ),
+      processingStatus: pick(source, ["processing_status", "processingState"], "ready"),
+      lifecycleStatus: pick(
+        source,
+        ["lifecycle_status", "source_status", "record_status", "status"],
+        pick(lifecycle, ["status", "state"], ""),
+      ),
+      lifecycleReason: pick(
+        source,
+        ["lifecycle_reason", "status_reason", "archive_reason"],
+        pick(lifecycle, ["reason", "status_reason"], ""),
+      ),
+      archivedAt: pick(source, ["archived_at", "outdated_at"], pick(lifecycle, ["archived_at"], "")),
+      supersededBy: pick(
+        source,
+        ["superseded_by", "superseded_by_source_id", "superseded_by_source_file_id"],
+        pick(lifecycle, ["superseded_by", "superseded_by_source_file_id"], ""),
+      ),
+      referencedCount: pick(source, ["referenced_count", "reference_count", "used_by_count"], derivedReferenceCount),
+      sheets: pick(
+        source,
+        ["sheet_count", "sheets_count", "number_of_sheets"],
+        pick(summary, ["sheets", "sheet_count"], source.sheets?.length || 0),
+      ),
+      rows: pick(
+        source,
+        ["extracted_rows", "data_rows", "row_count", "rows"],
+        pick(summary, ["data_rows", "extracted_rows", "rows", "row_count"], 0),
+      ),
       warnings: pick(source, ["warning_count", "warnings"], 0),
       uploadedAt: pick(source, ["uploaded_at", "created_at", "imported_at"], ""),
+      summary: {
+        sheets: pick(summary, ["sheets", "sheet_count"], source.sheets?.length || 0),
+        rows: pick(summary, ["rows", "row_count"], 0),
+        dataRows: pick(summary, ["data_rows", "extracted_rows"], 0),
+        products: pick(summary, ["products", "product_count", "materials", "material_count"], 0),
+        prices: pick(summary, ["prices", "price_count", "product_prices", "observations"], 0),
+        priceObservations: pick(summary, ["price_observations", "observation_count"], 0),
+        labor: pick(summary, ["labor", "labor_count", "labor_items", "labors"], 0),
+        laborRates: pick(summary, ["labor_rates", "rate_count"], 0),
+        boq: pick(summary, ["boq", "boq_count", "boq_items"], 0),
+        catalogLinks: pick(summary, ["catalog_links", "link_count"], 0),
+        warnings: pick(summary, ["warnings", "warning_count"], pick(source, ["warning_count"], 0)),
+      },
+      sheetsData: rawArray(source, ["sheets", "worksheets"]),
+      rawRowsLoaded:
+        Boolean(source.raw_rows_loaded || source.include_rows) ||
+        rawArray(source, ["sheets", "worksheets"]).some((sheet) => rawArray(sheet, ["rows"]).length > 0),
+      products: rawArray(source, ["products", "product_records", "catalog_products"]),
+      prices: rawArray(source, ["prices", "price_records", "price_observations", "observations"]),
+      labor: rawArray(source, ["labor", "labor_items", "labor_records", "labor_rates"]),
+      boq: rawArray(source, ["boq", "boq_items", "boq_records"]),
       metadata: source.metadata || {},
       raw: source,
+    };
+  }
+
+  function normalizeCatalogItem(item = {}, kindHint = "") {
+    const sourceValue =
+      [item.source, item.provenance, item.price_source].find(
+        (candidate) => candidate && (!Array.isArray(candidate) || candidate.length > 0),
+      ) || {};
+    const source = Array.isArray(sourceValue) ? sourceValue[0] || {} : sourceValue;
+    const kind = String(
+      pick(item, ["kind", "record_type", "item_type", "type"], kindHint || (item.labor_item_id || item.labor_id ? "labor" : "product")),
+    ).toLowerCase();
+    const isLabor = ["labor", "labour", "labor_item", "labor_rate", "nhan_cong"].includes(kind);
+    const observations = rawArray(item, ["observations", "prices", "price_observations", "history"]);
+    const current = item.current_price || item.current || item.latest_price || item.latest_rate || {};
+    const scalar = (value, keys) => {
+      const candidate = pick(value, keys, null);
+      return candidate && typeof candidate === "object" ? null : candidate;
+    };
+    const currentValue = isLabor
+      ? scalar(item, ["current_rate", "labor_rate", "rate_value", "price"]) ?? scalar(current, ["rate", "price", "value"])
+      : scalar(item, ["current_price", "net_price", "unit_price", "price"]) ?? scalar(current, ["net_price", "price", "value"]);
+    return {
+      id: pick(item, ["id", "item_id", isLabor ? "labor_item_id" : "product_id"], ""),
+      kind: isLabor ? "labor" : kind === "price" || kind === "observation" ? "price" : "product",
+      name: pick(item, ["name", "normalized_name", "product_name", "description", "canonical_name"], "Hạng mục chưa đặt tên"),
+      code: pick(item, ["code", "product_code", "item_code", "labor_code"], ""),
+      category: pick(item, ["category", "group", "section", "subcategory"], "Chưa phân loại"),
+      subcategory: pick(item, ["subcategory", "sub_category"], ""),
+      brand: pick(item, ["brand", "manufacturer"], ""),
+      origin: pick(item, ["origin", "country"], ""),
+      unit: pick(item, ["unit", "uom"], ""),
+      status: pick(item, ["status", "lifecycle_status", "record_status"], "active"),
+      currentPrice: currentValue,
+      currency: pick(item, ["currency"], pick(current, ["currency"], "VND")),
+      // Entity created_at is not a price effective date. Showing it as such
+      // made unpriced catalog rows look current even when no rate/source exists.
+      effectiveDate: pick(item, ["effective_date", "price_date", "valid_from"], pick(current, ["effective_date", "date"], "")),
+      validTo: pick(item, ["valid_to", "expires_at"], pick(current, ["valid_to"], "")),
+      supplier: pick(item, ["supplier", "vendor"], pick(current, ["supplier"], "")),
+      taxMode: pick(item, ["tax_mode", "tax_basis"], pick(current, ["tax_mode"], "ex_vat")),
+      confidence: pick(item, ["confidence", "score"], pick(current, ["confidence"], null)),
+      observationCount: pick(item, ["observation_count", "price_count", "history_count"], observations.length),
+      sourceId: pick(item, ["source_file_id", "source_id", "workbook_id"], pick(source, ["source_file_id", "source_id", "file_id", "id"], "")),
+      sourceFilename: pick(item, ["source_filename", "filename", "workbook"], pick(source, ["filename", "name"], "")),
+      sourceSheet: pick(item, ["source_sheet", "sheet_name"], pick(source, ["sheet_name", "sheet"], "")),
+      sourceRow: pick(item, ["source_row", "row_no", "row_number"], pick(source, ["row_no", "row"], "")),
+      source,
+      observations,
+      aliases: rawArray(item, ["aliases", "alias"]),
+      technicalAttributes: item.technical_attributes || item.technicalAttributes || {},
+      raw: item,
     };
   }
 
@@ -266,6 +415,15 @@
 
   function sourceStatus(status) {
     const value = String(status || "").toLowerCase();
+    if (["active", "enabled", "current"].includes(value)) {
+      return { label: "Đang sử dụng", className: "badge-success" };
+    }
+    if (["archived", "archive", "inactive", "retired"].includes(value)) {
+      return { label: "Đã lưu trữ", className: "badge-neutral" };
+    }
+    if (["superseded", "outdated", "replaced"].includes(value)) {
+      return { label: "Đã thay thế", className: "badge-warning" };
+    }
     if (["completed", "complete", "ready", "imported", "success", "done"].includes(value)) {
       return { label: "Sẵn sàng", className: "badge-success" };
     }
@@ -286,7 +444,7 @@
     if (["running", "processing", "queued"].includes(value)) {
       return { label: "Đang chạy", className: "badge-blue" };
     }
-    if (["review", "review_required", "needs_review", "price_drift_warning"].includes(value)) {
+    if (["review", "review_required", "needs_review", "price_drift_warning", "external_quotation_required", "needs_supplier_quotation"].includes(value)) {
       return { label: "Cần rà soát", className: "badge-warning" };
     }
     if (["failed", "error"].includes(value)) {
@@ -299,6 +457,9 @@
     const value = String(status || "").toLowerCase();
     if (["approved", "auto_approved", "accepted", "matched"].includes(value)) {
       return { label: "Đã duyệt", className: "badge-success" };
+    }
+    if (["external_quotation_required", "needs_supplier_quotation"].includes(value)) {
+      return { label: "Cần báo giá NCC", className: "badge-danger" };
     }
     if (["no_match", "no_price_found", "unmatched"].includes(value)) {
       return { label: "Chưa có giá", className: "badge-danger" };
@@ -384,8 +545,13 @@
       payload = await response.blob().catch(() => null);
     }
     if (!response.ok) {
-      const detail = payload?.detail || payload?.message || payload?.error || `HTTP ${response.status}`;
+      const detailValue = payload?.detail || payload?.message || payload?.error || `HTTP ${response.status}`;
+      const detail =
+        detailValue && typeof detailValue === "object"
+          ? detailValue.message || detailValue.detail || detailValue.error || JSON.stringify(detailValue)
+          : detailValue;
       const error = new Error(String(detail));
+      error.payload = payload;
       error.status = response.status;
       throw error;
     }
@@ -402,6 +568,100 @@
     },
     async catalogStats() {
       return request("/api/catalog/stats");
+    },
+    async source(id, options = {}) {
+      const params = new URLSearchParams();
+      params.set("include_rows", String(Boolean(options.includeRows)));
+      params.set("limit", String(options.limit || 500));
+      return request(`/api/sources/${encodeURIComponent(id)}?${params.toString()}`);
+    },
+    async catalogItems(filters = {}) {
+      const params = new URLSearchParams();
+      const mapping = {
+        kind: filters.kind,
+        category: filters.category,
+        source_id: filters.sourceId,
+        status: filters.status === "all" ? "ALL" : filters.status,
+        q: filters.query,
+        search: filters.query,
+        limit: filters.limit || 200,
+        offset: filters.offset || 0,
+      };
+      Object.entries(mapping).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "" && value !== "all") params.set(key, value);
+      });
+      try {
+        const payload = await request(`/api/catalog/items${params.toString() ? `?${params.toString()}` : ""}`);
+        if (payload && typeof payload === "object" && !Array.isArray(payload)) payload.__serverFiltered = true;
+        return payload;
+      } catch (error) {
+        // Older servers only expose separate product/labor endpoints. Keep the
+        // new screen usable while the API is being upgraded.
+        if (error.status !== 404) throw error;
+        const kinds = filters.kind === "labor" ? ["labor"] : filters.kind === "product" ? ["product"] : ["product", "labor"];
+        const responses = await Promise.all(
+          kinds.map(async (kind) => {
+            const fallbackParams = new URLSearchParams();
+            if (filters.query) fallbackParams.set("q", filters.query);
+            if (filters.category && filters.category !== "all") fallbackParams.set("category", filters.category);
+            if (filters.sourceId && filters.sourceId !== "all") fallbackParams.set("source_id", filters.sourceId);
+            const path = kind === "labor" ? "/api/catalog/labor" : "/api/catalog/products";
+            try {
+              return rawArray(await request(`${path}${fallbackParams.toString() ? `?${fallbackParams.toString()}` : ""}`), ["items", "data", "products", "labor"]);
+            } catch (fallbackError) {
+              if (fallbackError.status === 404) return [];
+              throw fallbackError;
+            }
+          }),
+        );
+        const items = responses.flat();
+        return { items, total: items.length, categories: [], sources: [], __serverFiltered: false };
+      }
+    },
+    async catalogItem(kind, id) {
+      const normalizedKind = kind === "labor" ? "labor" : "product";
+      try {
+        return await request(`/api/catalog/items/${encodeURIComponent(normalizedKind)}/${encodeURIComponent(id)}`);
+      } catch (error) {
+        if (error.status !== 404) throw error;
+        const path = normalizedKind === "labor" ? "/api/catalog/labor" : "/api/catalog/products";
+        return request(`${path}/${encodeURIComponent(id)}`);
+      }
+    },
+    async archiveSource(id) {
+      return request(`/api/sources/${encodeURIComponent(id)}/archive?reason=${encodeURIComponent("archived_by_user")}`, {
+        method: "POST",
+      });
+    },
+    async restoreSource(id) {
+      return request(`/api/sources/${encodeURIComponent(id)}/restore`, { method: "POST", body: JSON.stringify({}) });
+    },
+    async deleteSource(id) {
+      return request(`/api/sources/${encodeURIComponent(id)}`, { method: "DELETE" });
+    },
+    async archiveCatalogItem(item) {
+      const kind = item.kind === "labor" ? "labor" : "product";
+      try {
+        return await request(`/api/catalog/items/${encodeURIComponent(kind)}/${encodeURIComponent(item.id)}/archive?reason=${encodeURIComponent("archived_by_user")}`, {
+          method: "POST",
+        });
+      } catch (error) {
+        if (error.status !== 404) throw error;
+        return request(`/api/catalog/${encodeURIComponent(kind)}/${encodeURIComponent(item.id)}/archive`, { method: "POST" });
+      }
+    },
+    async restoreCatalogItem(item) {
+      const kind = item.kind === "labor" ? "labor" : "product";
+      return request(`/api/catalog/items/${encodeURIComponent(kind)}/${encodeURIComponent(item.id)}/restore`, { method: "POST" });
+    },
+    async deleteCatalogItem(item) {
+      const kind = item.kind === "labor" ? "labor" : "product";
+      try {
+        return await request(`/api/catalog/items/${encodeURIComponent(kind)}/${encodeURIComponent(item.id)}`, { method: "DELETE" });
+      } catch (error) {
+        if (error.status !== 404) throw error;
+        return request(`/api/catalog/${encodeURIComponent(kind)}/${encodeURIComponent(item.id)}`, { method: "DELETE" });
+      }
     },
     async quotations() {
       return rawArray(await request("/api/quotations"), ["quotations", "items", "data"]);
@@ -858,7 +1118,10 @@
         <tbody>
           ${sources
             .map((source) => {
-              const status = sourceStatus(source.status);
+              const status = sourceStatus(source.lifecycleStatus || source.status);
+              const lifecycleValue = String(source.lifecycleStatus || "").toLowerCase();
+              const isArchived = ["archived", "archive", "inactive", "retired"].includes(lifecycleValue);
+              const isSuperseded = ["superseded", "outdated", "replaced"].includes(lifecycleValue);
               return `
                 <tr>
                   <td><div class="cell-strong ellipsis-cell" title="${escapeHtml(source.filename)}">${escapeHtml(source.filename)}</div>${source.warnings ? `<div class="cell-muted">${formatNumber(source.warnings)} cảnh báo</div>` : ""}</td>
@@ -867,7 +1130,18 @@
                   <td class="cell-number">${formatNumber(source.sheets)}</td>
                   <td class="cell-number">${formatNumber(source.rows)}</td>
                   <td class="cell-muted">${formatDateTime(source.uploadedAt)}</td>
-                  <td><button class="icon-button" data-action="source-detail" data-id="${escapeHtml(source.id)}" aria-label="Xem chi tiết">${icon("external")}</button></td>
+                  <td>
+                    <div class="table-actions">
+                      <button class="icon-button" data-action="source-detail" data-id="${escapeHtml(source.id)}" aria-label="Xem chi tiết">${icon("external")}</button>
+                      ${
+                        isSuperseded
+                          ? ""
+                          : isArchived
+                          ? `<button class="icon-button" data-action="restore-source" data-id="${escapeHtml(source.id)}" aria-label="Khôi phục workbook" title="Khôi phục">${icon("refresh")}</button>`
+                          : `<button class="icon-button" data-action="archive-source" data-id="${escapeHtml(source.id)}" aria-label="Lưu trữ workbook" title="Lưu trữ">${icon("layers")}</button>`
+                      }
+                    </div>
+                  </td>
                 </tr>
               `;
             })
@@ -1395,7 +1669,7 @@
     return state.reviewItems.filter((item) => {
       const matchesFilter =
         state.reviewFilter === "all" ||
-        (state.reviewFilter === "review" && ["review_required", "review", "ambiguous"].includes(String(item.status).toLowerCase())) ||
+        (state.reviewFilter === "review" && ["review_required", "review", "ambiguous", "external_quotation_required", "needs_supplier_quotation"].includes(String(item.status).toLowerCase())) ||
         (state.reviewFilter === "no_price" && ["no_match", "no_price_found", "unmatched"].includes(String(item.status).toLowerCase())) ||
         (state.reviewFilter === "approved" && ["approved", "auto_approved", "matched"].includes(String(item.status).toLowerCase()));
       const haystack = `${item.rawDescription} ${item.code} ${item.section} ${item.normalizedDescription}`.toLowerCase();
@@ -1673,12 +1947,128 @@
   }
 
   async function loadCatalog() {
-    try {
-      state.catalogStats = await api.catalogStats();
-    } catch (error) {
-      toast(error.message, "error", "Không tải được danh mục");
-    }
+    state.catalogLoading = true;
     renderCatalog();
+    const [statsResult, sourcesResult] = await Promise.allSettled([api.catalogStats(), api.sources()]);
+    if (statsResult.status === "fulfilled") state.catalogStats = statsResult.value || {};
+    if (sourcesResult.status === "fulfilled") state.sources = sourcesResult.value.map(normalizeSource);
+    await loadCatalogItems(false);
+    state.catalogLoading = false;
+    renderCatalog();
+  }
+
+  function normalizeCatalogPayload(payload) {
+    const nestedCatalog = payload?.catalog || payload?.data?.catalog || {};
+    const nestedData = payload?.data && typeof payload.data === "object" ? payload.data : {};
+    const facets = payload?.facets || nestedData.facets || nestedCatalog.facets || {};
+    const rawItems = rawArray(payload, ["items", "records", "data"]).length
+      ? rawArray(payload, ["items", "records", "data"])
+      : rawArray(nestedData, ["items", "records"]);
+    const fallbackItems = rawItems.length
+      ? rawItems
+      : [
+          ...rawArray(payload, ["products", "product_records"]).map((item) => ({ ...item, kind: "product" })),
+          ...rawArray(payload, ["labor", "labor_items", "labor_records"]).map((item) => ({ ...item, kind: "labor" })),
+          ...rawArray(nestedCatalog, ["products", "product_records"]).map((item) => ({ ...item, kind: "product" })),
+          ...rawArray(nestedCatalog, ["labor", "labor_items", "labor_records"]).map((item) => ({ ...item, kind: "labor" })),
+        ];
+    const items = fallbackItems.map((item) => normalizeCatalogItem(item, state.catalogFilters.kind));
+    const categories = rawArray(payload, ["categories", "category_facets", "facets_categories"]).length
+      ? rawArray(payload, ["categories", "category_facets", "facets_categories"])
+      : rawArray(facets, ["categories", "category"]);
+    const sources = rawArray(payload, ["sources", "source_facets", "facets_sources"]).length
+      ? rawArray(payload, ["sources", "source_facets", "facets_sources"])
+      : rawArray(facets, ["sources", "source"]);
+    const statuses = rawArray(payload, ["statuses", "status_facets", "facets_statuses"]).length
+      ? rawArray(payload, ["statuses", "status_facets", "facets_statuses"])
+      : rawArray(facets, ["statuses", "status"]);
+    return {
+      items,
+      total: countValue(pick(payload, ["total", "count", "total_items"], items.length), items.length),
+      categories: categories.length ? categories : Array.from(new Set(items.map((item) => item.category).filter(Boolean))),
+      sources: sources.length ? sources : Array.from(new Set(items.map((item) => item.sourceId).filter(Boolean))),
+      statuses: statuses.length ? statuses : Array.from(new Set(items.map((item) => item.status).filter(Boolean))),
+    };
+  }
+
+  function applyCatalogFilters(items) {
+    const filters = state.catalogFilters;
+    const query = String(filters.query || "").trim().toLowerCase();
+    return items.filter((item) => {
+      const kindMatches = filters.kind === "all" || item.kind === filters.kind;
+      const categoryMatches = filters.category === "all" || String(item.category || "").toLowerCase() === String(filters.category).toLowerCase();
+      const sourceMatches = filters.sourceId === "all" || String(item.sourceId || "") === String(filters.sourceId);
+      const statusMatches = filters.status === "all" || String(item.status || "").toLowerCase() === String(filters.status).toLowerCase();
+      const haystack = [item.name, item.code, item.category, item.subcategory, item.brand, item.origin, item.sourceFilename]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return kindMatches && categoryMatches && sourceMatches && statusMatches && (!query || haystack.includes(query));
+    });
+  }
+
+  async function loadCatalogItems(render = true) {
+    state.catalogLoading = true;
+    if (render) renderCatalog();
+    try {
+      const payload = await api.catalogItems({
+        ...state.catalogFilters,
+        limit: state.catalogPageSize,
+        offset: state.catalogPage * state.catalogPageSize,
+      });
+      const normalized = normalizeCatalogPayload(payload || {});
+      state.catalogItems = payload?.__serverFiltered ? normalized.items : applyCatalogFilters(normalized.items);
+      state.catalogTotal = normalized.total;
+      state.catalogFacets = {
+        categories: normalized.categories,
+        sources: normalized.sources,
+        statuses: normalized.statuses,
+      };
+    } catch (error) {
+      state.catalogItems = [];
+      state.catalogTotal = 0;
+      if (render) toast(error.message, "error", "Không tải được danh sách danh mục");
+    } finally {
+      state.catalogLoading = false;
+      if (render) renderCatalog();
+    }
+  }
+
+  function catalogKindLabel(kind) {
+    return kind === "labor" ? "Nhân công" : kind === "price" ? "Quan sát giá" : "Vật tư";
+  }
+
+  function catalogStatus(status) {
+    const value = String(status || "").toLowerCase();
+    if (["archived", "inactive", "retired"].includes(value)) return { label: "Đã lưu trữ", className: "badge-neutral" };
+    if (["outdated", "superseded", "replaced"].includes(value)) return { label: "Đã thay thế", className: "badge-warning" };
+    if (["draft", "pending"].includes(value)) return { label: "Nháp", className: "badge-blue" };
+    return { label: "Đang dùng", className: "badge-success" };
+  }
+
+  function catalogSourceLabel(item) {
+    if (item.sourceFilename) return item.sourceFilename;
+    if (item.sourceId) {
+      const source = state.sources.find((candidate) => String(candidate.id) === String(item.sourceId));
+      if (source) return source.filename;
+    }
+    return "Chưa có provenance";
+  }
+
+  function catalogFacetValues(values, sourceMode = false) {
+    const normalized = [];
+    (values || []).forEach((value) => {
+      if (value && typeof value === "object") {
+        const id = pick(value, ["id", "source_id", "value", "key"], "");
+        const label = pick(value, ["label", "name", "filename", "title"], id);
+        if (id !== "") normalized.push({ value: String(id), label: String(label) });
+      } else if (value !== null && value !== undefined && String(value) !== "") {
+        const source = sourceMode && state.sources.find((item) => String(item.id) === String(value));
+        normalized.push({ value: String(value), label: source?.filename || String(value) });
+      }
+    });
+    const seen = new Set();
+    return normalized.filter((item) => !seen.has(item.value) && seen.add(item.value));
   }
 
   function renderCatalog() {
@@ -1687,13 +2077,77 @@
     const prices = getCatalogNumber(["prices", "price_count", "product_prices"], 0);
     const labors = getCatalogNumber(["labor_items", "labor_count", "labors"], 0);
     const rules = getCatalogNumber(["rules", "rule_count", "aliases"], 0);
+    const filters = state.catalogFilters;
+    const categoryOptions = catalogFacetValues(state.catalogFacets.categories);
+    const sourceOptions = catalogFacetValues(
+      state.catalogFacets.sources?.length ? state.catalogFacets.sources : state.sources.map((source) => ({ id: source.id, filename: source.filename })),
+      true,
+    );
+    const statusOptions = catalogFacetValues(state.catalogFacets.statuses);
     pageView.innerHTML = `
-      ${pageIntro("DANH MỤC & GIÁ", "Operational data hub", "Kiểm tra nhanh quy mô dữ liệu đã chuẩn hóa. Chi tiết sản phẩm và giá được truy xuất từ database, không đọc lại Excel mỗi lần báo giá.")}
+      ${pageIntro(
+        "DANH MỤC & GIÁ",
+        "Operational data hub",
+        "Kiểm soát từng vật tư, giá và mục nhân công đã ingest. Mỗi dòng đều có thể truy ngược về workbook, sheet và dòng nguồn.",
+        `<button class="button button-secondary button-small" data-action="refresh-catalog">${icon("refresh")}<span>Làm mới danh mục</span></button>`,
+      )}
       <div class="catalog-overview">
         <div class="catalog-tile"><span class="catalog-tile-icon">${icon("database")}</span><span><strong>${formatNumber(products)}</strong><span>Sản phẩm chuẩn hóa</span></span></div>
         <div class="catalog-tile"><span class="catalog-tile-icon">${icon("layers")}</span><span><strong>${formatNumber(prices)}</strong><span>Phiên bản giá</span></span></div>
         <div class="catalog-tile"><span class="catalog-tile-icon">${icon("book")}</span><span><strong>${formatNumber(labors)}</strong><span>Mục nhân công</span></span></div>
       </div>
+      <section class="card catalog-browser">
+        <div class="card-header">
+          <div class="card-header-copy">
+            <h2>Danh sách hạng mục đã nhận</h2>
+            <p>${state.catalogTotal ? `${formatNumber(state.catalogTotal)} record theo bộ lọc hiện tại.` : "Lọc theo loại, nhóm hoặc nguồn để kiểm tra dữ liệu cụ thể."}</p>
+          </div>
+          <span class="badge badge-neutral">${formatNumber(state.catalogTotal || state.catalogItems.length)} record</span>
+        </div>
+        <div class="toolbar catalog-toolbar">
+          <div class="toolbar-left catalog-toolbar-left">
+            <label class="input-with-icon search-field">
+              ${icon("search")}
+              <span class="sr-only">Tìm trong danh mục</span>
+              <input class="text-input" id="catalog-search" type="search" value="${escapeHtml(filters.query)}" placeholder="Tìm tên, mã, hãng, mô tả…" />
+            </label>
+            <select class="select-input filter-select" id="catalog-kind-filter" aria-label="Lọc loại hạng mục">
+              <option value="all" ${filters.kind === "all" ? "selected" : ""}>Tất cả loại</option>
+              <option value="product" ${filters.kind === "product" ? "selected" : ""}>Vật tư</option>
+              <option value="labor" ${filters.kind === "labor" ? "selected" : ""}>Nhân công</option>
+            </select>
+          </div>
+          <div class="toolbar-right catalog-toolbar-right">
+            <select class="select-input filter-select" id="catalog-category-filter" aria-label="Lọc nhóm danh mục">
+              <option value="all">Tất cả nhóm</option>
+              ${categoryOptions.map((option) => `<option value="${escapeHtml(option.value)}" ${filters.category === option.value ? "selected" : ""}>${escapeHtml(option.label)}</option>`).join("")}
+            </select>
+            <select class="select-input filter-select" id="catalog-source-filter" aria-label="Lọc workbook nguồn">
+              <option value="all">Tất cả nguồn</option>
+              ${sourceOptions.map((option) => `<option value="${escapeHtml(option.value)}" ${String(filters.sourceId) === option.value ? "selected" : ""}>${escapeHtml(option.label)}</option>`).join("")}
+            </select>
+            <select class="select-input filter-select" id="catalog-status-filter" aria-label="Lọc trạng thái">
+              <option value="all">Tất cả trạng thái</option>
+              ${statusOptions.map((option) => `<option value="${escapeHtml(option.value)}" ${String(filters.status) === option.value ? "selected" : ""}>${escapeHtml(catalogStatus(option.value).label)}</option>`).join("")}
+              ${statusOptions.length === 0 ? `<option value="active" ${filters.status === "active" ? "selected" : ""}>Đang dùng</option><option value="archived" ${filters.status === "archived" ? "selected" : ""}>Đã lưu trữ</option>` : ""}
+            </select>
+          </div>
+        </div>
+        ${
+          state.catalogLoading
+            ? `<div class="card-body">${skeletonCard()}</div>`
+            : state.catalogItems.length
+              ? `<div class="table-wrap">${renderCatalogTable(state.catalogItems)}</div>`
+              : emptyState({
+                  iconName: "database",
+                  title: "Không có record phù hợp",
+                  description: "Thử bỏ bớt bộ lọc hoặc nhập thêm workbook bảng giá / nhân công vào Kho dữ liệu.",
+                  actionLabel: "Mở Kho dữ liệu",
+                  action: "import",
+                })
+        }
+        ${state.catalogLoading ? "" : renderCatalogPagination()}
+      </section>
       <div class="dashboard-grid">
         <section class="card">
           <div class="card-header"><div class="card-header-copy"><h2>Phạm vi dữ liệu</h2><p>Thống kê trả về từ <code>/api/catalog/stats</code>.</p></div><span class="badge badge-success">Nguồn vận hành</span></div>
@@ -1723,6 +2177,77 @@
     `;
   }
 
+  function renderCatalogPagination() {
+    const total = Math.max(0, Number(state.catalogTotal) || 0);
+    const pageSize = Math.max(1, Number(state.catalogPageSize) || 100);
+    const pageCount = Math.max(1, Math.ceil(total / pageSize));
+    const currentPage = Math.min(Math.max(0, Number(state.catalogPage) || 0), pageCount - 1);
+    const start = total ? currentPage * pageSize + 1 : 0;
+    const end = total ? Math.min(total, (currentPage + 1) * pageSize) : 0;
+    if (!total && currentPage === 0) return "";
+    return `
+      <div class="catalog-pagination" aria-label="Phân trang danh mục">
+        <span class="catalog-pagination-summary">${total ? `Hiển thị ${formatNumber(start)}–${formatNumber(end)} trong ${formatNumber(total)} record` : "Không có record"}</span>
+        <span class="catalog-pagination-controls">
+          <button class="button button-secondary button-small" data-action="catalog-page" data-direction="prev" ${currentPage <= 0 ? "disabled" : ""}>${icon("chevron-right", "icon-rotate-180")}<span>Trước</span></button>
+          <span class="catalog-pagination-page">Trang ${formatNumber(currentPage + 1)} / ${formatNumber(pageCount)}</span>
+          <button class="button button-secondary button-small" data-action="catalog-page" data-direction="next" ${currentPage >= pageCount - 1 ? "disabled" : ""}><span>Sau</span>${icon("chevron-right")}</button>
+        </span>
+      </div>
+    `;
+  }
+
+  function renderCatalogTable(items) {
+    return `
+      <table class="data-table catalog-table">
+        <thead><tr><th>Hạng mục</th><th>Loại</th><th>Phân loại</th><th>Đơn vị</th><th>Giá hiện hành</th><th>Nguồn / hiệu lực</th><th>Trạng thái</th><th></th></tr></thead>
+        <tbody>
+          ${items.map((item) => {
+            const status = catalogStatus(item.status);
+            const price = item.currentPrice === null || item.currentPrice === undefined || item.currentPrice === ""
+              ? "—"
+              : item.kind === "labor"
+                ? formatCurrency(item.currentPrice)
+                : formatCurrency(item.currentPrice);
+            const source = catalogSourceLabel(item);
+            return `
+              <tr>
+                <td>
+                  <button class="button button-quiet catalog-item-link" data-action="catalog-detail" data-id="${escapeHtml(item.id)}" data-kind="${escapeHtml(item.kind)}">${escapeHtml(item.name)}</button>
+                  ${item.code ? `<div class="cell-muted">${escapeHtml(item.code)}</div>` : ""}
+                  ${item.brand || item.origin ? `<div class="cell-muted">${escapeHtml([item.brand, item.origin].filter(Boolean).join(" • "))}</div>` : ""}
+                </td>
+                <td><span class="badge badge-neutral">${escapeHtml(catalogKindLabel(item.kind))}</span></td>
+                <td>${escapeHtml(item.category || "Chưa phân loại")}${item.subcategory ? `<div class="cell-muted">${escapeHtml(item.subcategory)}</div>` : ""}</td>
+                <td class="cell-muted">${escapeHtml(item.unit || "—")}</td>
+                <td class="cell-number">${price}${item.observationCount ? `<div class="cell-muted catalog-observation-count">${formatNumber(item.observationCount)} quan sát</div>` : ""}</td>
+                <td>
+                  ${
+                    item.sourceId
+                      ? `<button class="button button-quiet source-link" data-action="source-detail" data-id="${escapeHtml(item.sourceId)}" title="Mở workbook nguồn">${escapeHtml(source)}</button>`
+                      : `<span class="cell-muted">${escapeHtml(source)}</span>`
+                  }
+                  ${item.effectiveDate ? `<div class="cell-muted">Hiệu lực ${formatDate(item.effectiveDate)}</div>` : ""}
+                </td>
+                <td><span class="badge ${status.className}">${status.label}</span></td>
+                <td>
+                  <div class="table-actions">
+                    <button class="icon-button" data-action="catalog-detail" data-id="${escapeHtml(item.id)}" data-kind="${escapeHtml(item.kind)}" aria-label="Xem chi tiết">${icon("external")}</button>
+                    ${
+                      ["archived", "inactive", "retired"].includes(String(item.status || "").toLowerCase())
+                        ? `<button class="icon-button" data-action="restore-catalog-item" data-id="${escapeHtml(item.id)}" data-kind="${escapeHtml(item.kind)}" aria-label="Khôi phục hạng mục" title="Khôi phục hạng mục">${icon("refresh")}</button>`
+                        : `<button class="icon-button" data-action="archive-catalog-item" data-id="${escapeHtml(item.id)}" data-kind="${escapeHtml(item.kind)}" aria-label="Lưu trữ hạng mục" title="Lưu trữ hạng mục">${icon("layers")}</button>`
+                    }
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
   async function loadBenchmark() {
     state.benchmarkLoading = true;
     renderBenchmark();
@@ -1748,6 +2273,7 @@
     const highConfidence = benchmarkValue(["high_confidence_accuracy", "accuracy", "material_accuracy"], null);
     const total = benchmarkValue(["total_items", "total_rows", "holdout_rows"], 0);
     const reportUrl = benchmarkValue(["report_url", "report"], "");
+    const safeReportUrl = safeHref(reportUrl);
     pageView.innerHTML = `
       ${pageIntro("ĐÁNH GIÁ ĐỘ PHỦ", "Holdout benchmark", "Đo coverage và độ chính xác trên dữ liệu holdout, tách khỏi nguồn giá dùng để train / ingest.", `<button class="button button-secondary button-small" data-action="refresh-benchmark">${icon("refresh")}<span>Làm mới benchmark</span></button>`)}
       ${
@@ -1772,7 +2298,7 @@
                     <li>Dòng confidence thấp luôn đi qua bàn review thay vì tự đoán giá.</li>
                     <li>Chỉ dùng benchmark có holdout riêng để tránh data leakage.</li>
                   </ol>
-                  ${reportUrl ? `<div class="card-body" style="padding-top:0"><a class="button button-secondary button-small" href="${escapeHtml(reportUrl)}" target="_blank" rel="noreferrer">${icon("external")}<span>Mở báo cáo chi tiết</span></a></div>` : ""}
+                  ${safeReportUrl ? `<div class="card-body" style="padding-top:0"><a class="button button-secondary button-small" href="${safeReportUrl}" target="_blank" rel="noopener noreferrer">${icon("external")}<span>Mở báo cáo chi tiết</span></a></div>` : ""}
                 </section>
               </div>
               <section class="card" style="margin-top:18px"><div class="card-header"><div class="card-header-copy"><h2>Raw benchmark response</h2><p>Dùng để audit / debug khi điều chỉnh matcher.</p></div></div><div class="card-body"><pre style="margin:0;max-height:260px;overflow:auto;color:var(--ink-soft);font-size:11px;white-space:pre-wrap">${escapeHtml(JSON.stringify(state.benchmark, null, 2))}</pre></div></section>
@@ -1805,29 +2331,520 @@
     }
   }
 
-  function showSourceDetail(id) {
-    const source = state.sources.find((item) => String(item.id) === String(id));
-    if (!source) return;
+  function sourceDetailRecords(source, names) {
+    const nested = source.raw?.catalog || source.raw?.records || source.raw?.data || {};
+    const rawPayload = source.raw || {};
+    const records = names.flatMap((name) => [
+      ...rawArray(source, [name]),
+      ...rawArray(rawPayload, [name]),
+      ...rawArray(nested, [name]),
+    ]);
+    const seen = new Set();
+    return records.filter((record) => {
+      if (!record || typeof record !== "object") return true;
+      const key = pick(record, ["id", "product_id", "labor_item_id", "source_row_id", "row_id"], "");
+      if (key === "") return true;
+      const signature = `${nameSignature(record)}:${key}`;
+      if (seen.has(signature)) return false;
+      seen.add(signature);
+      return true;
+    });
+  }
+
+  function nameSignature(record) {
+    return pick(record, ["kind", "record_type", "observation_type", "type"], "record");
+  }
+
+  function sourcePointerFromRecord(record, source) {
+    const pointerValue = record?.source || record?.provenance;
+    const pointer = Array.isArray(pointerValue) ? pointerValue[0] : pointerValue;
+    if (pointer && typeof pointer === "object" && Object.keys(pointer).length) return pointer;
+    return {
+      file_id: source.id || "",
+      filename: source.filename || "",
+      status: source.lifecycleStatus || source.status || "ACTIVE",
+      sheet_id: pick(record, ["source_sheet_id", "sheet_id"], ""),
+      sheet_name: pick(record, ["sheet_name", "source_sheet"], ""),
+      row_id: pick(record, ["source_row_id", "row_id"], ""),
+      row_no: pick(record, ["row_no", "source_row", "row_number"], ""),
+    };
+  }
+
+  function legacyCatalogSource(source, record, kind) {
+    const idKey = kind === "labor" ? "labor_item_id" : "product_id";
+    const relatedNames = kind === "labor" ? ["labor_rates", "rates"] : ["prices", "price_observations", "observations"];
+    const related = sourceDetailRecords(source, relatedNames).find(
+      (candidate) => String(candidate?.[idKey] ?? "") === String(record?.id ?? ""),
+    );
+    return related ? sourcePointerFromRecord(related, source) : sourcePointerFromRecord(record, source);
+  }
+
+  function sourcePriceRecords(source) {
+    const observations = sourceDetailRecords(source, ["price_observations", "observations"]);
+    // New imports keep immutable observations as the source of truth while
+    // product_prices remains a compatibility projection. Prefer observations
+    // so one workbook row is not rendered twice in the source detail modal.
+    if (observations.length) return observations;
+    return sourceDetailRecords(source, ["prices", "price_records"]);
+  }
+
+  function renderSourceDetailModal(source, loading = false, errorMessage = "") {
+    const lifecycleValue = source.lifecycleStatus || source.status;
+    const lifecycle = sourceStatus(lifecycleValue);
+    const sheets = source.sheetsData?.length ? source.sheetsData : rawArray(source.raw, ["sheets", "worksheets"]);
+    const products = sourceDetailRecords(source, ["products", "product_records", "catalog_products"]);
+    const prices = sourcePriceRecords(source);
+    const labor = sourceDetailRecords(source, ["labor", "labor_items", "labor_records", "labor_rates"]);
+    const boq = sourceDetailRecords(source, ["boq", "boq_items", "boq_records"]);
+    const warnings = rawArray(source.raw, ["warnings", "parse_warnings"]).length
+      ? rawArray(source.raw, ["warnings", "parse_warnings"])
+      : rawArray(source.metadata, ["warnings", "parse_warnings"]);
+    const summary = source.summary || {};
+    const referenceCount = countValue(source.referencedCount, 0);
+    const isArchived = ["archived", "inactive", "retired"].includes(String(lifecycleValue || "").toLowerCase());
+    const isSuperseded = ["superseded", "outdated", "replaced"].includes(String(lifecycleValue || "").toLowerCase());
+    const priceRecordCount = pick(
+      summary,
+      ["price_observations", "observation_count", "prices", "price_count"],
+      prices.length,
+    );
     modalRoot.innerHTML = `
       <div class="modal-backdrop" data-modal-dismiss>
-        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="source-detail-title">
-          <div class="modal-header"><div><h2 id="source-detail-title">Chi tiết nguồn dữ liệu</h2><p style="margin:4px 0 0;color:var(--ink-muted);font-size:11px">${escapeHtml(source.filename)}</p></div><button class="icon-button" data-modal-dismiss aria-label="Đóng">${icon("x")}</button></div>
-          <div class="modal-body">
-            <dl class="quotation-summary">
-              <div class="summary-row"><dt>Loại phát hiện</dt><dd>${escapeHtml(sourceTypeLabel(source.detectedType))}</dd></div>
-              <div class="summary-row"><dt>Loại xác nhận</dt><dd>${escapeHtml(sourceTypeLabel(source.confirmedType || source.detectedType))}</dd></div>
-              <div class="summary-row"><dt>Sheet / dòng</dt><dd>${formatNumber(source.sheets)} / ${formatNumber(source.rows)}</dd></div>
-              <div class="summary-row"><dt>Trạng thái</dt><dd>${escapeHtml(sourceStatus(source.status).label)}</dd></div>
-              <div class="summary-row"><dt>Nhập lúc</dt><dd>${formatDateTime(source.uploadedAt)}</dd></div>
-            </dl>
-            <div class="callout callout-success" style="margin-top:16px">${icon("check-circle")}<span>File gốc và raw row được giữ lại để reprocess / audit.</span></div>
-            <pre style="margin:16px 0 0;max-height:220px;overflow:auto;color:var(--ink-soft);font-size:11px;white-space:pre-wrap">${escapeHtml(JSON.stringify(source.metadata || {}, null, 2))}</pre>
+        <section class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="source-detail-title">
+          <div class="modal-header">
+            <div>
+              <p class="eyebrow">WORKBOOK ĐÃ NHẬP</p>
+              <h2 id="source-detail-title">${escapeHtml(source.filename)}</h2>
+              <p class="modal-subtitle">${escapeHtml(sourceTypeLabel(source.confirmedType || source.detectedType))} • nhập ${formatDateTime(source.uploadedAt)}</p>
+            </div>
+            <button class="icon-button" data-modal-dismiss aria-label="Đóng">${icon("x")}</button>
           </div>
-          <div class="modal-footer"><button class="button button-secondary" data-modal-dismiss>Đóng</button></div>
+          <div class="modal-body source-detail-body">
+            ${loading ? `<div class="card-body">${skeletonCard()}</div>` : ""}
+            ${errorMessage ? `<div class="callout callout-warning">${icon("alert")}<span>${escapeHtml(errorMessage)}. Đang hiển thị dữ liệu đã tải trước đó.</span></div>` : ""}
+            <div class="source-detail-toolbar">
+              <span class="badge ${lifecycle.className}">${lifecycle.label}</span>
+              ${source.lifecycleReason ? `<span class="cell-muted">${escapeHtml(source.lifecycleReason)}</span>` : ""}
+              <span class="source-detail-toolbar-spacer"></span>
+              ${
+                isSuperseded
+                  ? `<span class="cell-muted">Chỉ đọc — dùng phiên bản thay thế để báo giá mới.</span>`
+                  : isArchived
+                  ? `<button class="button button-secondary button-small" data-action="restore-source" data-id="${escapeHtml(source.id)}">${icon("refresh")}<span>Khôi phục sử dụng</span></button>`
+                  : `<button class="button button-secondary button-small" data-action="archive-source" data-id="${escapeHtml(source.id)}">${icon("layers")}<span>Lưu trữ / đánh dấu cũ</span></button>`
+              }
+              <button class="button button-danger button-small" data-action="delete-source" data-id="${escapeHtml(source.id)}">${icon("x")}<span>Xóa an toàn</span></button>
+            </div>
+            <div class="callout ${referenceCount > 0 ? "callout-warning" : "callout-success"}">
+              ${icon(referenceCount > 0 ? "alert" : "check-circle")}
+              <span>${referenceCount > 0
+                ? `Nguồn này đang được ${formatNumber(referenceCount)} record tham chiếu. Lưu trữ sẽ giữ nguyên lịch sử/provenance; xóa cứng có thể bị API từ chối.`
+                : "Raw workbook, mapping và provenance được giữ lại để audit. Khi dữ liệu lỗi thời, nên lưu trữ thay vì xóa cứng."}</span>
+            </div>
+            ${
+              source.supersededBy || source.raw?.lifecycle?.superseded_by_source_file_id
+                ? `<div class="callout callout-warning">${icon("refresh")}<span>Workbook này đã có phiên bản thay thế (#${escapeHtml(source.supersededBy || source.raw?.lifecycle?.superseded_by_source_file_id)}). Các giá cũ chỉ còn dùng để tra cứu lịch sử.</span></div>`
+                : ""
+            }
+            <div class="source-summary-grid">
+              ${sourceSummaryTile("Sheet", pick(summary, ["sheets", "sheet_count"], source.sheets), "file")}
+              ${sourceSummaryTile("Dòng nhận diện", pick(summary, ["rows", "row_count", "extracted_rows"], source.rows), "layers")}
+              ${sourceSummaryTile("Vật tư / giá", `${formatNumber(pick(summary, ["products", "product_count"], products.length))} / ${formatNumber(priceRecordCount)}`, "database")}
+              ${sourceSummaryTile("Nhân công / BOQ", `${formatNumber(pick(summary, ["labor", "labor_count"], labor.length))} / ${formatNumber(pick(summary, ["boq", "boq_count"], boq.length))}`, "book")}
+            </div>
+            <div class="source-detail-sections">
+              <details open>
+                <summary>Sheets, header và mapping <span class="badge badge-neutral">${formatNumber(sheets.length)}</span></summary>
+                <div class="source-detail-section-content">
+                  ${sheets.length ? renderSourceSheets(sheets) : `<p class="cell-muted">API chưa trả về chi tiết sheet cho workbook này.</p>`}
+                  ${
+                    source.rawRowsLoaded
+                      ? renderSourceRawRows(sheets)
+                      : `<div class="source-row-preview-cta"><span class="cell-muted">${products.length + prices.length + labor.length + boq.length ? "Có thể xem raw row khi cần đối chiếu parser." : "Workbook chưa tạo record dẫn xuất; xem raw row để kiểm tra dữ liệu parser đã đọc."}</span><button class="button button-secondary button-small" data-action="source-row-preview" data-id="${escapeHtml(source.id)}">${icon("search")}<span>Xem mẫu raw row</span></button></div>`
+                  }
+                </div>
+              </details>
+              <details open>
+                <summary>Hạng mục danh mục phát sinh <span class="badge badge-neutral">${formatNumber(products.length + labor.length)}</span></summary>
+                <div class="source-detail-section-content">
+                  ${renderSourceRecordGroups(source, products, labor)}
+                </div>
+              </details>
+              <details>
+                <summary>Quan sát giá / lịch sử giá <span class="badge badge-neutral">${formatNumber(priceRecordCount)}</span></summary>
+                <div class="source-detail-section-content">
+                  ${prices.length ? renderSourcePriceRecords(prices, source) : `<p class="cell-muted">Không có price observation trả về từ API.</p>`}
+                </div>
+              </details>
+              <details>
+                <summary>Dòng BOQ đã nhận <span class="badge badge-neutral">${formatNumber(boq.length)}</span></summary>
+                <div class="source-detail-section-content">
+                  ${boq.length ? renderSourceBoqRecords(boq) : `<p class="cell-muted">Không có dòng BOQ thuộc workbook này.</p>`}
+                </div>
+              </details>
+              <details ${warnings.length ? "open" : ""}>
+                <summary>Cảnh báo parse / dữ liệu <span class="badge ${warnings.length ? "badge-warning" : "badge-success"}">${formatNumber(warnings.length)}</span></summary>
+                <div class="source-detail-section-content">
+                  ${warnings.length ? `<ul class="warning-list">${warnings.map((warning) => `<li>${icon("alert")}<span>${escapeHtml(typeof warning === "string" ? warning : pick(warning, ["message", "warning", "detail"], JSON.stringify(warning)))}</span></li>`).join("")}</ul>` : `<p class="cell-muted">Không có cảnh báo được ghi nhận.</p>`}
+                </div>
+              </details>
+            </div>
+            <details class="source-raw-details">
+              <summary>Metadata kỹ thuật (audit)</summary>
+              <pre>${escapeHtml(JSON.stringify(source.metadata || source.raw || {}, null, 2))}</pre>
+            </details>
+          </div>
+          <div class="modal-footer">
+            <span class="cell-muted source-modal-footer-note">ID nguồn: ${escapeHtml(source.id || "—")}</span>
+            <button class="button button-secondary" data-modal-dismiss>Đóng</button>
+          </div>
         </section>
       </div>
     `;
     bindModalDismiss(() => {});
+  }
+
+  function sourceSummaryTile(label, value, iconName) {
+    return `<div class="source-summary-tile"><span class="source-summary-icon">${icon(iconName)}</span><span><strong>${typeof value === "string" ? escapeHtml(value) : formatNumber(value)}</strong><span>${escapeHtml(label)}</span></span></div>`;
+  }
+
+  function renderSourceSheets(sheets) {
+    return `
+      <div class="table-wrap">
+        <table class="data-table compact-table">
+          <thead><tr><th>Sheet</th><th>Loại nhận diện</th><th>Header</th><th>Mapping</th><th>Dòng</th><th>Cảnh báo</th></tr></thead>
+          <tbody>
+            ${sheets.map((sheet) => {
+              const mapping = sheet.mapping || sheet.header_mapping || sheet.mapping_json || {};
+              const warnings = rawArray(sheet, ["warnings", "parse_warnings"]);
+              return `<tr>
+                <td><span class="cell-strong">${escapeHtml(pick(sheet, ["sheet_name", "name"], "Sheet"))}</span><div class="cell-muted">#${formatNumber(pick(sheet, ["sheet_index", "index"], ""))}</div></td>
+                <td><span class="badge badge-neutral">${escapeHtml(sourceTypeLabel(pick(sheet, ["detected_type", "type"], "unknown")))}</span></td>
+                <td class="cell-number">${formatNumber(pick(sheet, ["header_row", "header"], "—"))}</td>
+                <td><pre class="inline-json">${escapeHtml(JSON.stringify(mapping))}</pre></td>
+                <td class="cell-number">${formatNumber(pick(sheet, ["data_row_count", "data_rows", "row_count", "rows"], 0))}</td>
+                <td>${warnings.length ? `<span class="badge badge-warning">${formatNumber(warnings.length)}</span>` : `<span class="badge badge-success">0</span>`}</td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function renderSourceRawRows(sheets) {
+    const sheetsWithRows = sheets.filter((sheet) => rawArray(sheet, ["rows"]).length);
+    if (!sheetsWithRows.length) {
+      return `<div class="callout callout-warning" style="margin-top:10px">${icon("info")}<span>API đã tải chi tiết nhưng workbook không có raw row được lưu cho các sheet này.</span></div>`;
+    }
+    return `
+      <div class="source-raw-row-preview">
+        <h3 class="source-record-heading">Raw row preview</h3>
+        ${sheetsWithRows.map((sheet) => {
+          const rows = rawArray(sheet, ["rows"]);
+          const visibleRows = rows.slice(0, 25);
+          return `
+            <details class="source-row-sheet" open>
+              <summary>${escapeHtml(pick(sheet, ["sheet_name", "name"], "Sheet"))}<span class="badge badge-neutral">${formatNumber(rows.length)} row đã lưu</span></summary>
+              <div class="source-detail-section-content">
+                <div class="table-wrap"><table class="data-table compact-table source-raw-row-table">
+                  <thead><tr><th>#</th><th>Loại dòng</th><th>Raw cells</th><th>Cảnh báo</th></tr></thead>
+                  <tbody>${visibleRows.map((row) => {
+                    const warnings = rawArray(row, ["warnings", "parse_warnings"]);
+                    const rawCells = row.raw_cells || row.cells || row.raw || {};
+                    return `<tr><td class="cell-number">${escapeHtml(pick(row, ["row_no", "row_number"], "—"))}</td><td><span class="badge badge-neutral">${escapeHtml(pick(row, ["row_kind", "kind"], "unknown"))}</span></td><td><pre class="inline-json source-row-json">${escapeHtml(JSON.stringify(rawCells))}</pre></td><td>${warnings.length ? `<span class="badge badge-warning">${formatNumber(warnings.length)}</span>` : `<span class="badge badge-success">0</span>`}</td></tr>`;
+                  }).join("")}</tbody>
+                </table></div>
+                ${rows.length > visibleRows.length ? `<p class="cell-muted">Đang hiển thị ${formatNumber(visibleRows.length)} row đầu tiên trong ${formatNumber(rows.length)} row đã tải.</p>` : ""}
+              </div>
+            </details>
+          `;
+        }).join("")}
+      </div>
+    `;
+  }
+
+  function renderSourceRecordGroups(source, products, labor) {
+    const productRows = products.slice(0, 80).map((record) => {
+      const item = normalizeCatalogItem(
+        record?.source || (Array.isArray(record?.provenance) && record.provenance.length)
+          ? record
+          : { ...record, source: legacyCatalogSource(source, record, "product") },
+        "product",
+      );
+      return `<tr><td><button class="button button-quiet catalog-item-link" data-action="catalog-detail" data-kind="product" data-id="${escapeHtml(item.id)}">${escapeHtml(item.name)}</button>${item.code ? `<div class="cell-muted">${escapeHtml(item.code)}</div>` : ""}</td><td>${escapeHtml(item.category)}</td><td>${escapeHtml(item.unit || "—")}</td><td class="cell-muted">${escapeHtml(item.sourceSheet || "—")} ${item.sourceRow ? `• dòng ${escapeHtml(item.sourceRow)}` : ""}</td></tr>`;
+    });
+    const laborRows = labor.slice(0, 80).map((record) => {
+      const item = normalizeCatalogItem(
+        record?.source || (Array.isArray(record?.provenance) && record.provenance.length)
+          ? record
+          : { ...record, source: legacyCatalogSource(source, record, "labor") },
+        "labor",
+      );
+      return `<tr><td><button class="button button-quiet catalog-item-link" data-action="catalog-detail" data-kind="labor" data-id="${escapeHtml(item.id)}">${escapeHtml(item.name)}</button>${item.code ? `<div class="cell-muted">${escapeHtml(item.code)}</div>` : ""}</td><td>${escapeHtml(item.category)}</td><td>${escapeHtml(item.unit || "—")}</td><td class="cell-muted">${escapeHtml(item.sourceSheet || "—")} ${item.sourceRow ? `• dòng ${escapeHtml(item.sourceRow)}` : ""}</td></tr>`;
+    });
+    if (!productRows.length && !laborRows.length) return `<p class="cell-muted">API chưa trả về product/labor records riêng cho workbook này. Hãy xem raw metadata hoặc làm mới sau khi ingest hoàn tất.</p>`;
+    return `
+      ${productRows.length ? `<h3 class="source-record-heading">Vật tư (${formatNumber(products.length)})</h3><div class="table-wrap"><table class="data-table compact-table"><thead><tr><th>Tên / mã</th><th>Phân loại</th><th>Đơn vị</th><th>Provenance</th></tr></thead><tbody>${productRows.join("")}</tbody></table></div>` : ""}
+      ${laborRows.length ? `<h3 class="source-record-heading">Nhân công (${formatNumber(labor.length)})</h3><div class="table-wrap"><table class="data-table compact-table"><thead><tr><th>Tên / mã</th><th>Phân loại</th><th>Đơn vị</th><th>Provenance</th></tr></thead><tbody>${laborRows.join("")}</tbody></table></div>` : ""}
+      ${(products.length + labor.length) > 160 ? `<p class="cell-muted">Đang hiển thị 160 record đầu tiên. Dùng bộ lọc ở Danh mục & giá để xem toàn bộ.</p>` : ""}
+    `;
+  }
+
+  function renderSourcePriceRecords(prices, source) {
+    return `<div class="table-wrap"><table class="data-table compact-table"><thead><tr><th>Sản phẩm</th><th>Loại dữ liệu</th><th>Nhà cung cấp</th><th>Giá net</th><th>Thuế</th><th>Hiệu lực</th><th>Provenance</th></tr></thead><tbody>${prices.slice(0, 120).map((record) => {
+      const item = normalizeCatalogItem(
+        record?.source || (Array.isArray(record?.provenance) && record.provenance.length)
+          ? record
+          : { ...record, source: sourcePointerFromRecord(record, source) },
+        "price",
+      );
+      const productId = pick(record, ["product_id"], item.id);
+      const recordType = pick(
+        record,
+        ["observation_type", "record_type"],
+        record.context_json !== undefined || record.context !== undefined ? "price_observation" : "operational_price",
+      );
+      return `<tr><td><button class="button button-quiet catalog-item-link" data-action="catalog-detail" data-kind="product" data-id="${escapeHtml(productId)}">${escapeHtml(item.name)}</button></td><td><span class="badge badge-neutral">${escapeHtml(recordType)}</span></td><td class="cell-muted">${escapeHtml(item.supplier || "—")}</td><td class="cell-number">${formatCurrency(item.currentPrice)}</td><td class="cell-muted">${escapeHtml(item.taxMode || "ex_vat")}</td><td class="cell-muted">${formatDate(item.effectiveDate)}</td><td class="cell-muted">${escapeHtml(item.sourceSheet || "—")} ${item.sourceRow ? `• dòng ${escapeHtml(item.sourceRow)}` : ""}</td></tr>`;
+    }).join("")}</tbody></table></div>${prices.length > 120 ? `<p class="cell-muted">Đang hiển thị 120 quan sát đầu tiên.</p>` : ""}`;
+  }
+
+  function renderSourceBoqRecords(boq) {
+    return `<div class="table-wrap"><table class="data-table compact-table"><thead><tr><th>Mô tả</th><th>Section</th><th>Đơn vị</th><th>Khối lượng</th><th>Trạng thái</th></tr></thead><tbody>${boq.slice(0, 120).map((record) => {
+      const status = reviewStatus(pick(record, ["status", "review_status"], "review_required"));
+      return `<tr><td class="cell-strong">${escapeHtml(pick(record, ["raw_description", "description", "name"], "Dòng BOQ"))}</td><td class="cell-muted">${escapeHtml(pick(record, ["section", "group"], "—"))}</td><td class="cell-muted">${escapeHtml(pick(record, ["unit", "uom"], "—"))}</td><td class="cell-number">${formatNumber(pick(record, ["quantity", "qty"], "—"))}</td><td><span class="badge ${status.className}">${status.label}</span></td></tr>`;
+    }).join("")}</tbody></table></div>${boq.length > 120 ? `<p class="cell-muted">Đang hiển thị 120 dòng đầu tiên.</p>` : ""}`;
+  }
+
+  async function showSourceDetail(id) {
+    const existing = state.sources.find((item) => String(item.id) === String(id));
+    if (!existing) {
+      toast("Không tìm thấy workbook trong danh sách hiện tại.", "warning", "Nguồn dữ liệu");
+      return;
+    }
+    state.activeSource = existing;
+    renderSourceDetailModal(existing, true);
+    try {
+      const payload = await api.source(id, { includeRows: false, limit: 500 });
+      state.activeSource = normalizeSource(payload?.source || payload?.data || payload || existing);
+      renderSourceDetailModal(state.activeSource);
+    } catch (error) {
+      renderSourceDetailModal(existing, false, error.message);
+    }
+  }
+
+  async function previewSourceRows(id) {
+    const source = state.activeSource && String(state.activeSource.id) === String(id)
+      ? state.activeSource
+      : state.sources.find((item) => String(item.id) === String(id));
+    if (!source) return;
+    renderSourceDetailModal(source, true);
+    try {
+      const payload = await api.source(id, { includeRows: true, limit: 300 });
+      const detailed = normalizeSource(payload?.source || payload?.data || payload || source);
+      detailed.rawRowsLoaded = true;
+      state.activeSource = detailed;
+      renderSourceDetailModal(detailed);
+    } catch (error) {
+      renderSourceDetailModal(source, false, error.message);
+      toast(error.message, "warning", "Không tải được raw row preview");
+    }
+  }
+
+  async function refreshSourceAfterMutation(id, message, title = "Đã cập nhật nguồn") {
+    toast(message, "success", title);
+    await loadSources();
+    if (state.activeSource && String(state.activeSource.id) === String(id)) {
+      const source = state.sources.find((item) => String(item.id) === String(id));
+      if (source) {
+        state.activeSource = source;
+        renderSourceDetailModal(source, true);
+        try {
+          const payload = await api.source(id, { includeRows: false, limit: 500 });
+          state.activeSource = normalizeSource(payload?.source || payload?.data || payload || source);
+        } catch (_) {
+          // List response is enough to keep the modal usable.
+        }
+        renderSourceDetailModal(state.activeSource);
+      } else {
+        modalRoot.innerHTML = "";
+      }
+    }
+    if (state.route === "catalog") await loadCatalogItems();
+  }
+
+  async function archiveSource(id) {
+    const source = state.sources.find((item) => String(item.id) === String(id));
+    if (!source || !window.confirm(`Lưu trữ workbook "${source.filename}"?\n\nCác record và provenance vẫn được giữ, nhưng nguồn sẽ không còn được chọn làm giá hiện hành.`)) return;
+    try {
+      await api.archiveSource(id);
+      await refreshSourceAfterMutation(id, "Workbook đã được lưu trữ; lịch sử và provenance vẫn nguyên vẹn.");
+    } catch (error) {
+      toast(error.message, "error", "Không thể lưu trữ workbook");
+    }
+  }
+
+  async function restoreSource(id) {
+    try {
+      await api.restoreSource(id);
+      await refreshSourceAfterMutation(id, "Workbook đã được khôi phục vào nguồn đang hoạt động.");
+    } catch (error) {
+      toast(error.message, "error", "Không thể khôi phục workbook");
+    }
+  }
+
+  async function deleteSource(id) {
+    const source = state.sources.find((item) => String(item.id) === String(id));
+    if (!source || !window.confirm(`Xóa workbook "${source.filename}"?\n\nChỉ nên xóa nguồn chưa được tham chiếu. Nếu đã có provenance, máy chủ sẽ từ chối để bảo vệ lịch sử.`)) return;
+    try {
+      await api.deleteSource(id);
+      toast("Workbook đã được xóa khỏi kho dữ liệu.", "success", "Đã xóa nguồn");
+      modalRoot.innerHTML = "";
+      await loadSources();
+      if (state.route === "catalog") await loadCatalogItems();
+    } catch (error) {
+      toast(error.message, "warning", "Không thể xóa cứng workbook");
+    }
+  }
+
+  function renderCatalogItemModal(item, loading = false, errorMessage = "") {
+    const status = catalogStatus(item?.status);
+    const observations = item?.observations || rawArray(item?.raw, ["observations", "prices", "price_observations", "history"]);
+    const technical = item?.technicalAttributes || item?.raw?.technical_attributes || {};
+    modalRoot.innerHTML = `
+      <div class="modal-backdrop" data-modal-dismiss>
+        <section class="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="catalog-detail-title">
+          <div class="modal-header">
+            <div>
+              <p class="eyebrow">DANH MỤC & GIÁ</p>
+              <h2 id="catalog-detail-title">${escapeHtml(item?.name || "Chi tiết hạng mục")}</h2>
+              <p class="modal-subtitle">${escapeHtml(catalogKindLabel(item?.kind))}${item?.code ? ` • mã ${escapeHtml(item.code)}` : ""}</p>
+            </div>
+            <button class="icon-button" data-modal-dismiss aria-label="Đóng">${icon("x")}</button>
+          </div>
+          <div class="modal-body catalog-detail-body">
+            ${loading ? `<div class="card-body">${skeletonCard()}</div>` : ""}
+            ${errorMessage ? `<div class="callout callout-warning">${icon("alert")}<span>${escapeHtml(errorMessage)}. Đang hiển thị bản ghi trong danh sách.</span></div>` : ""}
+            ${
+              item
+                ? `
+                  <div class="source-detail-toolbar">
+                    <span class="badge ${status.className}">${status.label}</span>
+                    <span class="cell-muted">${item.category ? escapeHtml(item.category) : "Chưa phân loại"}${item.unit ? ` • ${escapeHtml(item.unit)}` : ""}</span>
+                    <span class="source-detail-toolbar-spacer"></span>
+                    ${
+                      ["archived", "inactive", "retired"].includes(String(item.status || "").toLowerCase())
+                        ? `<button class="button button-secondary button-small" data-action="restore-catalog-item" data-id="${escapeHtml(item.id)}" data-kind="${escapeHtml(item.kind)}">${icon("refresh")}<span>Khôi phục hạng mục</span></button>`
+                        : `<button class="button button-secondary button-small" data-action="archive-catalog-item" data-id="${escapeHtml(item.id)}" data-kind="${escapeHtml(item.kind)}">${icon("layers")}<span>Lưu trữ hạng mục</span></button>`
+                    }
+                    <button class="button button-danger button-small" data-action="delete-catalog-item" data-id="${escapeHtml(item.id)}" data-kind="${escapeHtml(item.kind)}">${icon("x")}<span>Xóa an toàn</span></button>
+                  </div>
+                  <div class="source-summary-grid">
+                    ${sourceSummaryTile(item.kind === "labor" ? "Đơn giá nhân công" : "Giá net hiện hành", formatCurrency(item.currentPrice), "layers")}
+                    ${sourceSummaryTile("Quan sát / phiên bản", item.observationCount, "calendar")}
+                    ${sourceSummaryTile("Nguồn", item.sourceFilename || (item.sourceId ? `#${item.sourceId}` : "Thiếu"), "file")}
+                    ${sourceSummaryTile("Hiệu lực", item.effectiveDate ? formatDate(item.effectiveDate) : "Chưa có", "calendar")}
+                  </div>
+                  <div class="catalog-detail-grid">
+                    <section class="detail-panel">
+                      <h3>Thông tin chuẩn hóa</h3>
+                      <dl class="quotation-summary">
+                        <div class="summary-row"><dt>Tên chuẩn hóa</dt><dd>${escapeHtml(item.name)}</dd></div>
+                        <div class="summary-row"><dt>Mã</dt><dd>${escapeHtml(item.code || "—")}</dd></div>
+                        <div class="summary-row"><dt>Nhóm / phân loại</dt><dd>${escapeHtml(item.category || "Chưa phân loại")}${item.subcategory ? ` • ${escapeHtml(item.subcategory)}` : ""}</dd></div>
+                        <div class="summary-row"><dt>Hãng / xuất xứ</dt><dd>${escapeHtml([item.brand, item.origin].filter(Boolean).join(" • ") || "—")}</dd></div>
+                        <div class="summary-row"><dt>Thuế / tiền tệ</dt><dd>${escapeHtml(item.taxMode || "ex_vat")} • ${escapeHtml(item.currency || "VND")}</dd></div>
+                      </dl>
+                    </section>
+                    <section class="detail-panel">
+                      <h3>Provenance</h3>
+                      ${
+                        item.sourceId
+                          ? `<button class="source-provenance-card" data-action="source-detail" data-id="${escapeHtml(item.sourceId)}"><span class="source-provenance-icon">${icon("file")}</span><span><strong>${escapeHtml(catalogSourceLabel(item))}</strong><span>${escapeHtml(item.sourceSheet || "Sheet chưa rõ")}${item.sourceRow ? ` • dòng ${escapeHtml(item.sourceRow)}` : ""}</span></span>${icon("chevron-right")}</button>`
+                          : `<div class="callout callout-warning">${icon("alert")}<span>Record này chưa có workbook/sheet/dòng nguồn. Không nên áp dụng tự động cho báo giá.</span></div>`
+                      }
+                    </section>
+                  </div>
+                  <details class="source-raw-details" open>
+                    <summary>Lịch sử giá / observation (${formatNumber(observations.length)})</summary>
+                    <div class="source-detail-section-content">${observations.length ? renderCatalogObservations(observations) : `<p class="cell-muted">Chưa có observation chi tiết.</p>`}</div>
+                  </details>
+                  <details class="source-raw-details">
+                    <summary>Thuộc tính kỹ thuật / alias</summary>
+                    <pre>${escapeHtml(JSON.stringify({ technical_attributes: technical, aliases: item.aliases || [] }, null, 2))}</pre>
+                  </details>
+                `
+                : `<div class="callout callout-warning">${icon("alert")}<span>Không có dữ liệu hạng mục.</span></div>`
+            }
+          </div>
+          <div class="modal-footer"><span class="cell-muted source-modal-footer-note">ID record: ${escapeHtml(item?.id || "—")}</span><button class="button button-secondary" data-modal-dismiss>Đóng</button></div>
+        </section>
+      </div>
+    `;
+    bindModalDismiss(() => {});
+  }
+
+  function renderCatalogObservations(observations) {
+    return `<div class="table-wrap"><table class="data-table compact-table"><thead><tr><th>Giá net</th><th>Nhà cung cấp</th><th>Loại quan sát</th><th>Thuế</th><th>Hiệu lực</th><th>Nguồn</th></tr></thead><tbody>${observations.slice(0, 160).map((observation) => {
+      const price = pick(observation, ["net_price", "price", "rate", "value"], null);
+      return `<tr><td class="cell-number">${formatCurrency(price)}</td><td class="cell-muted">${escapeHtml(pick(observation, ["supplier", "vendor"], "—"))}</td><td><span class="badge badge-neutral">${escapeHtml(pick(observation, ["observation_type", "source_type", "type"], "supplier"))}</span></td><td class="cell-muted">${escapeHtml(pick(observation, ["tax_mode", "tax_basis"], "ex_vat"))}</td><td class="cell-muted">${formatDate(pick(observation, ["effective_date", "created_at"], ""))}</td><td class="cell-muted">${escapeHtml(pick(observation, ["source_filename", "filename", "sheet_name"], "—"))}</td></tr>`;
+    }).join("")}</tbody></table></div>${observations.length > 160 ? `<p class="cell-muted">Đang hiển thị 160 observation đầu tiên.</p>` : ""}`;
+  }
+
+  async function showCatalogDetail(kind, id) {
+    const existing = state.catalogItems.find((item) => String(item.id) === String(id) && (item.kind === kind || kind === "price"));
+    if (!existing) {
+      toast("Không tìm thấy record trong danh sách hiện tại.", "warning", "Danh mục");
+      return;
+    }
+    state.activeCatalogItem = existing;
+    renderCatalogItemModal(existing, true);
+    try {
+      const payload = await api.catalogItem(kind, id);
+      state.activeCatalogItem = normalizeCatalogItem(payload?.item || payload?.data || payload || existing, kind);
+      renderCatalogItemModal(state.activeCatalogItem);
+    } catch (error) {
+      renderCatalogItemModal(existing, false, error.message);
+    }
+  }
+
+  async function archiveCatalogItem(kind, id) {
+    const item = state.catalogItems.find((candidate) => String(candidate.id) === String(id) && candidate.kind === kind);
+    if (!item || !window.confirm(`Lưu trữ hạng mục "${item.name}"?\n\nGiá và provenance cũ vẫn giữ trong lịch sử, nhưng record sẽ không còn là lựa chọn mặc định.`)) return;
+    try {
+      await api.archiveCatalogItem(item);
+      toast("Hạng mục đã được lưu trữ.", "success", "Đã cập nhật danh mục");
+      modalRoot.innerHTML = "";
+      await loadCatalogItems();
+    } catch (error) {
+      toast(error.message, "warning", "Không thể lưu trữ hạng mục");
+    }
+  }
+
+  async function restoreCatalogItem(kind, id) {
+    const item = state.catalogItems.find((candidate) => String(candidate.id) === String(id) && candidate.kind === kind);
+    if (!item) return;
+    try {
+      await api.restoreCatalogItem(item);
+      toast("Hạng mục đã được khôi phục.", "success", "Đã cập nhật danh mục");
+      modalRoot.innerHTML = "";
+      await loadCatalogItems();
+    } catch (error) {
+      toast(error.message, "warning", "Không thể khôi phục hạng mục");
+    }
+  }
+
+  async function deleteCatalogItem(kind, id) {
+    const item = state.catalogItems.find((candidate) => String(candidate.id) === String(id) && candidate.kind === kind);
+    if (!item || !window.confirm(`Xóa hạng mục "${item.name}"?\n\nChỉ record chưa được tham chiếu mới có thể xóa cứng. Nếu đang dùng trong báo giá, API sẽ bảo vệ provenance.`)) return;
+    try {
+      await api.deleteCatalogItem(item);
+      toast("Hạng mục đã được xóa.", "success", "Đã xóa record");
+      modalRoot.innerHTML = "";
+      await loadCatalogItems();
+    } catch (error) {
+      toast(error.message, "warning", "Không thể xóa cứng hạng mục");
+    }
   }
 
   function showGuide() {
@@ -1894,7 +2911,7 @@
       const matchesFilter =
         filter === "all" ||
         (filter === "completed" && ["completed", "complete", "priced", "done", "exported"].includes(status)) ||
-        (filter === "review" && ["review", "review_required", "needs_review", "price_drift_warning"].includes(status)) ||
+        (filter === "review" && ["review", "review_required", "needs_review", "price_drift_warning", "external_quotation_required", "needs_supplier_quotation"].includes(status)) ||
         (filter === "running" && ["running", "processing", "queued"].includes(status)) ||
         (filter === "draft" && ["draft", "new"].includes(status));
       return matchesFilter && (!query || haystack.includes(query));
@@ -1926,6 +2943,7 @@
     else if (action === "review-quotation" && id) navigate(`#review/${encodeURIComponent(id)}`);
     else if (action === "refresh-sources") await loadSources();
     else if (action === "refresh-quotations") await loadQuotations();
+    else if (action === "refresh-catalog") await loadCatalog();
     else if (action === "refresh-benchmark") await loadBenchmark();
     else if (action === "focus-import-input") {
       if (state.route !== "import") navigate("#import");
@@ -1960,7 +2978,23 @@
       state.reviewFilter = "all";
       state.reviewQuery = "";
       renderReview();
-    } else if (action === "source-detail") showSourceDetail(id);
+    } else if (action === "source-detail") await showSourceDetail(id);
+    else if (action === "source-row-preview") await previewSourceRows(id);
+    else if (action === "archive-source") await archiveSource(id);
+    else if (action === "restore-source") await restoreSource(id);
+    else if (action === "delete-source") await deleteSource(id);
+    else if (action === "catalog-detail") await showCatalogDetail(actionElement.dataset.kind || "product", id);
+    else if (action === "archive-catalog-item") await archiveCatalogItem(actionElement.dataset.kind || "product", id);
+    else if (action === "restore-catalog-item") await restoreCatalogItem(actionElement.dataset.kind || "product", id);
+    else if (action === "delete-catalog-item") await deleteCatalogItem(actionElement.dataset.kind || "product", id);
+    else if (action === "catalog-page") {
+      const direction = actionElement.dataset.direction;
+      const totalPages = Math.max(1, Math.ceil((Number(state.catalogTotal) || 0) / state.catalogPageSize));
+      const nextPage = direction === "next" ? state.catalogPage + 1 : state.catalogPage - 1;
+      state.catalogPage = Math.max(0, Math.min(totalPages - 1, nextPage));
+      await loadCatalogItems();
+      pageView.focus({ preventScroll: true });
+    }
   });
 
   document.addEventListener("change", (event) => {
@@ -1970,6 +3004,13 @@
       if (result) result.confirmed_type = event.target.value;
     } else if (event.target.matches("#quotation-status-filter")) {
       filterQuotations();
+    } else if (event.target.matches("#catalog-kind-filter, #catalog-category-filter, #catalog-source-filter, #catalog-status-filter")) {
+      state.catalogPage = 0;
+      if (event.target.matches("#catalog-kind-filter")) state.catalogFilters.kind = event.target.value;
+      if (event.target.matches("#catalog-category-filter")) state.catalogFilters.category = event.target.value;
+      if (event.target.matches("#catalog-source-filter")) state.catalogFilters.sourceId = event.target.value;
+      if (event.target.matches("#catalog-status-filter")) state.catalogFilters.status = event.target.value;
+      loadCatalogItems();
     } else if (event.target.matches("#review-filter")) {
       state.reviewFilter = event.target.value;
       renderReview();
@@ -1978,6 +3019,12 @@
 
   document.addEventListener("input", (event) => {
     if (event.target.matches("#quotation-search")) filterQuotations();
+    else if (event.target.matches("#catalog-search")) {
+      state.catalogFilters.query = event.target.value;
+      state.catalogPage = 0;
+      if (state.catalogSearchTimer) window.clearTimeout(state.catalogSearchTimer);
+      state.catalogSearchTimer = window.setTimeout(() => loadCatalogItems(), 260);
+    }
     else if (event.target.matches("#review-search")) {
       state.reviewQuery = event.target.value;
       const selected = state.selectedReviewId;

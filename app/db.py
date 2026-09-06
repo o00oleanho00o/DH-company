@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS source_files (
     filename TEXT NOT NULL,
     storage_key TEXT NOT NULL,
     sha256 TEXT NOT NULL,
+    content_sha256 TEXT,
     extension TEXT NOT NULL,
     size_bytes INTEGER NOT NULL DEFAULT 0,
     detected_type TEXT NOT NULL DEFAULT 'UNKNOWN',
@@ -25,6 +26,12 @@ CREATE TABLE IF NOT EXISTS source_files (
     metadata_json TEXT NOT NULL DEFAULT '{}',
     parsing_version TEXT NOT NULL DEFAULT '1.0',
     processing_status TEXT NOT NULL DEFAULT 'PENDING',
+    lifecycle_status TEXT NOT NULL DEFAULT 'ACTIVE',
+    status_reason TEXT,
+    archived_at TEXT,
+    superseded_by_source_file_id INTEGER REFERENCES source_files(id) ON DELETE SET NULL,
+    supersedes_source_file_id INTEGER REFERENCES source_files(id) ON DELETE SET NULL,
+    version_no INTEGER NOT NULL DEFAULT 1,
     uploaded_at TEXT NOT NULL
 );
 
@@ -63,6 +70,9 @@ CREATE TABLE IF NOT EXISTS products (
     unit TEXT,
     technical_attributes_json TEXT NOT NULL DEFAULT '{}',
     aliases_json TEXT NOT NULL DEFAULT '[]',
+    lifecycle_status TEXT NOT NULL DEFAULT 'ACTIVE',
+    status_reason TEXT,
+    archived_at TEXT,
     created_at TEXT NOT NULL
 );
 
@@ -130,9 +140,33 @@ CREATE TABLE IF NOT EXISTS labor_items (
     category TEXT,
     unit TEXT,
     technical_attributes_json TEXT NOT NULL DEFAULT '{}',
+    lifecycle_status TEXT NOT NULL DEFAULT 'ACTIVE',
+    status_reason TEXT,
+    archived_at TEXT,
     created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_labor_name ON labor_items(normalized_name);
+
+-- Keep identity records connected to every workbook row that contributed
+-- them, including rows from holdout/detail sheets that do not produce an
+-- operational price/rate row.
+CREATE TABLE IF NOT EXISTS catalog_source_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entity_type TEXT NOT NULL,
+    product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
+    labor_item_id INTEGER REFERENCES labor_items(id) ON DELETE CASCADE,
+    source_file_id INTEGER REFERENCES source_files(id) ON DELETE SET NULL,
+    source_sheet_id INTEGER REFERENCES source_sheets(id) ON DELETE SET NULL,
+    source_row_id INTEGER REFERENCES source_rows(id) ON DELETE SET NULL,
+    relation_type TEXT NOT NULL DEFAULT 'ingested',
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_catalog_source_links_product
+    ON catalog_source_links(entity_type, product_id, source_file_id);
+CREATE INDEX IF NOT EXISTS idx_catalog_source_links_labor
+    ON catalog_source_links(entity_type, labor_item_id, source_file_id);
+CREATE INDEX IF NOT EXISTS idx_catalog_source_links_source
+    ON catalog_source_links(source_file_id, entity_type);
 
 CREATE TABLE IF NOT EXISTS projects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -281,17 +315,57 @@ def connect() -> sqlite3.Connection:
 def init_db() -> None:
     with connect() as conn:
         conn.executescript(SCHEMA_SQL)
-        # Keep existing developer databases usable after the Round 2 schema
-        # extension.  SQLite cannot add a column through CREATE IF NOT EXISTS,
-        # so inspect and ALTER only when a legacy database is missing it.
-        columns = {
-            str(row["name"])
-            for row in conn.execute("PRAGMA table_info(boq_items)").fetchall()
+        # Keep existing developer databases usable after schema extensions.
+        # SQLite cannot add a column through CREATE IF NOT EXISTS, so inspect
+        # and ALTER only when a legacy database is missing it.
+        migrations: dict[str, dict[str, str]] = {
+            "boq_items": {
+                "line_class": "TEXT",
+                "status_reason": "TEXT",
+            },
+            "source_files": {
+                "content_sha256": "TEXT",
+                "lifecycle_status": "TEXT NOT NULL DEFAULT 'ACTIVE'",
+                "status_reason": "TEXT",
+                "archived_at": "TEXT",
+                "superseded_by_source_file_id": "INTEGER",
+                "supersedes_source_file_id": "INTEGER",
+                "version_no": "INTEGER NOT NULL DEFAULT 1",
+            },
+            "products": {
+                "lifecycle_status": "TEXT NOT NULL DEFAULT 'ACTIVE'",
+                "status_reason": "TEXT",
+                "archived_at": "TEXT",
+            },
+            "labor_items": {
+                "lifecycle_status": "TEXT NOT NULL DEFAULT 'ACTIVE'",
+                "status_reason": "TEXT",
+                "archived_at": "TEXT",
+            },
         }
-        if "line_class" not in columns:
-            conn.execute("ALTER TABLE boq_items ADD COLUMN line_class TEXT")
-        if "status_reason" not in columns:
-            conn.execute("ALTER TABLE boq_items ADD COLUMN status_reason TEXT")
+        for table, table_migrations in migrations.items():
+            columns = {
+                str(row["name"])
+                for row in conn.execute(f"PRAGMA table_info({table})").fetchall()
+            }
+            for column, definition in table_migrations.items():
+                if column not in columns:
+                    conn.execute(
+                        f"ALTER TABLE {table} ADD COLUMN {column} {definition}"
+                    )
+        # A legacy row's record checksum is also its content checksum.
+        conn.execute(
+            "UPDATE source_files SET content_sha256=sha256 "
+            "WHERE content_sha256 IS NULL OR content_sha256=''"
+        )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_source_files_content_sha256 "
+            "ON source_files(content_sha256)"
+        )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_source_files_lifecycle "
+            "ON source_files(lifecycle_status)"
+        )
         conn.commit()
 
 

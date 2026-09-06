@@ -39,7 +39,91 @@ def _classify_boq_row(
 
 
 def _source_file_record(conn, sha256: str) -> dict[str, Any] | None:
-    return row_dict(conn.execute("SELECT * FROM source_files WHERE sha256 = ?", (sha256,)).fetchone())
+    # ``content_sha256`` is stable across versions while ``sha256`` may be a
+    # unique record checksum for a forced reimport/duplicate quotation.
+    return row_dict(
+        conn.execute(
+            """
+            SELECT * FROM source_files
+            WHERE content_sha256 = ? OR sha256 = ?
+            ORDER BY CASE WHEN lifecycle_status='ACTIVE' THEN 0 ELSE 1 END,
+                     version_no DESC,
+                     CASE WHEN sha256=? THEN 0 ELSE 1 END,
+                     id DESC
+            LIMIT 1
+            """,
+            (sha256, sha256, sha256),
+        ).fetchone()
+    )
+
+
+def _link_catalog_source(
+    conn,
+    *,
+    entity_type: str,
+    product_id: int | None = None,
+    labor_item_id: int | None = None,
+    source_file_id: int | None = None,
+    source_sheet_id: int | None = None,
+    source_row_id: int | None = None,
+    relation_type: str = "ingested",
+) -> None:
+    """Attach a catalog identity to the exact source location that supplied it.
+
+    Identity rows are shared across workbooks, so direct ``source_file_id``
+    columns on price/rate tables are insufficient for detail sheets or
+    holdouts that contribute specs but intentionally no operational price.
+    """
+
+    if entity_type not in {"product", "labor"}:
+        return
+    if entity_type == "product" and not product_id:
+        return
+    if entity_type == "labor" and not labor_item_id:
+        return
+    if not source_file_id:
+        return
+    existing = conn.execute(
+        """
+        SELECT id FROM catalog_source_links
+        WHERE entity_type=? AND COALESCE(product_id, 0)=COALESCE(?, 0)
+          AND COALESCE(labor_item_id, 0)=COALESCE(?, 0)
+          AND source_file_id=?
+          AND COALESCE(source_sheet_id, 0)=COALESCE(?, 0)
+          AND COALESCE(source_row_id, 0)=COALESCE(?, 0)
+          AND relation_type=?
+        LIMIT 1
+        """,
+        (
+            entity_type,
+            product_id,
+            labor_item_id,
+            source_file_id,
+            source_sheet_id,
+            source_row_id,
+            relation_type,
+        ),
+    ).fetchone()
+    if existing:
+        return
+    conn.execute(
+        """
+        INSERT INTO catalog_source_links(
+            entity_type, product_id, labor_item_id, source_file_id,
+            source_sheet_id, source_row_id, relation_type, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            entity_type,
+            product_id,
+            labor_item_id,
+            source_file_id,
+            source_sheet_id,
+            source_row_id,
+            relation_type,
+            utc_now(),
+        ),
+    )
 
 
 def _upsert_product(
@@ -264,8 +348,6 @@ def ingest_workbook(
             stats = source_file_detail(conn, int(existing["id"]))
             stats["skipped_duplicate"] = True
             return stats
-        if existing and force:
-            conn.execute("DELETE FROM source_files WHERE id = ?", (existing["id"],))
 
         # ``source_files.sha256`` is intentionally unique for ordinary
         # idempotent imports.  A quotation upload may explicitly request a
@@ -274,8 +356,30 @@ def ingest_workbook(
         # unique record checksum so the database constraint is respected.
         content_sha256 = parsed["sha256"]
         duplicate_of_source_file_id: int | None = None
+        supersedes_source_file_id: int | None = None
         record_sha256 = content_sha256
-        if existing and allow_duplicate and not force:
+        version_no = 1
+        if existing and force:
+            # Never delete the old source: derived prices, labor rates, BOQ
+            # rows and audit records must retain their original provenance.
+            # A forced reimport is a new immutable source version.
+            supersedes_source_file_id = int(existing["id"])
+            version_no = int(
+                conn.execute(
+                    """
+                    SELECT COALESCE(MAX(version_no), 0) + 1
+                    FROM source_files
+                    WHERE COALESCE(content_sha256, sha256)=?
+                    """,
+                    (content_sha256,),
+                ).fetchone()[0]
+            )
+            record_sha256 = hashlib.sha256(
+                f"dh-source-version:{content_sha256}:{uuid.uuid4().hex}".encode(
+                    "utf-8"
+                )
+            ).hexdigest()
+        elif existing and allow_duplicate:
             duplicate_of_source_file_id = int(existing["id"])
             record_sha256 = hashlib.sha256(
                 f"dh-source-duplicate:{content_sha256}:{uuid.uuid4().hex}".encode(
@@ -297,29 +401,48 @@ def ingest_workbook(
             "original_filename": display_filename,
             "content_sha256": content_sha256,
             "duplicate_of_source_file_id": duplicate_of_source_file_id,
+            "supersedes_source_file_id": supersedes_source_file_id,
+            "version_no": version_no,
         }
         cur = conn.execute(
             """
             INSERT INTO source_files(
-                filename, storage_key, sha256, extension, size_bytes,
+                filename, storage_key, sha256, content_sha256, extension, size_bytes,
                 detected_type, confirmed_type, metadata_json, parsing_version,
-                processing_status, uploaded_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'PROCESSING', ?)
+                processing_status, lifecycle_status, status_reason,
+                supersedes_source_file_id, version_no, uploaded_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PROCESSING', 'ACTIVE', ?, ?, ?, ?)
             """,
             (
                 display_filename,
                 str(raw_path),
                 record_sha256,
+                content_sha256,
                 parsed["extension"],
                 path.stat().st_size,
                 parsed["workbook_type"],
                 confirmed_type,
                 dumps(metadata),
                 parsed["parsing_version"],
+                "forced_reimport" if supersedes_source_file_id else None,
+                supersedes_source_file_id,
+                version_no,
                 utc_now(),
             ),
         )
         source_file_id = int(cur.lastrowid)
+        if supersedes_source_file_id:
+            conn.execute(
+                """
+                UPDATE source_files
+                SET lifecycle_status='SUPERSEDED',
+                    status_reason='superseded_by_forced_reimport',
+                    archived_at=COALESCE(archived_at, ?),
+                    superseded_by_source_file_id=?
+                WHERE id=?
+                """,
+                (utc_now(), source_file_id, supersedes_source_file_id),
+            )
 
         project_id: int | None = None
         workbook_type = confirmed_type or parsed["workbook_type"]
@@ -476,6 +599,15 @@ def ingest_workbook(
                         attrs.get("category"),
                         context_attrs,
                     )
+                    _link_catalog_source(
+                        conn,
+                        entity_type="product",
+                        product_id=product_id,
+                        source_file_id=source_file_id,
+                        source_sheet_id=source_sheet_id,
+                        source_row_id=source_row_id,
+                        relation_type="detail_specification",
+                    )
                     _merge_product_context(
                         conn,
                         product_id,
@@ -533,6 +665,15 @@ def ingest_workbook(
                         fields.get("unit") or "m",
                         category,
                         context_attrs,
+                    )
+                    _link_catalog_source(
+                        conn,
+                        entity_type="product",
+                        product_id=product_id,
+                        source_file_id=source_file_id,
+                        source_sheet_id=source_sheet_id,
+                        source_row_id=source_row_id,
+                        relation_type="price_observation",
                     )
                     stats["products"] += 1
                     if not exclude_prices:
@@ -663,6 +804,15 @@ def ingest_workbook(
                         fields.get("unit"),
                         sheet.snapshot.name,
                     )
+                    _link_catalog_source(
+                        conn,
+                        entity_type="labor",
+                        labor_item_id=item_id,
+                        source_file_id=source_file_id,
+                        source_sheet_id=source_sheet_id,
+                        source_row_id=source_row_id,
+                        relation_type="labor_rate" if fields.get("labor_price") is not None else "identity",
+                    )
                     stats["labor_items"] += 1
                     rate = fields.get("labor_price")
                     if rate is not None and rate > 0 and not exclude_prices:
@@ -736,6 +886,15 @@ def ingest_workbook(
                                 fields.get("unit"),
                                 attrs.get("category"),
                             )
+                            _link_catalog_source(
+                                conn,
+                                entity_type="product",
+                                product_id=product_id,
+                                source_file_id=source_file_id,
+                                source_sheet_id=source_sheet_id,
+                                source_row_id=source_row_id,
+                                relation_type="historical_price",
+                            )
                             conn.execute(
                                 """
                                 INSERT INTO product_prices(
@@ -757,8 +916,33 @@ def ingest_workbook(
                                     utc_now(),
                                 ),
                             )
+                            conn.execute(
+                                """
+                                INSERT INTO price_observations(
+                                    product_id, source_file_id, source_sheet_id,
+                                    source_row_id, source_project_id,
+                                    supplier, observation_type, net_price,
+                                    tax_mode, price_basis, effective_date,
+                                    confidence, context_json, created_at
+                                ) VALUES (?, ?, ?, ?, ?, ?, 'historical_boq', ?,
+                                          'ex_vat', 'net', ?, 0.82, ?, ?)
+                                """,
+                                (
+                                    product_id,
+                                    source_file_id,
+                                    source_sheet_id,
+                                    source_row_id,
+                                    project_id,
+                                    "Historical quotation",
+                                    material_price,
+                                    parsed["effective_date"],
+                                    dumps({"boq_item_id": boq_id, "source_type": "historical_boq"}),
+                                    utc_now(),
+                                ),
+                            )
                             stats["products"] += 1
                             stats["product_prices"] += 1
+                            stats["price_observations"] += 1
                         labor_price = fields.get("labor_price")
                         if labor_price is not None and labor_price > 0:
                             labor_id = _upsert_labor_item(
@@ -767,6 +951,15 @@ def ingest_workbook(
                                 fields.get("code"),
                                 fields.get("unit"),
                                 attrs.get("category"),
+                            )
+                            _link_catalog_source(
+                                conn,
+                                entity_type="labor",
+                                labor_item_id=labor_id,
+                                source_file_id=source_file_id,
+                                source_sheet_id=source_sheet_id,
+                                source_row_id=source_row_id,
+                                relation_type="historical_rate",
                             )
                             conn.execute(
                                 """
@@ -803,30 +996,509 @@ def ingest_workbook(
             """,
             (source_file_id, dumps(stats), utc_now()),
         )
+        # Catalog/price selectors keep process-local caches for large BOQs.
+        # Invalidate them after a successful import so a subsequent run sees
+        # newly ingested identities and observations immediately.
+        try:
+            from .pricing import clear_runtime_caches
+
+            clear_runtime_caches()
+        except Exception:
+            # Ingestion is also used by lightweight parser/benchmark contexts
+            # where importing the pricing module is intentionally avoided.
+            pass
         return stats
 
 
-def source_file_detail(conn, source_file_id: int) -> dict[str, Any]:
-    source = conn.execute("SELECT * FROM source_files WHERE id = ?", (source_file_id,)).fetchone()
+def _decode_json_field(value: Any, default: Any) -> Any:
+    decoded = loads(value, default)
+    return decoded
+
+
+def _source_ref_payload(conn, source_file_id: int, *, sheet_id: int | None = None, row_id: int | None = None) -> dict[str, Any]:
+    """Return a compact, stable source pointer for catalog/detail responses."""
+
+    source = conn.execute(
+        """
+        SELECT filename, lifecycle_status, status_reason, version_no
+        FROM source_files WHERE id=?
+        """,
+        (source_file_id,),
+    ).fetchone()
+    result: dict[str, Any] = {"file_id": source_file_id}
+    if source:
+        result.update(
+            {
+                "filename": source["filename"],
+                "status": source["lifecycle_status"] or "ACTIVE",
+                "status_reason": source["status_reason"],
+                "version_no": source["version_no"] or 1,
+            }
+        )
+    if sheet_id is not None:
+        row = conn.execute(
+            "SELECT sheet_name, sheet_index FROM source_sheets WHERE id=?",
+            (sheet_id,),
+        ).fetchone()
+        if row:
+            result.update(
+                {
+                    "sheet_id": sheet_id,
+                    "sheet_name": row["sheet_name"],
+                    "sheet_index": row["sheet_index"],
+                }
+            )
+    if row_id is not None:
+        row = conn.execute(
+            "SELECT row_no FROM source_rows WHERE id=?",
+            (row_id,),
+        ).fetchone()
+        if row:
+            result.update({"row_id": row_id, "row_no": row["row_no"]})
+    return result
+
+
+def source_file_detail(
+    conn,
+    source_file_id: int,
+    *,
+    include_rows: bool = True,
+    limit: int = 500,
+) -> dict[str, Any]:
+    """Return everything the importer derived from one workbook.
+
+    The raw workbook remains the source of truth; this response exposes the
+    parsed sheets/mappings/rows and all catalog/BOQ records carrying a
+    provenance pointer back to this source. ``limit`` bounds payload size
+    while ``summary`` always reports complete counts.
+    """
+
+    source = conn.execute(
+        "SELECT * FROM source_files WHERE id = ?", (source_file_id,)
+    ).fetchone()
     if not source:
         raise KeyError(source_file_id)
-    sheets = [
-        dict(row)
+    limit = max(1, min(int(limit or 500), 5000))
+    result = dict(source)
+    # Never return the internal absolute storage path in an API payload.
+    storage_key = result.pop("storage_key", None)
+    result["raw_available"] = bool(storage_key)
+    result["metadata"] = _decode_json_field(result.pop("metadata_json", "{}"), {})
+    if not isinstance(result["metadata"], dict):
+        result["metadata"] = {}
+    # Keep server-local paths out of source detail responses.  The raw
+    # workbook is represented by ``raw_available`` and resolved internally
+    # for reprocess/delete operations.
+    result["metadata"].pop("original_path", None)
+    result["lifecycle"] = {
+        "status": result.get("lifecycle_status") or "ACTIVE",
+        "reason": result.get("status_reason"),
+        "archived_at": result.get("archived_at"),
+        "version_no": result.get("version_no") or 1,
+        "supersedes_source_file_id": result.get("supersedes_source_file_id"),
+        "superseded_by_source_file_id": result.get("superseded_by_source_file_id"),
+    }
+
+    sheet_rows = conn.execute(
+        """
+        SELECT ss.*, COUNT(sr.id) AS row_count,
+               COALESCE(SUM(CASE WHEN sr.row_kind='data' THEN 1 ELSE 0 END), 0) AS data_row_count
+        FROM source_sheets ss
+        LEFT JOIN source_rows sr ON sr.source_sheet_id=ss.id
+        WHERE ss.source_file_id=?
+        GROUP BY ss.id ORDER BY ss.sheet_index
+        """,
+        (source_file_id,),
+    ).fetchall()
+    sheets: list[dict[str, Any]] = []
+    metadata_warnings = result["metadata"].get("warnings")
+    warnings: list[Any] = (
+        list(metadata_warnings)
+        if isinstance(metadata_warnings, (list, tuple, set))
+        else ([metadata_warnings] if metadata_warnings else [])
+    )
+    for row in sheet_rows:
+        item = dict(row)
+        item["mapping"] = _decode_json_field(item.pop("mapping_json", "{}"), {})
+        item["metadata"] = _decode_json_field(item.pop("metadata_json", "{}"), {})
+        item["warnings"] = list(item["metadata"].get("warnings") or [])
+        warnings.extend(item["warnings"])
+        if include_rows:
+            # ``limit`` is a workbook-level payload budget, not a per-sheet
+            # multiplier.  Allocate a small, deterministic sample to every
+            # sheet so large workbooks remain inspectable without returning
+            # tens of thousands of raw cells in one response.
+            sheet_position = len(sheets)
+            sheet_total = len(sheet_rows)
+            base_limit, remainder = divmod(limit, max(1, sheet_total))
+            row_limit = base_limit + (1 if sheet_position < remainder else 0)
+            raw_rows = conn.execute(
+                """
+                SELECT id, row_no, raw_cells_json, row_kind, parse_warnings_json
+                FROM source_rows
+                WHERE source_sheet_id=?
+                ORDER BY row_no LIMIT ?
+                """,
+                (row["id"], row_limit),
+            ).fetchall()
+            item["rows"] = []
+            for raw in raw_rows:
+                parsed_row = dict(raw)
+                parsed_row["raw_cells"] = _decode_json_field(
+                    parsed_row.pop("raw_cells_json", "{}"), {}
+                )
+                parsed_row["warnings"] = _decode_json_field(
+                    parsed_row.pop("parse_warnings_json", "[]"), []
+                )
+                item["rows"].append(parsed_row)
+                warnings.extend(parsed_row["warnings"] or [])
+        sheets.append(item)
+    result["sheets"] = sheets
+
+    # Resolve identity ids from both the explicit bridge and legacy direct
+    # provenance columns so older databases still produce complete details.
+    product_ids = {
+        int(row[0])
         for row in conn.execute(
             """
-            SELECT ss.*, COUNT(sr.id) AS row_count,
-                   SUM(CASE WHEN sr.row_kind='data' THEN 1 ELSE 0 END) AS data_row_count
-            FROM source_sheets ss
-            LEFT JOIN source_rows sr ON sr.source_sheet_id=ss.id
-            WHERE ss.source_file_id=?
-            GROUP BY ss.id ORDER BY ss.sheet_index
+            SELECT product_id FROM catalog_source_links
+            WHERE source_file_id=? AND product_id IS NOT NULL
+            UNION SELECT product_id FROM product_prices
+            WHERE source_file_id=? AND product_id IS NOT NULL
+            UNION SELECT product_id FROM price_observations
+            WHERE source_file_id=? AND product_id IS NOT NULL
+            UNION SELECT matched_product_id FROM boq_items
+            WHERE source_file_id=? AND matched_product_id IS NOT NULL
             """,
-            (source_file_id,),
+            (source_file_id, source_file_id, source_file_id, source_file_id),
         ).fetchall()
-    ]
-    result = dict(source)
-    result["metadata"] = result.pop("metadata_json")
-    result["sheets"] = sheets
+    }
+    labor_ids = {
+        int(row[0])
+        for row in conn.execute(
+            """
+            SELECT labor_item_id FROM catalog_source_links
+            WHERE source_file_id=? AND labor_item_id IS NOT NULL
+            UNION SELECT labor_item_id FROM labor_rates
+            WHERE source_file_id=? AND labor_item_id IS NOT NULL
+            UNION SELECT matched_labor_item_id FROM boq_items
+            WHERE source_file_id=? AND matched_labor_item_id IS NOT NULL
+            """,
+            (source_file_id, source_file_id, source_file_id),
+        ).fetchall()
+    }
+
+    def _entity_provenance(entity_type: str, entity_id: int) -> list[dict[str, Any]]:
+        """Resolve bridge links plus legacy direct provenance for one entity.
+
+        Databases created before ``catalog_source_links`` was introduced still
+        contain useful source pointers on ``product_prices``,
+        ``price_observations`` and ``labor_rates``.  Include those references
+        so the workbook detail view remains truthful after a schema upgrade.
+        """
+
+        if entity_type == "product":
+            refs = conn.execute(
+                """
+                SELECT source_file_id, source_sheet_id, source_row_id, relation_type
+                FROM catalog_source_links
+                WHERE entity_type='product' AND product_id=? AND source_file_id=?
+                ORDER BY id
+                """,
+                (entity_id, source_file_id),
+            ).fetchall()
+            refs = [
+                *refs,
+                *conn.execute(
+                    """
+                    SELECT source_file_id, source_sheet_id, source_row_id,
+                           'price' AS relation_type
+                    FROM product_prices
+                    WHERE product_id=? AND source_file_id=?
+                    ORDER BY id
+                    """,
+                    (entity_id, source_file_id),
+                ).fetchall(),
+                *conn.execute(
+                    """
+                    SELECT source_file_id, source_sheet_id, source_row_id,
+                           'observation' AS relation_type
+                    FROM price_observations
+                    WHERE product_id=? AND source_file_id=?
+                    ORDER BY id
+                    """,
+                    (entity_id, source_file_id),
+                ).fetchall(),
+            ]
+        else:
+            refs = conn.execute(
+                """
+                SELECT source_file_id, source_sheet_id, source_row_id, relation_type
+                FROM catalog_source_links
+                WHERE entity_type='labor' AND labor_item_id=? AND source_file_id=?
+                ORDER BY id
+                """,
+                (entity_id, source_file_id),
+            ).fetchall()
+            refs = [
+                *refs,
+                *conn.execute(
+                    """
+                    SELECT source_file_id, source_sheet_id, source_row_id,
+                           'labor_rate' AS relation_type
+                    FROM labor_rates
+                    WHERE labor_item_id=? AND source_file_id=?
+                    ORDER BY id
+                    """,
+                    (entity_id, source_file_id),
+                ).fetchall(),
+            ]
+
+        result: list[dict[str, Any]] = []
+        seen: set[tuple[Any, ...]] = set()
+        for ref in refs:
+            pointer = _source_ref_payload(
+                conn,
+                int(ref["source_file_id"]),
+                sheet_id=ref["source_sheet_id"],
+                row_id=ref["source_row_id"],
+            )
+            pointer["relation_type"] = ref["relation_type"]
+            key = (
+                pointer.get("file_id"),
+                pointer.get("sheet_id"),
+                pointer.get("row_id"),
+                pointer.get("relation_type"),
+            )
+            if key in seen:
+                continue
+            seen.add(key)
+            result.append(pointer)
+        return result
+
+    def _product_payload(row: Any) -> dict[str, Any]:
+        item = dict(row)
+        item["technical_attributes"] = _decode_json_field(
+            item.pop("technical_attributes_json", "{}"), {}
+        )
+        item["aliases"] = _decode_json_field(item.pop("aliases_json", "[]"), [])
+        item["provenance"] = _entity_provenance("product", int(item["id"]))
+        return item
+
+    products = [
+        _product_payload(row)
+        for row in conn.execute(
+            f"SELECT * FROM products WHERE id IN ({','.join('?' for _ in product_ids)}) ORDER BY normalized_name",
+            tuple(product_ids),
+        ).fetchall()
+    ] if product_ids else []
+
+    def _labor_payload(row: Any) -> dict[str, Any]:
+        item = dict(row)
+        item["technical_attributes"] = _decode_json_field(
+            item.pop("technical_attributes_json", "{}"), {}
+        )
+        item["provenance"] = _entity_provenance("labor", int(item["id"]))
+        return item
+
+    labor = [
+        _labor_payload(row)
+        for row in conn.execute(
+            f"SELECT * FROM labor_items WHERE id IN ({','.join('?' for _ in labor_ids)}) ORDER BY normalized_name",
+            tuple(labor_ids),
+        ).fetchall()
+    ] if labor_ids else []
+
+    price_rows = conn.execute(
+        """
+        SELECT pp.*, p.normalized_name, p.product_code, p.category,
+               sf.filename AS source_filename, ss.sheet_name,
+               sr.row_no
+        FROM product_prices pp
+        JOIN products p ON p.id=pp.product_id
+        LEFT JOIN source_files sf ON sf.id=pp.source_file_id
+        LEFT JOIN source_sheets ss ON ss.id=pp.source_sheet_id
+        LEFT JOIN source_rows sr ON sr.id=pp.source_row_id
+        WHERE pp.source_file_id=?
+        ORDER BY COALESCE(pp.effective_date, pp.created_at) DESC, pp.id DESC
+        LIMIT ?
+        """,
+        (source_file_id, limit),
+    ).fetchall()
+    prices = []
+    for row in price_rows:
+        item = dict(row)
+        item["calc"] = _decode_json_field(item.pop("calc_json", "{}"), {})
+        item["provenance"] = _source_ref_payload(
+            conn, source_file_id, sheet_id=item.get("source_sheet_id"), row_id=item.get("source_row_id")
+        )
+        prices.append(item)
+
+    observation_rows = conn.execute(
+        """
+        SELECT po.*, p.normalized_name, p.product_code, p.category,
+               sf.filename AS source_filename, ss.sheet_name, sr.row_no
+        FROM price_observations po
+        JOIN products p ON p.id=po.product_id
+        LEFT JOIN source_files sf ON sf.id=po.source_file_id
+        LEFT JOIN source_sheets ss ON ss.id=po.source_sheet_id
+        LEFT JOIN source_rows sr ON sr.id=po.source_row_id
+        WHERE po.source_file_id=?
+        ORDER BY COALESCE(po.effective_date, po.created_at) DESC, po.id DESC
+        LIMIT ?
+        """,
+        (source_file_id, limit),
+    ).fetchall()
+    observations = []
+    for row in observation_rows:
+        item = dict(row)
+        item["context"] = _decode_json_field(item.pop("context_json", "{}"), {})
+        item["calc"] = _decode_json_field(item.pop("calc_json", "{}"), {})
+        item["provenance"] = _source_ref_payload(
+            conn, source_file_id, sheet_id=item.get("source_sheet_id"), row_id=item.get("source_row_id")
+        )
+        observations.append(item)
+
+    rate_rows = conn.execute(
+        """
+        SELECT lr.*, li.normalized_name, li.code, li.category,
+               sf.filename AS source_filename, ss.sheet_name, sr.row_no
+        FROM labor_rates lr
+        JOIN labor_items li ON li.id=lr.labor_item_id
+        LEFT JOIN source_files sf ON sf.id=lr.source_file_id
+        LEFT JOIN source_sheets ss ON ss.id=lr.source_sheet_id
+        LEFT JOIN source_rows sr ON sr.id=lr.source_row_id
+        WHERE lr.source_file_id=?
+        ORDER BY COALESCE(lr.effective_date, lr.created_at) DESC, lr.id DESC
+        LIMIT ?
+        """,
+        (source_file_id, limit),
+    ).fetchall()
+    rates = []
+    for row in rate_rows:
+        item = dict(row)
+        item["policy"] = _decode_json_field(item.pop("policy_json", "{}"), {})
+        item["provenance"] = _source_ref_payload(
+            conn, source_file_id, sheet_id=item.get("source_sheet_id"), row_id=item.get("source_row_id")
+        )
+        rates.append(item)
+
+    boq_rows = conn.execute(
+        """
+        SELECT bi.*, p.normalized_name AS matched_product_name,
+               li.normalized_name AS matched_labor_name
+        FROM boq_items bi
+        LEFT JOIN products p ON p.id=bi.matched_product_id
+        LEFT JOIN labor_items li ON li.id=bi.matched_labor_item_id
+        WHERE bi.source_file_id=?
+        ORDER BY bi.id LIMIT ?
+        """,
+        (source_file_id, limit),
+    ).fetchall()
+    boq = []
+    for row in boq_rows:
+        item = dict(row)
+        item["raw_cells"] = _decode_json_field(item.pop("raw_cells_json", "{}"), {})
+        item["material_source"] = _decode_json_field(
+            item.pop("material_source_json", "{}"), {}
+        )
+        item["labor_source"] = _decode_json_field(item.pop("labor_source_json", "{}"), {})
+        item["alternatives"] = _decode_json_field(item.pop("alternatives_json", "[]"), [])
+        boq.append(item)
+
+    counts = {
+        "sheets": len(sheet_rows),
+        "rows": int(
+            conn.execute(
+                """
+                SELECT COUNT(*) FROM source_rows sr
+                JOIN source_sheets ss ON ss.id=sr.source_sheet_id
+                WHERE ss.source_file_id=?
+                """,
+                (source_file_id,),
+            ).fetchone()[0]
+        ),
+        "data_rows": int(
+            conn.execute(
+                """
+                SELECT COUNT(*) FROM source_rows sr
+                JOIN source_sheets ss ON ss.id=sr.source_sheet_id
+                WHERE ss.source_file_id=? AND sr.row_kind='data'
+                """,
+                (source_file_id,),
+            ).fetchone()[0]
+        ),
+        "products": len(product_ids),
+        "prices": int(
+            conn.execute(
+                "SELECT COUNT(*) FROM product_prices WHERE source_file_id=?",
+                (source_file_id,),
+            ).fetchone()[0]
+        ),
+        "price_observations": int(
+            conn.execute(
+                "SELECT COUNT(*) FROM price_observations WHERE source_file_id=?",
+                (source_file_id,),
+            ).fetchone()[0]
+        ),
+        "labor": len(labor_ids),
+        "labor_rates": int(
+            conn.execute(
+                "SELECT COUNT(*) FROM labor_rates WHERE source_file_id=?",
+                (source_file_id,),
+            ).fetchone()[0]
+        ),
+        "boq": int(
+            conn.execute(
+                "SELECT COUNT(*) FROM boq_items WHERE source_file_id=?",
+                (source_file_id,),
+            ).fetchone()[0]
+        ),
+        "projects": int(
+            conn.execute(
+                "SELECT COUNT(*) FROM projects WHERE source_file_id=?",
+                (source_file_id,),
+            ).fetchone()[0]
+        ),
+        "catalog_links": int(
+            conn.execute(
+                "SELECT COUNT(*) FROM catalog_source_links WHERE source_file_id=?",
+                (source_file_id,),
+            ).fetchone()[0]
+        ),
+    }
+    # Preserve ordering while avoiding duplicate warning strings from sheet
+    # and row metadata.
+    result["warnings"] = list(dict.fromkeys(str(w) for w in warnings if str(w).strip()))
+    result["summary"] = counts
+    result["products"] = products[:limit]
+    result["prices"] = prices
+    result["price_observations"] = observations
+    result["labor"] = labor[:limit]
+    result["labor_rates"] = rates
+    result["boq"] = boq
+    result["provenance"] = {
+        "source_file_id": source_file_id,
+        "derived_counts": counts,
+        "retained_on_archive": True,
+    }
+    result["referenced_count"] = int(
+        sum(
+            counts.get(key, 0)
+            for key in (
+                "projects",
+                "prices",
+                "price_observations",
+                "labor_rates",
+                "boq",
+                "catalog_links",
+            )
+        )
+    )
+    result["processing"] = {
+        "status": result.get("processing_status") or "PENDING",
+        "warnings": len(result["warnings"]),
+    }
     return result
 
 

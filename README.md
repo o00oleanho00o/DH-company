@@ -72,6 +72,16 @@ hợp model yêu cầu xem lại.
    ghi nguồn, yêu cầu báo giá NCC hoặc bỏ qua. Correction được lưu.
 5. **Xuất Excel:** `.xlsx` có dữ liệu báo giá và sheet `AI Audit`.
 
+### Kiểm soát vòng đời dữ liệu
+
+Mỗi workbook có trạng thái `ACTIVE`, `ARCHIVED` hoặc `SUPERSEDED`. Khi bảng
+giá lỗi thời, hãy archive hoặc nạp lại để tạo phiên bản mới; không xóa cứng
+nguồn đã được dùng trong báo giá. Các bảng `price_observations` và
+`catalog_source_links` giữ liên kết tới workbook/sheet/dòng để có thể truy
+ngược và giải thích giá đã áp dụng. Record vật tư/nhân công trong **Danh mục &
+giá** mặc định chỉ hiển thị trạng thái `ACTIVE`; dùng `status=all` để kiểm tra
+những record đã archive.
+
 Các API chính:
 
 - `GET /api/health`
@@ -79,7 +89,16 @@ Các API chính:
 - `POST /api/import`
 - `POST /api/seed`
 - `GET /api/sources`
+- `GET /api/sources/{id}` (chi tiết sheet, mapping, raw rows, catalog, giá, BOQ và provenance)
+- `POST /api/sources/{id}/archive`
+- `POST /api/sources/{id}/restore`
+- `DELETE /api/sources/{id}` (nguồn đã tham chiếu sẽ trả `409`, không phá lịch sử)
+- `POST /api/sources/{id}/reprocess` (tạo version mới, giữ version cũ ở `SUPERSEDED`)
 - `GET /api/catalog/stats`
+- `GET /api/catalog/items?kind=product|labor&category=...&source_id=...&status=...&q=...`
+- `GET /api/catalog/products/{id}`
+- `GET /api/catalog/labor/{id}`
+- `POST/DELETE /api/catalog/items/{kind}/{id}` (archive/restore/xóa an toàn)
 - `POST /api/quotations`
 - `POST /api/quotations/{id}/run`
 - `GET /api/quotations/{id}/review`

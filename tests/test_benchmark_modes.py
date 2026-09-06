@@ -4,15 +4,18 @@ import json
 
 import pytest
 
+from app import db
 from benchmarks.modes import (
     CURRENT_REPRICING,
     HISTORICAL_REPRODUCTION,
+    _db_source_observations,
     classify_price_error,
     compare_mode_metrics,
     eligible_observations,
     evaluate_temporal_modes,
     infer_benchmark_date,
     make_mode_spec,
+    select_mode_observation,
     temporal_observation_status,
 )
 
@@ -233,3 +236,174 @@ def test_compare_mode_metrics_reports_current_minus_historical() -> None:
     assert comparison["material"]["coverage_delta"] == pytest.approx(0.5)
     assert comparison["labor"]["relative_error_delta"] == pytest.approx(-0.2)
     assert comparison["temporal"]["historical_future_excluded"] == 4
+
+
+def test_db_source_observations_prefers_active_ex_vat_observations(isolated_db) -> None:
+    """DB-backed temporal reports must follow the immutable material history."""
+
+    with db.db_session() as conn:
+        source_current = conn.execute(
+            """
+            INSERT INTO source_files(
+                filename, storage_key, sha256, content_sha256, extension,
+                size_bytes, detected_type, processing_status, lifecycle_status,
+                uploaded_at
+            ) VALUES ('current.xlsx', 'unused', 'current', 'current', '.xlsx',
+                      1, 'SUPPLIER_PRICE', 'COMPLETED', 'ACTIVE', datetime('now'))
+            """
+        ).lastrowid
+        source_old = conn.execute(
+            """
+            INSERT INTO source_files(
+                filename, storage_key, sha256, content_sha256, extension,
+                size_bytes, detected_type, processing_status, lifecycle_status,
+                uploaded_at
+            ) VALUES ('old.xlsx', 'unused', 'old', 'old', '.xlsx',
+                      1, 'SUPPLIER_PRICE', 'COMPLETED', 'ACTIVE', datetime('now'))
+            """
+        ).lastrowid
+        source_archived = conn.execute(
+            """
+            INSERT INTO source_files(
+                filename, storage_key, sha256, content_sha256, extension,
+                size_bytes, detected_type, processing_status, lifecycle_status,
+                uploaded_at
+            ) VALUES ('archived.xlsx', 'unused', 'archived', 'archived', '.xlsx',
+                      1, 'SUPPLIER_PRICE', 'COMPLETED', 'ARCHIVED', datetime('now'))
+            """
+        ).lastrowid
+        product_id = int(
+            conn.execute(
+                """
+                INSERT INTO products(
+                    canonical_key, normalized_name, category, unit,
+                    technical_attributes_json, aliases_json, created_at
+                ) VALUES ('db-observation-product', 'Cable DB observation',
+                          'cable', 'm', '{}', '[]', datetime('now'))
+                """
+            ).lastrowid
+        )
+        # Legacy row is retained but must not shadow the newer immutable source.
+        conn.execute(
+            """
+            INSERT INTO product_prices(
+                product_id, source_file_id, supplier, net_price, tax_mode,
+                effective_date, created_at
+            ) VALUES (?, ?, 'Historical quotation', 100, 'ex_vat',
+                      '2025-01-01', datetime('now'))
+            """,
+            (product_id, source_old),
+        )
+        conn.execute(
+            """
+            INSERT INTO price_observations(
+                product_id, source_file_id, supplier, observation_type,
+                net_price, tax_mode, price_basis, effective_date, created_at
+            ) VALUES (?, ?, 'Current supplier', 'supplier_list', 200,
+                      'ex_vat', 'net', '2026-01-01', datetime('now'))
+            """,
+            (product_id, source_current),
+        )
+        conn.execute(
+            """
+            INSERT INTO price_observations(
+                product_id, source_file_id, supplier, observation_type,
+                net_price, tax_mode, price_basis, effective_date, created_at
+            ) VALUES (?, ?, 'Archived supplier', 'supplier_list', 999,
+                      'ex_vat', 'net', '2026-02-01', datetime('now'))
+            """,
+            (product_id, source_archived),
+        )
+        observations = _db_source_observations(
+            conn, [{"matched_product_id": product_id}]
+        )
+
+    selected = observations[("material", product_id)]
+    assert [row["net_price"] for row in selected] == [200]
+    assert selected[0]["observation_type"] == "supplier_list"
+
+
+def test_mode_selector_prefers_explicit_tier_and_normalizes_tax_basis() -> None:
+    observations = [
+        {
+            "id": 1,
+            "net_price": 100,
+            "observation_type": "supplier_list",
+            "tax_mode": "EX VAT",
+            "price_basis": "NET PRICE",
+            "effective_date": "2026-01-01",
+            "context_json": json.dumps({"selected": True}),
+        },
+        {
+            "id": 2,
+            "net_price": 70,
+            "observation_type": "supplier_discounted",
+            "tax_mode": "ex_vat",
+            "price_basis": "net",
+            "effective_date": "2026-01-01",
+            "context_json": json.dumps({"selected": False}),
+        },
+        {
+            "id": 3,
+            "net_price": 108,
+            "observation_type": "supplier_list",
+            "tax_mode": "INC-VAT",
+            "price_basis": "gross",
+            "effective_date": "2026-01-01",
+            "context_json": json.dumps({"selected": False}),
+        },
+    ]
+    value, selected = select_mode_observation(observations, side="material")
+    assert value == 100
+    assert selected is not None
+    assert selected["id"] == 1
+
+
+def test_db_legacy_price_fallback_prefers_ex_vat_rows(isolated_db) -> None:
+    with db.db_session() as conn:
+        source_id = conn.execute(
+            """
+            INSERT INTO source_files(
+                filename, storage_key, sha256, content_sha256, extension,
+                size_bytes, detected_type, processing_status, lifecycle_status,
+                uploaded_at
+            ) VALUES ('legacy-prices.xlsx', 'unused', 'legacy-prices',
+                      'legacy-prices', '.xlsx', 1, 'SUPPLIER_PRICE',
+                      'COMPLETED', 'ACTIVE', datetime('now'))
+            """
+        ).lastrowid
+        product_id = int(
+            conn.execute(
+                """
+                INSERT INTO products(
+                    canonical_key, normalized_name, category, unit,
+                    technical_attributes_json, aliases_json, created_at
+                ) VALUES ('legacy-price-product', 'Legacy price product',
+                          'cable', 'm', '{}', '[]', datetime('now'))
+                """
+            ).lastrowid
+        )
+        conn.execute(
+            """
+            INSERT INTO product_prices(
+                product_id, source_file_id, supplier, net_price, tax_mode,
+                effective_date, created_at
+            ) VALUES (?, ?, 'Supplier', 100, 'EX VAT', '2026-01-01', datetime('now'))
+            """,
+            (product_id, source_id),
+        )
+        conn.execute(
+            """
+            INSERT INTO product_prices(
+                product_id, source_file_id, supplier, net_price, tax_mode,
+                effective_date, created_at
+            ) VALUES (?, ?, 'Supplier', 108, 'INC-VAT', '2026-01-01', datetime('now'))
+            """,
+            (product_id, source_id),
+        )
+        rows = _db_source_observations(
+            conn, [{"matched_product_id": product_id}]
+        )
+
+    selected = rows[("material", product_id)]
+    assert [item["net_price"] for item in selected] == [100]

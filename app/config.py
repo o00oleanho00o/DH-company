@@ -48,6 +48,7 @@ def _load_loose_env() -> None:
                 "LLM_MAX_PROMPT_CHARS",
                 "LLM_MAX_TOKENS",
                 "LLM_RERANK_MARGIN",
+                "PRICE_DRIFT_WARNING_THRESHOLD",
                 "DATABASE_URL",
                 "APP_HOST",
                 "APP_PORT",
@@ -99,6 +100,13 @@ class Settings:
     llm_max_prompt_chars: int = _env_int("LLM_MAX_PROMPT_CHARS", 12000, minimum=1000)
     llm_max_tokens: int = _env_int("LLM_MAX_TOKENS", 800, minimum=0)
     llm_rerank_margin: float = _env_float("LLM_RERANK_MARGIN", 0.045, minimum=0.0)
+    # A current supplier price that differs materially from an exact historical
+    # observation remains usable for review, but must not be silently treated
+    # as equivalent. The threshold is configurable because each business may
+    # have a different tolerance for negotiated/project-price drift.
+    price_drift_warning_threshold: float = _env_float(
+        "PRICE_DRIFT_WARNING_THRESHOLD", 0.25, minimum=0.0
+    )
 
 
 settings = Settings()
