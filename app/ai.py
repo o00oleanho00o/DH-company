@@ -93,7 +93,8 @@ class ClassificationResult:
 @dataclass
 class ColumnMappingResult:
     """Validated column-index mapping for header fields the deterministic
-    ``HEADER_SYNONYMS`` matcher in :mod:`app.excel` could not find.
+    header-synonym matcher in :mod:`app.excel` (DB-backed; see its
+    ``header_synonyms`` table) could not find.
 
     ``mapping`` only ever contains fields the caller listed as missing, each
     pointing at a column index that actually exists in the supplied header
@@ -853,8 +854,8 @@ class AIProvider:
         that actually exists in ``header_cells`` — the model can never invent
         a field outside that allow-list or a column outside the sheet's real
         width, and it never sees or returns a data value or price. Called
-        only when :mod:`app.excel`'s deterministic ``HEADER_SYNONYMS`` pass
-        left required fields unmapped for a sheet that clearly has data.
+        only when :mod:`app.excel`'s deterministic header-synonym pass left
+        required fields unmapped for a sheet that clearly has data.
         """
 
         if not self.configured:
@@ -1090,10 +1091,10 @@ async def safe_map_columns(
 ) -> ColumnMappingResult:
     """Best-effort column mapping with a safe empty-mapping fallback.
 
-    Meant to run only after :mod:`app.excel`'s deterministic
-    ``HEADER_SYNONYMS`` pass already ran and still left required fields
-    unmapped for a sheet that clearly has data — the caller decides that, not
-    this function. An empty ``mapping`` here always means "keep the
+    Meant to run only after :mod:`app.excel`'s deterministic header-synonym
+    pass already ran and still left required fields unmapped for a sheet
+    that clearly has data — the caller decides that, not this function. An
+    empty ``mapping`` here always means "keep the
     deterministic result as-is"; it never raises and never blocks ingestion.
     """
 

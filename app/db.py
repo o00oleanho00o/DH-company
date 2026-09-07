@@ -288,14 +288,20 @@ CREATE TABLE IF NOT EXISTS audit_events (
     created_at TEXT NOT NULL
 );
 
--- Header text an AI column-mapping call (app.ai.safe_map_columns) confirmed
--- for a given sheet type, so app.excel's deterministic HEADER_SYNONYMS
--- matching recognizes the same header instantly next time with no AI call.
-CREATE TABLE IF NOT EXISTS learned_header_synonyms (
+-- Excel header vocabulary for app.excel's column matching. sheet_type=''
+-- means the row applies to every sheet type (the original global
+-- HEADER_SYNONYMS behavior); a specific sheet_type is an AI-confirmed
+-- mapping scoped to that type only. source='seed' rows are inserted once,
+-- on first use, from app.excel's built-in defaults; source='ai' rows come
+-- from app.ai.safe_map_columns confirming a header the seed list missed.
+-- This table is the live matching source — app.excel no longer hardcodes
+-- header vocabulary itself.
+CREATE TABLE IF NOT EXISTS header_synonyms (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sheet_type TEXT NOT NULL,
+    sheet_type TEXT NOT NULL DEFAULT '',
     field TEXT NOT NULL,
     header_text TEXT NOT NULL,
+    source TEXT NOT NULL DEFAULT 'seed',
     hit_count INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL,
     last_used_at TEXT NOT NULL,

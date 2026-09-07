@@ -19,42 +19,6 @@ from .price_policy import (
 _BOQ_SHEET_TYPES = {"HISTORICAL_BOQ", "BOQ", "PANEL_BOM"}
 
 
-def _load_learned_header_synonyms() -> dict[str, dict[str, tuple[str, ...]]]:
-    """Header text an earlier AI column-mapping call confirmed, by sheet type.
-
-    Feeds :func:`app.excel.parse_workbook`'s ``learned_synonyms`` so a header
-    seen once is recognized deterministically next time — no AI call.
-    """
-
-    with db_session() as conn:
-        rows = conn.execute(
-            "SELECT sheet_type, field, header_text FROM learned_header_synonyms"
-        ).fetchall()
-    grouped: dict[str, dict[str, list[str]]] = {}
-    for row in rows:
-        by_field = grouped.setdefault(row["sheet_type"], {})
-        by_field.setdefault(row["field"], []).append(row["header_text"])
-    return {
-        sheet_type: {field: tuple(values) for field, values in by_field.items()}
-        for sheet_type, by_field in grouped.items()
-    }
-
-
-def _record_learned_header_synonyms(conn: Any, learned: list[tuple[str, str, str]]) -> None:
-    now = utc_now()
-    for sheet_type, field, header_text in learned:
-        conn.execute(
-            """
-            INSERT INTO learned_header_synonyms
-                (sheet_type, field, header_text, hit_count, created_at, last_used_at)
-            VALUES (?, ?, ?, 1, ?, ?)
-            ON CONFLICT(sheet_type, field, header_text)
-            DO UPDATE SET hit_count = hit_count + 1, last_used_at = excluded.last_used_at
-            """,
-            (sheet_type, field, header_text, now, now),
-        )
-
-
 def _classify_boq_row(
     row: dict[str, Any],
     sheet_type: str,
@@ -365,15 +329,7 @@ def ingest_workbook(
 
     ensure_directories()
     display_filename = Path(source_filename).name if source_filename else path.name
-    learned_synonyms = _load_learned_header_synonyms()
-    newly_learned: list[tuple[str, str, str]] = []
-    parsed = parse_workbook(
-        path,
-        learned_synonyms=learned_synonyms,
-        on_ai_column_mapped=lambda sheet_type, field, header_text: newly_learned.append(
-            (sheet_type, field, header_text)
-        ),
-    )
+    parsed = parse_workbook(path)
     manual_pricing_rules = load_manual_pricing_rules()
     supplier_hint = next(
         (
@@ -387,8 +343,6 @@ def ingest_workbook(
         None,
     )
     with db_session() as conn:
-        if newly_learned:
-            _record_learned_header_synonyms(conn, newly_learned)
         existing = _source_file_record(conn, parsed["sha256"])
         if existing and not force and not allow_duplicate:
             stats = source_file_detail(conn, int(existing["id"]))

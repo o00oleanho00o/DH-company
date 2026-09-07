@@ -2,17 +2,20 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Iterable, Mapping
+from typing import Any, Iterable, Mapping
 
 from openpyxl import load_workbook
 import xlrd
 
 from .ai import ai_provider, safe_map_columns_sync
 from .normalize import normalize_text, normalize_unit, parse_number
+
+logger = logging.getLogger(__name__)
 
 
 PARSING_VERSION = "1.0"
@@ -44,7 +47,7 @@ class ParsedSheet:
     metadata: dict[str, Any] = field(default_factory=dict)
 
 
-HEADER_SYNONYMS: dict[str, tuple[str, ...]] = {
+_DEFAULT_HEADER_SYNONYMS: dict[str, tuple[str, ...]] = {
     "description": (
         "mo ta", "mô tả", "nội dung", "noi dung", "diễn giải", "dien giai",
         "hạng mục", "hang muc", "ten san pham", "tên sản phẩm",
@@ -198,7 +201,11 @@ def detect_sheet_type(snapshot: SheetSnapshot, workbook_type: str) -> str:
     return "OTHER"
 
 
-def find_header_row(snapshot: SheetSnapshot, sheet_type: str) -> int | None:
+def find_header_row(
+    snapshot: SheetSnapshot,
+    sheet_type: str,
+    synonyms_by_field: Mapping[str, tuple[str, ...]] = _DEFAULT_HEADER_SYNONYMS,
+) -> int | None:
     best_row: int | None = None
     best_score = 0
     scan = min(len(snapshot.rows), 60)
@@ -208,7 +215,7 @@ def find_header_row(snapshot: SheetSnapshot, sheet_type: str) -> int | None:
         if not text:
             continue
         score = 0
-        for synonyms in HEADER_SYNONYMS.values():
+        for synonyms in synonyms_by_field.values():
             if any(normalize_text(s) in text for s in synonyms):
                 score += 1
         # Strong signals for common sheet families.
@@ -250,7 +257,7 @@ def _combined_header_texts(snapshot: SheetSnapshot, header_row: int) -> list[str
 
 def _match_header_synonyms(
     combined: list[str],
-    extra_synonyms: Mapping[str, tuple[str, ...]] | None = None,
+    synonyms_by_field: Mapping[str, tuple[str, ...]] = _DEFAULT_HEADER_SYNONYMS,
 ) -> dict[str, int]:
     """Column index per canonical field, matched purely from header text.
 
@@ -260,17 +267,13 @@ def _match_header_synonyms(
     column-mapping fallback should even run (see
     :func:`_missing_required_fields`).
 
-    ``extra_synonyms`` layers in header text an AI call previously confirmed
-    for this workbook's sheet type (loaded by :mod:`app.ingest` from the
-    ``learned_header_synonyms`` table) on top of the static
-    ``HEADER_SYNONYMS`` — a header seen and confirmed once is recognized
-    instantly next time, with no AI call needed.
+    During a real import, :func:`parse_workbook` passes a ``synonyms_by_field``
+    built from the ``header_synonyms`` DB table (base + AI-learned rows for
+    this sheet type) rather than relying on this default — ``_DEFAULT_HEADER_SYNONYMS``
+    only remains as the one-time seed for that table and as a sane default
+    for standalone callers (tests, scripts) that never touch the database.
     """
 
-    synonyms_by_field: dict[str, tuple[str, ...]] = dict(HEADER_SYNONYMS)
-    if extra_synonyms:
-        for field, values in extra_synonyms.items():
-            synonyms_by_field[field] = synonyms_by_field.get(field, ()) + tuple(values)
     mapping: dict[str, int] = {}
     for field, synonyms in synonyms_by_field.items():
         best_col, best_score = None, 0
@@ -295,14 +298,14 @@ def map_columns(
     snapshot: SheetSnapshot,
     header_row: int | None,
     sheet_type: str,
-    extra_synonyms: Mapping[str, tuple[str, ...]] | None = None,
+    synonyms_by_field: Mapping[str, tuple[str, ...]] = _DEFAULT_HEADER_SYNONYMS,
 ) -> dict[str, int]:
     if header_row is None:
         return {}
     idx = header_row - 1
     width = min(snapshot.max_col, 80)
     combined = _combined_header_texts(snapshot, header_row)
-    mapping = _match_header_synonyms(combined, extra_synonyms)
+    mapping = _match_header_synonyms(combined, synonyms_by_field)
 
     # Context-specific fallbacks based on observed workbook families.
     if sheet_type == "SUPPLIER_PRICE":
@@ -336,7 +339,6 @@ def map_columns(
     elif sheet_type == "LABOR":
         mapping.setdefault("description", 1)
         mapping.setdefault("unit", 4)
-        # H is labor price in the DH master (G=material, H=labor).
         if "code" in mapping:
             code_text = combined[mapping["code"]]
             if (
@@ -345,7 +347,10 @@ def map_columns(
                 or ("model" in code_text and "ma" not in code_text)
             ):
                 mapping.pop("code", None)
-        mapping["labor_price"] = 7
+        # H is labor price in the DH master (G=material, H=labor); setdefault
+        # (not a blind overwrite) so a real synonym/AI-confirmed match is
+        # never clobbered by that positional assumption.
+        mapping.setdefault("labor_price", 7)
     return mapping
 
 
@@ -386,6 +391,111 @@ def _sheet_has_data_rows(snapshot: SheetSnapshot, header_row: int) -> bool:
         if any(value not in (None, "") for value in row):
             return True
     return False
+
+
+# ---------------------------------------------------------------------------
+# DB-backed header vocabulary.
+#
+# The ``header_synonyms`` table (see app.db.SCHEMA_SQL) is the live source of
+# truth for header matching, not ``_DEFAULT_HEADER_SYNONYMS`` above — that
+# dict only survives as the table's one-time seed, and as a plain default for
+# callers that use map_columns()/find_header_row() standalone without a
+# database (tests, ad-hoc scripts). A real import always calls
+# ``_load_header_synonyms()`` first and passes the DB-backed dict through
+# explicitly, so a header text an AI call confirms today is recognized
+# deterministically — no AI, no code change — the next time any workbook
+# shows the same text for that sheet type.
+# ---------------------------------------------------------------------------
+
+_GLOBAL_SHEET_SCOPE = ""  # sheet_type='' rows apply to every sheet type
+
+
+def _ensure_header_synonyms_seeded(conn: Any) -> None:
+    (count,) = conn.execute("SELECT COUNT(*) FROM header_synonyms").fetchone()
+    if count:
+        return
+    from .db import utc_now
+
+    now = utc_now()
+    for field, synonyms in _DEFAULT_HEADER_SYNONYMS.items():
+        for header_text in synonyms:
+            conn.execute(
+                "INSERT OR IGNORE INTO header_synonyms "
+                "(sheet_type, field, header_text, source, created_at, last_used_at) "
+                "VALUES (?, ?, ?, 'seed', ?, ?)",
+                (_GLOBAL_SHEET_SCOPE, field, normalize_text(header_text), now, now),
+            )
+
+
+def _load_header_synonyms() -> dict[str, dict[str, tuple[str, ...]]]:
+    """All ``header_synonyms`` rows, grouped by sheet_type (``''`` = global).
+
+    Self-seeds the table from ``_DEFAULT_HEADER_SYNONYMS`` on first use, so a
+    brand-new database recognizes exactly the same headers it always did.
+    Never raises: any database error falls back to the built-in defaults so a
+    workbook can still be parsed even if the DB is unreachable.
+    """
+
+    from .db import db_session
+
+    try:
+        with db_session() as conn:
+            _ensure_header_synonyms_seeded(conn)
+            rows = conn.execute(
+                "SELECT sheet_type, field, header_text FROM header_synonyms"
+            ).fetchall()
+    except Exception:
+        logger.warning("excel: could not load header_synonyms from DB; using built-in defaults")
+        return {_GLOBAL_SHEET_SCOPE: dict(_DEFAULT_HEADER_SYNONYMS)}
+    grouped: dict[str, dict[str, list[str]]] = {}
+    for row in rows:
+        by_field = grouped.setdefault(row["sheet_type"] or _GLOBAL_SHEET_SCOPE, {})
+        by_field.setdefault(row["field"], []).append(row["header_text"])
+    return {
+        sheet_type: {field: tuple(values) for field, values in by_field.items()}
+        for sheet_type, by_field in grouped.items()
+    }
+
+
+def _effective_synonyms(
+    sheet_type: str, by_sheet_type: Mapping[str, Mapping[str, tuple[str, ...]]]
+) -> dict[str, tuple[str, ...]]:
+    """Merge global (``''``) rows with this sheet type's own learned rows."""
+
+    merged: dict[str, tuple[str, ...]] = {}
+    for scope in (_GLOBAL_SHEET_SCOPE, sheet_type):
+        for field, values in (by_sheet_type.get(scope) or {}).items():
+            merged[field] = merged.get(field, ()) + tuple(values)
+    return merged
+
+
+def _record_header_synonym(sheet_type: str, field: str, header_text: str) -> None:
+    """Persist a header text an AI call just confirmed for ``sheet_type``.
+
+    Best-effort: a database error here must never fail the import itself —
+    the mapping AI just found is still applied to the sheet being parsed
+    right now regardless of whether this write succeeds.
+    """
+
+    from .db import db_session, utc_now
+
+    try:
+        with db_session() as conn:
+            now = utc_now()
+            conn.execute(
+                "INSERT INTO header_synonyms "
+                "(sheet_type, field, header_text, source, created_at, last_used_at) "
+                "VALUES (?, ?, ?, 'ai', ?, ?) "
+                "ON CONFLICT(sheet_type, field, header_text) "
+                "DO UPDATE SET hit_count = hit_count + 1, last_used_at = excluded.last_used_at",
+                (sheet_type, field, header_text, now, now),
+            )
+    except Exception:
+        logger.warning(
+            "excel: could not persist learned header synonym (sheet_type=%s, field=%s)",
+            sheet_type,
+            field,
+        )
 
 
 def _header_number(value: Any) -> float | None:
@@ -738,31 +848,21 @@ def extract_rows(
     return result
 
 
-def parse_workbook(
-    path: Path,
-    *,
-    learned_synonyms: Mapping[str, Mapping[str, tuple[str, ...]]] | None = None,
-    on_ai_column_mapped: Callable[[str, str, str], None] | None = None,
-) -> dict[str, Any]:
+def parse_workbook(path: Path) -> dict[str, Any]:
     """Parse a workbook into per-sheet header mapping + rows.
 
-    Pure and DB-free by default (identical to before these two keyword-only
-    parameters existed) — everything below is skipped unless a caller
-    explicitly supplies one:
-
-    * ``learned_synonyms``: ``{sheet_type: {field: (header_text, ...)}}``,
-      layered on top of the static ``HEADER_SYNONYMS`` before deciding
-      whether a sheet needs the AI fallback at all. :mod:`app.ingest` loads
-      this from the ``learned_header_synonyms`` table so a header text an
-      earlier AI call already confirmed is recognized instantly next time.
-    * ``on_ai_column_mapped(sheet_type, field, header_text)``: called once
-      per field the AI fallback actually resolved, so the caller can persist
-      it as a new learned synonym. This module never touches the database
-      itself — :mod:`app.ingest` owns that.
+    Header vocabulary is DB-backed (``header_synonyms`` table, self-seeded
+    from ``_DEFAULT_HEADER_SYNONYMS`` on first use) rather than a fixed list
+    in code: :func:`_load_header_synonyms` loads it once per workbook, and
+    any field the AI fallback resolves below is written back via
+    :func:`_record_header_synonym` so the next workbook — of any sheet type
+    that matches — recognizes the same header text deterministically, with
+    no further AI call.
     """
 
     snapshots = load_workbook_snapshots(path)
     workbook_type = detect_document_type(path.name, snapshots)
+    header_synonyms_by_type = _load_header_synonyms()
     parsed_sheets: list[ParsedSheet] = []
     total_data = 0
     warnings: list[str] = []
@@ -773,12 +873,12 @@ def parse_workbook(
         ai_provider.reset_budget()
     for snapshot in snapshots:
         sheet_type = detect_sheet_type(snapshot, workbook_type)
-        header_row = find_header_row(snapshot, sheet_type)
-        extra_synonyms = (learned_synonyms or {}).get(sheet_type)
-        mapping = map_columns(snapshot, header_row, sheet_type, extra_synonyms)
+        synonyms_by_field = _effective_synonyms(sheet_type, header_synonyms_by_type)
+        header_row = find_header_row(snapshot, sheet_type, synonyms_by_field)
+        mapping = map_columns(snapshot, header_row, sheet_type, synonyms_by_field)
         if header_row is not None and ai_provider.configured:
             combined = _combined_header_texts(snapshot, header_row)
-            synonym_mapping = _match_header_synonyms(combined, extra_synonyms)
+            synonym_mapping = _match_header_synonyms(combined, synonyms_by_field)
             missing_fields = _missing_required_fields(sheet_type, synonym_mapping)
             if missing_fields and _sheet_has_data_rows(snapshot, header_row):
                 ai_result = safe_map_columns_sync(
@@ -790,12 +890,13 @@ def parse_workbook(
                     # a field present only via a sheet-type positional guess
                     # (e.g. LABOR's unconditional labor_price=7) was never
                     # actually confirmed by header text, so AI may still
-                    # correct it. A real HEADER_SYNONYMS hit is never touched.
+                    # correct it. A real synonym hit (base or learned) is
+                    # never touched.
                     if field not in synonym_mapping:
                         mapping[field] = col
                         filled.append(field)
-                        if on_ai_column_mapped is not None and combined[col]:
-                            on_ai_column_mapped(sheet_type, field, combined[col])
+                        if combined[col]:
+                            _record_header_synonym(sheet_type, field, combined[col])
                 if filled:
                     warnings.append(f"{snapshot.name}:AI_COLUMN_MAPPING:{','.join(sorted(filled))}")
         metadata = detect_sheet_metadata(snapshot, header_row, sheet_type)
