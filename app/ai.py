@@ -90,6 +90,22 @@ class ClassificationResult:
     reason: str = ""
 
 
+@dataclass
+class ColumnMappingResult:
+    """Validated column-index mapping for header fields the deterministic
+    ``HEADER_SYNONYMS`` matcher in :mod:`app.excel` could not find.
+
+    ``mapping`` only ever contains fields the caller listed as missing, each
+    pointing at a column index that actually exists in the supplied header
+    row — never a fabricated column, and never a data value or price.
+    """
+
+    mapping: dict[str, int]
+    response: AIResponse | None = None
+    explanation: str = ""
+    reason: str = ""
+
+
 _SECRET_PATTERN = re.compile(
     r"(?i)(?:bearer\s+|api[_ -]?key\s*[=:]\s*)[A-Za-z0-9._~+/=-]{8,}|"
     r"\bsk-[A-Za-z0-9_-]{8,}"
@@ -824,6 +840,89 @@ class AIProvider:
             raise AIProtocolError("Classification returned no label")
         return result.label, result.response
 
+    async def map_columns_with_metadata(
+        self,
+        header_cells: Sequence[str],
+        *,
+        sheet_type: str,
+        missing_fields: Sequence[str],
+    ) -> ColumnMappingResult:
+        """Map still-unmapped header cells to canonical fields.
+
+        Only ``missing_fields`` may be assigned, and only to a column index
+        that actually exists in ``header_cells`` — the model can never invent
+        a field outside that allow-list or a column outside the sheet's real
+        width, and it never sees or returns a data value or price. Called
+        only when :mod:`app.excel`'s deterministic ``HEADER_SYNONYMS`` pass
+        left required fields unmapped for a sheet that clearly has data.
+        """
+
+        if not self.configured:
+            raise AIDisabledError("AI provider is disabled or incomplete")
+        allowed: list[str] = []
+        seen: set[str] = set()
+        for field in missing_fields:
+            value = _clip_text(field, 60)
+            if value and value not in seen:
+                allowed.append(value)
+                seen.add(value)
+        if not allowed:
+            raise ValueError("At least one missing field is required")
+        cells = [_clip_text(cell, 120) for cell in header_cells][:80]
+        result, response = await self.complete_json(
+            system=(
+                "You are a cautious Excel header classifier for Vietnamese "
+                "M&E (electrical/mechanical) workbooks. You are given the "
+                "header text of every column in one sheet. Map ONLY the "
+                "fields listed in allowed_fields to a 0-based index into "
+                "header_cells. Skip a field if no column plausibly matches "
+                "it — never guess. Never invent a column index outside "
+                "range(len(header_cells)). Never output a data value, "
+                "quantity, or price — only structural column-to-field "
+                "mapping metadata."
+            ),
+            prompt=json.dumps(
+                {
+                    "sheet_type": _clip_text(sheet_type, 40),
+                    "header_cells": cells,
+                    "allowed_fields": allowed,
+                },
+                ensure_ascii=False,
+                separators=(",", ":"),
+            ),
+            schema_hint={"column_mapping": {allowed[0]: 0}, "explanation": "string"},
+        )
+        raw_mapping = result.get("column_mapping")
+        if not isinstance(raw_mapping, Mapping):
+            raise AIProtocolError("column_mapping must be a JSON object")
+        validated: dict[str, int] = {}
+        for field, col in raw_mapping.items():
+            field_name = _clip_text(field, 60)
+            if field_name not in seen:
+                continue
+            try:
+                col_index = int(col)
+            except (TypeError, ValueError):
+                continue
+            if not (0 <= col_index < len(cells)):
+                continue
+            validated[field_name] = col_index
+        explanation = _clip_text(result.get("explanation"), 500)
+        response.explanation = explanation
+        response.metadata.update(
+            {
+                "sheet_type": sheet_type,
+                "missing_field_count": len(allowed),
+                "mapped_field_count": len(validated),
+            }
+        )
+        return ColumnMappingResult(
+            mapping=validated,
+            response=response,
+            explanation=explanation or "Đã ánh xạ cột dựa trên tiêu đề được cung cấp.",
+            reason="model_column_mapping",
+        )
+
 
 def _is_ambiguous(
     candidates: Sequence[Mapping[str, Any]] | Sequence[Any],
@@ -982,6 +1081,53 @@ async def safe_classify(
     return result
 
 
+async def safe_map_columns(
+    header_cells: Sequence[str],
+    *,
+    sheet_type: str,
+    missing_fields: Sequence[str],
+    provider: AIProvider | None = None,
+) -> ColumnMappingResult:
+    """Best-effort column mapping with a safe empty-mapping fallback.
+
+    Meant to run only after :mod:`app.excel`'s deterministic
+    ``HEADER_SYNONYMS`` pass already ran and still left required fields
+    unmapped for a sheet that clearly has data — the caller decides that, not
+    this function. An empty ``mapping`` here always means "keep the
+    deterministic result as-is"; it never raises and never blocks ingestion.
+    """
+
+    selected_provider = provider or ai_provider
+    if not missing_fields:
+        return ColumnMappingResult(
+            mapping={},
+            explanation="Không có field nào cần AI hỗ trợ.",
+            reason="no_missing_fields",
+        )
+    if not selected_provider.configured:
+        return ColumnMappingResult(
+            mapping={},
+            explanation="LLM đang tắt hoặc chưa cấu hình; giữ mapping deterministic.",
+            reason="disabled",
+        )
+    try:
+        return await selected_provider.map_columns_with_metadata(
+            header_cells, sheet_type=sheet_type, missing_fields=missing_fields
+        )
+    except AIBudgetExceeded:
+        return ColumnMappingResult(
+            mapping={},
+            explanation="Đã đạt giới hạn lượt gọi LLM; giữ mapping deterministic.",
+            reason="budget_exhausted",
+        )
+    except Exception as exc:
+        return ColumnMappingResult(
+            mapping={},
+            explanation="LLM column-mapping lỗi; giữ mapping deterministic.",
+            reason=f"provider_error:{type(exc).__name__}",
+        )
+
+
 def _run_coro_sync(coro: Any) -> Any:
     """Run an async helper from sync code, including a running-loop caller."""
 
@@ -1030,6 +1176,19 @@ def safe_classify_sync(
     return _run_coro_sync(safe_classify(text, labels, **kwargs))
 
 
+def safe_map_columns_sync(
+    header_cells: Sequence[str],
+    **kwargs: Any,
+) -> ColumnMappingResult:
+    """Synchronous wrapper for :func:`safe_map_columns`.
+
+    :mod:`app.excel` parses workbooks synchronously, so this is the entry
+    point it calls.
+    """
+
+    return _run_coro_sync(safe_map_columns(header_cells, **kwargs))
+
+
 # Singleton retained for the health endpoint and simple integrations. It does
 # not make a network request during import.
 ai_provider = AIProvider()
@@ -1039,3 +1198,5 @@ rerank_candidates = safe_rerank
 rerank_candidates_sync = safe_rerank_sync
 classify_text = safe_classify
 classify_text_sync = safe_classify_sync
+map_columns = safe_map_columns
+map_columns_sync = safe_map_columns_sync

@@ -6,11 +6,12 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable, Mapping
 
 from openpyxl import load_workbook
 import xlrd
 
+from .ai import ai_provider, safe_map_columns_sync
 from .normalize import normalize_text, normalize_unit, parse_number
 
 
@@ -225,12 +226,16 @@ def find_header_row(snapshot: SheetSnapshot, sheet_type: str) -> int | None:
     return best_row if best_score >= 2 else None
 
 
-def map_columns(snapshot: SheetSnapshot, header_row: int | None, sheet_type: str) -> dict[str, int]:
-    if header_row is None:
-        return {}
+def _combined_header_texts(snapshot: SheetSnapshot, header_row: int) -> list[str]:
+    """Normalized header text per column, merging up to 3 rows below it.
+
+    Merged cells often put semantics above the leaf header, so a column's
+    real label is frequently split across the header row and the one or two
+    rows beneath it. Shared by :func:`map_columns` and the optional AI
+    column-mapping fallback so both see identical column text.
+    """
+
     idx = header_row - 1
-    # Combine up to three header rows; merged cells often put semantics above
-    # the leaf header.
     combined: list[str] = []
     width = min(snapshot.max_col, 80)
     for col in range(width):
@@ -240,8 +245,34 @@ def map_columns(snapshot: SheetSnapshot, header_row: int | None, sheet_type: str
             if value not in (None, ""):
                 parts.append(str(value))
         combined.append(normalize_text(" ".join(parts)))
+    return combined
+
+
+def _match_header_synonyms(
+    combined: list[str],
+    extra_synonyms: Mapping[str, tuple[str, ...]] | None = None,
+) -> dict[str, int]:
+    """Column index per canonical field, matched purely from header text.
+
+    Deliberately excludes the sheet-type positional fallbacks applied later
+    in :func:`map_columns` — this is the honest signal of what the header
+    text actually recognized, used to decide whether the optional AI
+    column-mapping fallback should even run (see
+    :func:`_missing_required_fields`).
+
+    ``extra_synonyms`` layers in header text an AI call previously confirmed
+    for this workbook's sheet type (loaded by :mod:`app.ingest` from the
+    ``learned_header_synonyms`` table) on top of the static
+    ``HEADER_SYNONYMS`` — a header seen and confirmed once is recognized
+    instantly next time, with no AI call needed.
+    """
+
+    synonyms_by_field: dict[str, tuple[str, ...]] = dict(HEADER_SYNONYMS)
+    if extra_synonyms:
+        for field, values in extra_synonyms.items():
+            synonyms_by_field[field] = synonyms_by_field.get(field, ()) + tuple(values)
     mapping: dict[str, int] = {}
-    for field, synonyms in HEADER_SYNONYMS.items():
+    for field, synonyms in synonyms_by_field.items():
         best_col, best_score = None, 0
         for col, text in enumerate(combined):
             if not text:
@@ -257,6 +288,21 @@ def map_columns(snapshot: SheetSnapshot, header_row: int | None, sheet_type: str
                 best_col, best_score = col, score
         if best_col is not None:
             mapping[field] = best_col
+    return mapping
+
+
+def map_columns(
+    snapshot: SheetSnapshot,
+    header_row: int | None,
+    sheet_type: str,
+    extra_synonyms: Mapping[str, tuple[str, ...]] | None = None,
+) -> dict[str, int]:
+    if header_row is None:
+        return {}
+    idx = header_row - 1
+    width = min(snapshot.max_col, 80)
+    combined = _combined_header_texts(snapshot, header_row)
+    mapping = _match_header_synonyms(combined, extra_synonyms)
 
     # Context-specific fallbacks based on observed workbook families.
     if sheet_type == "SUPPLIER_PRICE":
@@ -301,6 +347,45 @@ def map_columns(snapshot: SheetSnapshot, header_row: int | None, sheet_type: str
                 mapping.pop("code", None)
         mapping["labor_price"] = 7
     return mapping
+
+
+# Fields a sheet type needs at least one real (synonym-matched) hit for, to
+# ever classify a row as "data" in ``classify_row``. Each inner tuple is an
+# OR-group: the group is satisfied if any one of its fields was matched.
+# Deliberately checked against ``_match_header_synonyms`` output, not the
+# final ``map_columns`` result — SUPPLIER_PRICE/LABOR/BOQ all carry hardcoded
+# positional fallbacks (e.g. ``mapping.setdefault("description", 0)``) that
+# would otherwise mask a genuine header-matching miss.
+_REQUIRED_FIELD_GROUPS: dict[str, tuple[tuple[str, ...], ...]] = {
+    "SUPPLIER_PRICE": (("description",), ("list_price",)),
+    "LABOR": (("description",), ("unit", "labor_price")),
+}
+_DEFAULT_REQUIRED_FIELD_GROUPS: tuple[tuple[str, ...], ...] = (
+    ("description",),
+    ("quantity", "material_price", "labor_price", "unit"),
+)
+
+
+def _missing_required_fields(sheet_type: str, synonym_mapping: dict[str, int]) -> list[str]:
+    groups = _REQUIRED_FIELD_GROUPS.get(sheet_type, _DEFAULT_REQUIRED_FIELD_GROUPS)
+    missing: list[str] = []
+    for group in groups:
+        if not any(field in synonym_mapping for field in group):
+            missing.extend(field for field in group if field not in missing)
+    return missing
+
+
+def _sheet_has_data_rows(snapshot: SheetSnapshot, header_row: int) -> bool:
+    """Whether any non-empty cell exists below the header row.
+
+    Guards the AI column-mapping fallback against genuinely empty sheets
+    (cover pages, section dividers) where there is nothing to map.
+    """
+
+    for row in snapshot.rows[header_row : header_row + 20]:
+        if any(value not in (None, "") for value in row):
+            return True
+    return False
 
 
 def _header_number(value: Any) -> float | None:
@@ -653,16 +738,66 @@ def extract_rows(
     return result
 
 
-def parse_workbook(path: Path) -> dict[str, Any]:
+def parse_workbook(
+    path: Path,
+    *,
+    learned_synonyms: Mapping[str, Mapping[str, tuple[str, ...]]] | None = None,
+    on_ai_column_mapped: Callable[[str, str, str], None] | None = None,
+) -> dict[str, Any]:
+    """Parse a workbook into per-sheet header mapping + rows.
+
+    Pure and DB-free by default (identical to before these two keyword-only
+    parameters existed) — everything below is skipped unless a caller
+    explicitly supplies one:
+
+    * ``learned_synonyms``: ``{sheet_type: {field: (header_text, ...)}}``,
+      layered on top of the static ``HEADER_SYNONYMS`` before deciding
+      whether a sheet needs the AI fallback at all. :mod:`app.ingest` loads
+      this from the ``learned_header_synonyms`` table so a header text an
+      earlier AI call already confirmed is recognized instantly next time.
+    * ``on_ai_column_mapped(sheet_type, field, header_text)``: called once
+      per field the AI fallback actually resolved, so the caller can persist
+      it as a new learned synonym. This module never touches the database
+      itself — :mod:`app.ingest` owns that.
+    """
+
     snapshots = load_workbook_snapshots(path)
     workbook_type = detect_document_type(path.name, snapshots)
     parsed_sheets: list[ParsedSheet] = []
     total_data = 0
     warnings: list[str] = []
+    # One fresh AI call budget per imported file, not per sheet — a workbook
+    # can hold dozens of sheets, and this keeps a single import's worst-case
+    # AI cost bounded by settings.llm_max_calls regardless of sheet count.
+    if ai_provider.configured:
+        ai_provider.reset_budget()
     for snapshot in snapshots:
         sheet_type = detect_sheet_type(snapshot, workbook_type)
         header_row = find_header_row(snapshot, sheet_type)
-        mapping = map_columns(snapshot, header_row, sheet_type)
+        extra_synonyms = (learned_synonyms or {}).get(sheet_type)
+        mapping = map_columns(snapshot, header_row, sheet_type, extra_synonyms)
+        if header_row is not None and ai_provider.configured:
+            combined = _combined_header_texts(snapshot, header_row)
+            synonym_mapping = _match_header_synonyms(combined, extra_synonyms)
+            missing_fields = _missing_required_fields(sheet_type, synonym_mapping)
+            if missing_fields and _sheet_has_data_rows(snapshot, header_row):
+                ai_result = safe_map_columns_sync(
+                    combined, sheet_type=sheet_type, missing_fields=missing_fields
+                )
+                filled = []
+                for field, col in ai_result.mapping.items():
+                    # Guard against synonym_mapping, not the final `mapping`:
+                    # a field present only via a sheet-type positional guess
+                    # (e.g. LABOR's unconditional labor_price=7) was never
+                    # actually confirmed by header text, so AI may still
+                    # correct it. A real HEADER_SYNONYMS hit is never touched.
+                    if field not in synonym_mapping:
+                        mapping[field] = col
+                        filled.append(field)
+                        if on_ai_column_mapped is not None and combined[col]:
+                            on_ai_column_mapped(sheet_type, field, combined[col])
+                if filled:
+                    warnings.append(f"{snapshot.name}:AI_COLUMN_MAPPING:{','.join(sorted(filled))}")
         metadata = detect_sheet_metadata(snapshot, header_row, sheet_type)
         rows = extract_rows(snapshot, sheet_type, header_row, mapping, metadata)
         total_data += sum(1 for row in rows if row["row_kind"] == "data")

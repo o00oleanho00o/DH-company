@@ -287,6 +287,20 @@ CREATE TABLE IF NOT EXISTS audit_events (
     payload_json TEXT NOT NULL DEFAULT '{}',
     created_at TEXT NOT NULL
 );
+
+-- Header text an AI column-mapping call (app.ai.safe_map_columns) confirmed
+-- for a given sheet type, so app.excel's deterministic HEADER_SYNONYMS
+-- matching recognizes the same header instantly next time with no AI call.
+CREATE TABLE IF NOT EXISTS learned_header_synonyms (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sheet_type TEXT NOT NULL,
+    field TEXT NOT NULL,
+    header_text TEXT NOT NULL,
+    hit_count INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL,
+    last_used_at TEXT NOT NULL,
+    UNIQUE(sheet_type, field, header_text)
+);
 """
 
 
