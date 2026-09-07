@@ -84,8 +84,9 @@ def _env_float(name: str, default: float, *, minimum: float = 0.0) -> float:
 @dataclass(frozen=True)
 class Settings:
     app_name: str = "DH M&E Pricing"
-    host: str = os.getenv("APP_HOST", "127.0.0.1")
-    port: int = int(os.getenv("APP_PORT", "8000") or 8000)
+    # Bind all interfaces by default so LAN clients and a Cloudflare Tunnel can reach the app.
+    host: str = os.getenv("APP_HOST", "0.0.0.0")
+    port: int = int(os.getenv("APP_PORT", "3000") or 3000)
     database_url: str = os.getenv("DATABASE_URL", f"sqlite:///{DB_PATH.as_posix()}")
     claude_base_url: str = os.getenv("CLAUDE_BASE_URL", "")
     claude_api_key: str = os.getenv("CLAUDE_API_KEY", "")
