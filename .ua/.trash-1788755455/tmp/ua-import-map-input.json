@@ -1,0 +1,330 @@
+{
+ "projectRoot": "E:/Desktop/DH-company",
+ "files": [
+  {
+   "path": ".env.example",
+   "language": "config",
+   "fileCategory": "config"
+  },
+  {
+   "path": ".ua/config.json",
+   "language": "json",
+   "fileCategory": "config"
+  },
+  {
+   "path": "AGENTS.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "ARCHITECTURE.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "CLAUDE.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "KNOWN_LIMITATIONS.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "PLAN.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "README.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "ROUND2-FINAL-REPORT.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "app/__init__.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/ai.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/cli.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/config.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/db.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/excel.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/export.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/ingest.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/labor_policy.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/main.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/normalize.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/price_policy.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/pricing.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/static/app.js",
+   "language": "javascript",
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/static/index.html",
+   "language": "html",
+   "fileCategory": "markup"
+  },
+  {
+   "path": "app/static/styles.css",
+   "language": "css",
+   "fileCategory": "markup"
+  },
+  {
+   "path": "benchmarks/__init__.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "benchmarks/holdout.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "benchmarks/modes.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "benchmarks/reports.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "benchmarks/round2_report.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "benchmarks/row_audit.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "deliverables/ARCH-DHBG1.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "deliverables/MODULEMAP-DHBG1.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "deliverables/SCOPE-DHBG1.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "deliverables/SPEC-DHBG1.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "deliverables/WBS-DHBG1.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "deliverables/adr/ADR-001-modular-monolith.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "deliverables/adr/ADR-002-sqlite-provenance.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "deliverables/adr/ADR-003-bounded-ai-rerank.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "deliverables/adr/ADR-004-formula-preserving-export.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "deliverables/adr/ADR-005-network-port-3000.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "docs/DATA-REQUIREMENTS-NEXT.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "docs/DECISIONS.md",
+   "language": "markdown",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "migrations/001_initial.sql",
+   "language": "sql",
+   "fileCategory": "data"
+  },
+  {
+   "path": "requirements.txt",
+   "language": "txt",
+   "fileCategory": "docs"
+  },
+  {
+   "path": "run.ps1",
+   "language": "powershell",
+   "fileCategory": "script"
+  },
+  {
+   "path": "tests/__init__.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/conftest.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_ai.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_benchmark.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_benchmark_modes.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_config.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_excel.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_export.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_labor_policy.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_normalize.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_price_policy.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_pricing.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_pricing_lifecycle_hardening.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_pricing_llm.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_reports.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_round2_report.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_row_audit.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_security.py",
+   "language": "python",
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_source_lifecycle_api.py",
+   "language": "python",
+   "fileCategory": "code"
+  }
+ ]
+}

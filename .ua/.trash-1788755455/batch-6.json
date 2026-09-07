@@ -1,0 +1,137 @@
+{
+  "nodes": [
+    {
+      "id": "config:.env.example",
+      "type": "config",
+      "name": ".env.example",
+      "filePath": ".env.example",
+      "summary": "Template biến môi trường (chỉ chứa giá trị placeholder) mô tả toàn bộ bề mặt cấu hình của ứng dụng: host/port server, DATABASE_URL, bật/tắt lớp LLM cùng các hạn mức timeout/retry/budget, đường dẫn manual pricing rules và ngưỡng cảnh báo price drift. Người dùng sao chép thành .env và không commit vào Git.",
+      "tags": ["configuration", "environment-template", "feature-flag", "llm-budget", "security"],
+      "complexity": "simple",
+      "languageNotes": "File khai báo 16 biến theo dạng KEY=VALUE; các khóa LLM_* đóng vai trò guardrail hạn mức cho provider AI tùy chọn."
+    },
+    {
+      "id": "document:AGENTS.md",
+      "type": "document",
+      "name": "AGENTS.md",
+      "filePath": "AGENTS.md",
+      "summary": "Tài liệu hướng dẫn dành cho AI coding agent, mô tả thứ tự đọc tài liệu bắt buộc, các lệnh runtime (cài requirements, init-db, chạy run.ps1, pytest), lệnh kiểm thử/biên dịch theo từng file và các quy ước bất biến của nghiệp vụ pricing (deterministic, provenance, phạm vi ghi cell khi export).",
+      "tags": ["documentation", "agent-instructions", "conventions", "runtime-commands", "workflow"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:ARCHITECTURE.md",
+      "type": "document",
+      "name": "ARCHITECTURE.md",
+      "filePath": "ARCHITECTURE.md",
+      "summary": "Ghi chú kiến trúc trình bày phạm vi hệ thống, sơ đồ runtime topology (browser đến FastAPI modular monolith đến SQLite), pipeline ingestion từ workbook snapshot tới normalization, cơ chế matching/pricing, data model có provenance, lớp AI provider và các điểm mở rộng độ tin cậy.",
+      "tags": ["documentation", "architecture", "data-flow", "overview", "extension-points"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:CLAUDE.md",
+      "type": "document",
+      "name": "CLAUDE.md",
+      "filePath": "CLAUDE.md",
+      "summary": "File entry point cực ngắn cho agent, chỉ trỏ sang AGENTS.md như tài liệu chỉ dẫn canonical của repository.",
+      "tags": ["documentation", "agent-instructions", "entry-point", "pointer"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:KNOWN_LIMITATIONS.md",
+      "type": "document",
+      "name": "KNOWN_LIMITATIONS.md",
+      "filePath": "KNOWN_LIMITATIONS.md",
+      "summary": "Liệt kê các giới hạn đã biết của bản MVP local: SQLite và pricing chạy đồng bộ in-process, cách xử lý workbook .xls/.xlsx, việc phụ thuộc cached value của công thức Excel, thiếu labor rate trong master, LLM chỉ là opt-in, và việc chưa có authentication/RBAC/PostgreSQL/job queue.",
+      "tags": ["documentation", "limitations", "production-readiness", "risk", "scope"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:PLAN.md",
+      "type": "document",
+      "name": "PLAN.md",
+      "filePath": "PLAN.md",
+      "summary": "Kế hoạch triển khai nêu mục tiêu sản phẩm, các quyết định công nghệ (Python/FastAPI, SQLite portable sang PostgreSQL, openpyxl/xlrd, AI provider tùy chọn), sáu delivery slice từ workbook inspector đến UI, kèm danh sách acceptance check nghiệm thu.",
+      "tags": ["documentation", "planning", "decisions", "roadmap", "acceptance-criteria"],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "README.md",
+      "summary": "Tài liệu tổng quan và hướng dẫn khởi động dự án bằng tiếng Việt: cài dependency, init-db, chạy server port 3000, truy cập qua LAN hoặc Cloudflare tunnel, cấu hình .env, năm bước luồng nghiệp vụ, ba pricing policy, danh sách API chính, cách chạy test, bản đồ tài liệu và cấu trúc code.",
+      "tags": ["documentation", "entry-point", "getting-started", "configuration", "overview"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:ROUND2-FINAL-REPORT.md",
+      "type": "document",
+      "name": "ROUND2-FINAL-REPORT.md",
+      "filePath": "ROUND2-FINAL-REPORT.md",
+      "summary": "Báo cáo kỹ thuật 19 mục cho vòng 2: tái lập baseline, root cause, danh sách bug và vấn đề thiết kế đã sửa, cách phân loại dòng BOQ, pricing policy, benchmark vật tư và nhân công trước/sau, coverage theo category, capture rate của engine, phân tích data gap, phát hiện về discount/VAT/net price, thí nghiệm LLM, trạng thái test và bước kỹ thuật đề xuất tiếp theo.",
+      "tags": ["documentation", "benchmark", "engineering-report", "pricing-policy", "data-gap"],
+      "complexity": "complex"
+    },
+    {
+      "id": "config:requirements.txt",
+      "type": "config",
+      "name": "requirements.txt",
+      "filePath": "requirements.txt",
+      "summary": "Manifest dependency Python của dự án: FastAPI và uvicorn[standard] cho web server, python-multipart cho upload file, openpyxl và xlrd để đọc workbook .xlsx/.xls, httpx cho AI provider client và pytest cho test suite.",
+      "tags": ["configuration", "dependencies", "python", "build-system", "manifest"],
+      "complexity": "simple",
+      "languageNotes": "xlrd bị pin cứng ở 2.0.1 vì đây là phiên bản chỉ còn hỗ trợ định dạng .xls legacy."
+    },
+    {
+      "id": "file:run.ps1",
+      "type": "file",
+      "name": "run.ps1",
+      "filePath": "run.ps1",
+      "summary": "Script PowerShell khởi động server phát triển: đặt ErrorActionPreference thành Stop, đọc PYTHON/APP_HOST/APP_PORT từ biến môi trường với mặc định python và 0.0.0.0:3000, rồi chạy uvicorn với target app.main:app ở chế độ reload.",
+      "tags": ["script", "entry-point", "launcher", "development", "powershell"],
+      "complexity": "simple",
+      "languageNotes": "Dùng cú pháp if/else trên biến môi trường của PowerShell để mô phỏng giá trị mặc định, và call operator & để gọi interpreter Python."
+    }
+  ],
+  "edges": [
+    {"source": "config:.env.example", "target": "file:app/config.py", "type": "configures", "direction": "forward", "weight": 0.6},
+    {"source": "config:.env.example", "target": "file:app/ai.py", "type": "configures", "direction": "forward", "weight": 0.6},
+    {"source": "config:.env.example", "target": "file:app/main.py", "type": "configures", "direction": "forward", "weight": 0.6},
+    {"source": "config:requirements.txt", "target": "file:app/main.py", "type": "configures", "direction": "forward", "weight": 0.6},
+    {"source": "file:run.ps1", "target": "file:app/main.py", "type": "deploys", "direction": "forward", "weight": 0.7},
+    {"source": "file:run.ps1", "target": "config:.env.example", "type": "depends_on", "direction": "forward", "weight": 0.6},
+    {"source": "document:README.md", "target": "file:app/main.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:README.md", "target": "file:app/cli.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:README.md", "target": "file:run.ps1", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:README.md", "target": "config:.env.example", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:README.md", "target": "config:requirements.txt", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:README.md", "target": "document:ARCHITECTURE.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:README.md", "target": "document:KNOWN_LIMITATIONS.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:ARCHITECTURE.md", "target": "file:app/main.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:ARCHITECTURE.md", "target": "file:app/ingest.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:ARCHITECTURE.md", "target": "file:app/normalize.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:ARCHITECTURE.md", "target": "file:app/pricing.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:ARCHITECTURE.md", "target": "file:app/export.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:ARCHITECTURE.md", "target": "file:app/db.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:ARCHITECTURE.md", "target": "file:app/ai.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:AGENTS.md", "target": "file:app/main.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:AGENTS.md", "target": "file:app/cli.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:AGENTS.md", "target": "file:run.ps1", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:AGENTS.md", "target": "config:requirements.txt", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:AGENTS.md", "target": "file:app/export.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:CLAUDE.md", "target": "document:AGENTS.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:PLAN.md", "target": "file:app/main.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:PLAN.md", "target": "file:app/db.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:PLAN.md", "target": "file:app/ingest.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:PLAN.md", "target": "file:app/export.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:KNOWN_LIMITATIONS.md", "target": "file:app/db.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:KNOWN_LIMITATIONS.md", "target": "file:app/excel.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:KNOWN_LIMITATIONS.md", "target": "file:app/ai.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:ROUND2-FINAL-REPORT.md", "target": "file:app/pricing.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:ROUND2-FINAL-REPORT.md", "target": "file:app/price_policy.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:ROUND2-FINAL-REPORT.md", "target": "file:app/labor_policy.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:ROUND2-FINAL-REPORT.md", "target": "file:app/ai.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:ROUND2-FINAL-REPORT.md", "target": "file:app/normalize.py", "type": "documents", "direction": "forward", "weight": 0.5}
+  ]
+}

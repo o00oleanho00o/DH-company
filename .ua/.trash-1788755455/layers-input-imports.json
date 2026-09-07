@@ -1,0 +1,667 @@
+[
+  {
+    "source": "file:benchmarks/holdout.py",
+    "target": "file:app/__init__.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:benchmarks/holdout.py",
+    "target": "file:app/config.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:benchmarks/holdout.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:benchmarks/holdout.py",
+    "target": "file:app/excel.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:benchmarks/holdout.py",
+    "target": "file:app/ingest.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:benchmarks/holdout.py",
+    "target": "file:app/normalize.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:benchmarks/holdout.py",
+    "target": "file:app/pricing.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:benchmarks/holdout.py",
+    "target": "file:benchmarks/modes.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:benchmarks/holdout.py",
+    "target": "file:benchmarks/reports.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:benchmarks/holdout.py",
+    "target": "file:benchmarks/row_audit.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:benchmarks/modes.py",
+    "target": "file:app/normalize.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:benchmarks/modes.py",
+    "target": "file:app/price_policy.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:benchmarks/reports.py",
+    "target": "file:app/normalize.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:benchmarks/row_audit.py",
+    "target": "file:app/normalize.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_benchmark.py",
+    "target": "file:benchmarks/holdout.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_benchmark_modes.py",
+    "target": "file:app/__init__.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_benchmark_modes.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_benchmark_modes.py",
+    "target": "file:benchmarks/modes.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_normalize.py",
+    "target": "file:app/normalize.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_reports.py",
+    "target": "file:app/__init__.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_reports.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_reports.py",
+    "target": "file:benchmarks/reports.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_round2_report.py",
+    "target": "file:benchmarks/holdout.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_round2_report.py",
+    "target": "file:benchmarks/round2_report.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_row_audit.py",
+    "target": "file:app/__init__.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_row_audit.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_row_audit.py",
+    "target": "file:app/pricing.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_row_audit.py",
+    "target": "file:benchmarks/row_audit.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/ai.py",
+    "target": "file:app/config.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/price_policy.py",
+    "target": "file:app/normalize.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/pricing.py",
+    "target": "file:app/ai.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/pricing.py",
+    "target": "file:app/config.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/pricing.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/pricing.py",
+    "target": "file:app/labor_policy.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/pricing.py",
+    "target": "file:app/normalize.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/pricing.py",
+    "target": "file:app/price_policy.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_ai.py",
+    "target": "file:app/ai.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_labor_policy.py",
+    "target": "file:app/__init__.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_labor_policy.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_labor_policy.py",
+    "target": "file:app/labor_policy.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_labor_policy.py",
+    "target": "file:app/pricing.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_pricing_lifecycle_hardening.py",
+    "target": "file:app/__init__.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_pricing_lifecycle_hardening.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_pricing_lifecycle_hardening.py",
+    "target": "file:app/price_policy.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_pricing_lifecycle_hardening.py",
+    "target": "file:app/pricing.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_pricing_llm.py",
+    "target": "file:app/__init__.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_pricing_llm.py",
+    "target": "file:app/ai.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_pricing_llm.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_pricing_llm.py",
+    "target": "file:app/pricing.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/cli.py",
+    "target": "file:app/config.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/cli.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/cli.py",
+    "target": "file:app/ingest.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/cli.py",
+    "target": "file:app/pricing.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/db.py",
+    "target": "file:app/config.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/export.py",
+    "target": "file:app/config.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/export.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/export.py",
+    "target": "file:app/pricing.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/ingest.py",
+    "target": "file:app/config.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/ingest.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/ingest.py",
+    "target": "file:app/excel.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/ingest.py",
+    "target": "file:app/normalize.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/ingest.py",
+    "target": "file:app/price_policy.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/main.py",
+    "target": "file:app/ai.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/main.py",
+    "target": "file:app/config.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/main.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/main.py",
+    "target": "file:app/excel.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/main.py",
+    "target": "file:app/export.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/main.py",
+    "target": "file:app/ingest.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/main.py",
+    "target": "file:app/normalize.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/main.py",
+    "target": "file:app/pricing.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_security.py",
+    "target": "file:app/main.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_source_lifecycle_api.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_source_lifecycle_api.py",
+    "target": "file:app/ingest.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_source_lifecycle_api.py",
+    "target": "file:app/main.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_source_lifecycle_api.py",
+    "target": "file:tests/conftest.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:app/excel.py",
+    "target": "file:app/normalize.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/conftest.py",
+    "target": "file:app/__init__.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/conftest.py",
+    "target": "file:app/config.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/conftest.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/conftest.py",
+    "target": "file:app/ingest.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_excel.py",
+    "target": "file:app/excel.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_excel.py",
+    "target": "file:tests/conftest.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_export.py",
+    "target": "file:app/__init__.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_export.py",
+    "target": "file:app/export.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_price_policy.py",
+    "target": "file:app/__init__.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_price_policy.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_price_policy.py",
+    "target": "file:app/excel.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_price_policy.py",
+    "target": "file:app/ingest.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_price_policy.py",
+    "target": "file:app/price_policy.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_price_policy.py",
+    "target": "file:tests/conftest.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_pricing.py",
+    "target": "file:app/__init__.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_pricing.py",
+    "target": "file:app/db.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_pricing.py",
+    "target": "file:app/ingest.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_pricing.py",
+    "target": "file:app/pricing.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  },
+  {
+    "source": "file:tests/test_pricing.py",
+    "target": "file:tests/conftest.py",
+    "type": "imports",
+    "direction": "forward",
+    "weight": 0.7
+  }
+]

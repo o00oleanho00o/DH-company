@@ -1,0 +1,408 @@
+{
+ "nodes": [
+  {
+   "id": "file:app/db.py",
+   "type": "file",
+   "name": "db.py",
+   "filePath": "app/db.py",
+   "summary": "Lớp truy cập dữ liệu SQLite: giữ SCHEMA_SQL, mở kết nối có bật foreign keys/WAL/busy timeout, chạy migration bù cột cho database cũ và cung cấp context manager db_session cùng các helper JSON.",
+   "tags": [
+    "database",
+    "sqlite",
+    "persistence",
+    "schema",
+    "migration"
+   ],
+   "complexity": "complex",
+   "languageNotes": "Migration được làm thủ công bằng cách introspect thông tin bảng rồi ALTER TABLE, vì SQLite không hỗ trợ ADD COLUMN IF NOT EXISTS."
+  },
+  {
+   "id": "file:app/export.py",
+   "type": "file",
+   "name": "export.py",
+   "filePath": "app/export.py",
+   "summary": "Xuất báo giá ra workbook Excel: chỉ ghi đè các ô đơn giá vật tư/nhân công, giữ nguyên số lượng, thành tiền, công thức và layout gốc, đồng thời khôi phục và tính lại formula cache trong file .xlsx.",
+   "tags": [
+    "export",
+    "excel",
+    "openpyxl",
+    "formula-cache",
+    "provenance"
+   ],
+   "complexity": "complex",
+   "languageNotes": "Vì openpyxl xoá cached value của công thức khi lưu, module mở trực tiếp package OOXML bằng zipfile + ElementTree để vá lại phần tử <v> trong sheet XML."
+  },
+  {
+   "id": "function:app/db.py:connect",
+   "type": "function",
+   "name": "connect",
+   "filePath": "app/db.py",
+   "lineRange": [
+    302,
+    312
+   ],
+   "summary": "Mở kết nối SQLite dùng chung cho nhiều thread, bật foreign keys, journal WAL và busy_timeout 10s để các request import/review chồng lấn không bị lỗi \"database is locked\".",
+   "tags": [
+    "database",
+    "sqlite",
+    "connection",
+    "concurrency"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/db.py:init_db",
+   "type": "function",
+   "name": "init_db",
+   "filePath": "app/db.py",
+   "lineRange": [
+    315,
+    391
+   ],
+   "summary": "Chạy SCHEMA_SQL rồi introspect từng bảng để ALTER bù các cột còn thiếu, giữ cho database phát triển cũ vẫn tương thích sau khi schema được mở rộng.",
+   "tags": [
+    "database",
+    "migration",
+    "schema",
+    "bootstrap"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "function:app/db.py:db_session",
+   "type": "function",
+   "name": "db_session",
+   "filePath": "app/db.py",
+   "lineRange": [
+    395,
+    404
+   ],
+   "summary": "Context manager cấp một connection có commit khi thành công, rollback khi lỗi và luôn đóng kết nối; đây là điểm truy cập database chuẩn của toàn ứng dụng.",
+   "tags": [
+    "database",
+    "context-manager",
+    "transaction",
+    "utility"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/export.py:_audit_rows",
+   "type": "function",
+   "name": "_audit_rows",
+   "filePath": "app/export.py",
+   "lineRange": [
+    34,
+    59
+   ],
+   "summary": "Dựng các dòng audit cho sheet phụ lục: trạng thái, nguồn giá và cảnh báo của từng BOQ item, giúp người duyệt truy vết được quyết định giá.",
+   "tags": [
+    "export",
+    "audit",
+    "provenance",
+    "reporting"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/export.py:_source_label",
+   "type": "function",
+   "name": "_source_label",
+   "filePath": "app/export.py",
+   "lineRange": [
+    62,
+    78
+   ],
+   "summary": "Chuyển object price source thành nhãn ngắn gọn dễ đọc cho sheet audit, phản ánh loại nguồn và tier giá đã chọn.",
+   "tags": [
+    "export",
+    "formatting",
+    "provenance",
+    "utility"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/export.py:_style_audit",
+   "type": "function",
+   "name": "_style_audit",
+   "filePath": "app/export.py",
+   "lineRange": [
+    81,
+    92
+   ],
+   "summary": "Áp định dạng font/fill và độ rộng cột cho sheet audit để bảng đối chiếu dễ đọc khi mở bằng Excel.",
+   "tags": [
+    "export",
+    "styling",
+    "openpyxl",
+    "presentation"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/export.py:_formula_cache_map",
+   "type": "function",
+   "name": "_formula_cache_map",
+   "filePath": "app/export.py",
+   "lineRange": [
+    99,
+    131
+   ],
+   "summary": "Đọc trực tiếp XML bên trong file .xlsx để lập bản đồ giá trị cache của mọi ô công thức theo từng sheet.",
+   "tags": [
+    "export",
+    "ooxml",
+    "formula-cache",
+    "parsing"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/export.py:_restore_formula_caches",
+   "type": "function",
+   "name": "_restore_formula_caches",
+   "filePath": "app/export.py",
+   "lineRange": [
+    134,
+    192
+   ],
+   "summary": "Ghép lại cached value từ workbook gốc vào file xuất, khắc phục việc openpyxl xoá kết quả công thức khi lưu.",
+   "tags": [
+    "export",
+    "ooxml",
+    "formula-cache",
+    "data-integrity"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "function:app/export.py:_recalculate_formula_caches",
+   "type": "function",
+   "name": "_recalculate_formula_caches",
+   "filePath": "app/export.py",
+   "lineRange": [
+    205,
+    357
+   ],
+   "summary": "Tính lại cache cho các công thức bị ảnh hưởng bởi đơn giá mới (SUM, nhân số lượng…) để file xuất hiển thị đúng thành tiền ngay cả khi chưa mở bằng Excel.",
+   "tags": [
+    "export",
+    "formula-engine",
+    "recalculation",
+    "ooxml"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "function:app/export.py:export_project",
+   "type": "function",
+   "name": "export_project",
+   "filePath": "app/export.py",
+   "lineRange": [
+    360,
+    466
+   ],
+   "summary": "Xuất workbook báo giá cho một project/run: sao chép file gốc, chỉ ghi đè ô đơn giá vật tư và nhân công, thêm sheet audit rồi vá lại formula cache trước khi trả về đường dẫn file.",
+   "tags": [
+    "export",
+    "excel",
+    "entry-point",
+    "provenance",
+    "data-integrity"
+   ],
+   "complexity": "complex"
+  }
+ ],
+ "edges": [
+  {
+   "source": "file:app/db.py",
+   "target": "function:app/db.py:connect",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/db.py",
+   "target": "function:app/db.py:init_db",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/db.py",
+   "target": "function:app/db.py:db_session",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/export.py",
+   "target": "function:app/export.py:_audit_rows",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/export.py",
+   "target": "function:app/export.py:_source_label",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/export.py",
+   "target": "function:app/export.py:_style_audit",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/export.py",
+   "target": "function:app/export.py:_formula_cache_map",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/export.py",
+   "target": "function:app/export.py:_restore_formula_caches",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/export.py",
+   "target": "function:app/export.py:_recalculate_formula_caches",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/export.py",
+   "target": "function:app/export.py:export_project",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/db.py",
+   "target": "file:app/config.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/export.py",
+   "target": "file:app/config.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/export.py",
+   "target": "file:app/db.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/export.py",
+   "target": "file:app/pricing.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/db.py",
+   "target": "function:app/db.py:connect",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:app/db.py",
+   "target": "function:app/db.py:init_db",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:app/db.py",
+   "target": "function:app/db.py:db_session",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:app/export.py",
+   "target": "function:app/export.py:export_project",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/db.py:connect",
+   "target": "function:app/config.py:ensure_directories",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/db.py:db_session",
+   "target": "function:app/db.py:connect",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/export.py:export_project",
+   "target": "function:app/pricing.py:get_project_result",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/export.py:export_project",
+   "target": "function:app/export.py:_restore_formula_caches",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/export.py:export_project",
+   "target": "function:app/export.py:_recalculate_formula_caches",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/export.py:export_project",
+   "target": "function:app/export.py:_audit_rows",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/export.py:_restore_formula_caches",
+   "target": "function:app/export.py:_formula_cache_map",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:app/db.py",
+   "target": "file:tests/test_source_lifecycle_api.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:app/export.py",
+   "target": "file:tests/test_export.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  }
+ ]
+}

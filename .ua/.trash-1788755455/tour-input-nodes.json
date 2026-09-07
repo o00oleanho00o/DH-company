@@ -1,0 +1,751 @@
+[
+  {
+    "id": "file:app/normalize.py",
+    "name": "normalize.py",
+    "filePath": "app/normalize.py",
+    "summary": "Lớp chuẩn hóa văn bản nền tảng của toàn hệ thống: bỏ dấu tiếng Việt, sinh canonical key, chuẩn hóa đơn vị đo, parse số kiểu Việt/Excel và trích xuất thuộc tính kỹ thuật M&E (số lõi, tiết diện, cấp điện áp, đường kính ống) bằng regex deterministic.",
+    "type": "file"
+  },
+  {
+    "id": "file:benchmarks/holdout.py",
+    "name": "holdout.py",
+    "filePath": "benchmarks/holdout.py",
+    "summary": "CLI benchmark holdout chống rò rỉ dữ liệu: nạp toàn bộ workbook mẫu trừ một file holdout làm tri thức, ingest holdout với exclude_prices=True để giữ giá gốc làm ground truth, chạy pricing engine rồi so sánh dự đoán và xuất holdout-report.json/.md.",
+    "type": "file"
+  },
+  {
+    "id": "file:benchmarks/modes.py",
+    "name": "modes.py",
+    "filePath": "benchmarks/modes.py",
+    "summary": "Tách bạch hai câu hỏi thời gian của benchmark: historical_reproduction (tái tạo giá tại thời điểm báo giá gốc, chỉ dùng observation hợp lệ đến ngày đó) và current_repricing (định giá lại bằng catalog hiện tại), kèm bộ chẩn đoán nguyên nhân lệch giá dựa trên bằng chứng.",
+    "type": "file"
+  },
+  {
+    "id": "file:benchmarks/reports.py",
+    "name": "reports.py",
+    "filePath": "benchmarks/reports.py",
+    "summary": "Sinh báo cáo data-gap và failure-analysis tổng quát từ một lần chạy pricing đã lưu DB: đo source coverage lý thuyết theo category, capture rate, phân loại nguyên nhân thất bại và quy đổi thành yêu cầu bổ sung dữ liệu.",
+    "type": "file"
+  },
+  {
+    "id": "file:benchmarks/round2_report.py",
+    "name": "round2_report.py",
+    "filePath": "benchmarks/round2_report.py",
+    "summary": "Chiếu hai report benchmark chi tiết (Round 1 baseline và Round 2 hiện tại) thành bản tóm tắt before/after gọn, chỉ giữ các metric ổn định và hữu ích cho quyết định, rồi ghi round2-report.json và round2-report.md.",
+    "type": "file"
+  },
+  {
+    "id": "file:benchmarks/row_audit.py",
+    "name": "row_audit.py",
+    "filePath": "benchmarks/row_audit.py",
+    "summary": "Lớp audit phân loại dòng BOQ tổng quát cho benchmark: mở rộng vốn từ data/section/empty của parser thành các lớp tường minh (PRICEABLE_LINE_ITEM, SECTION, SUBSECTION, NOTE, SUBTOTAL, TOTAL, HEADER, NON_PRICEABLE_REFERENCE) dựa trên hình dạng dòng, tín hiệu kỹ thuật và loại sheet.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_benchmark.py",
+    "name": "test_benchmark.py",
+    "filePath": "tests/test_benchmark.py",
+    "summary": "Test đơn vị cho các bất biến cốt lõi của benchmark holdout: ngưỡng so sánh giá phải nhỏ và deterministic, đánh giá chất lượng match phải phân biệt lệch tên với xung đột kỹ thuật cứng, và bộ chọn holdout chấp nhận prefix duy nhất.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_benchmark_modes.py",
+    "name": "test_benchmark_modes.py",
+    "filePath": "tests/test_benchmark_modes.py",
+    "summary": "Bộ test cho tầng temporal benchmark: suy luận ngày phải không nhập nhằng, observation tương lai chỉ bị loại bởi cutoff thời gian, hai mode phải cho metric tách bạch, chẩn đoán lỗi giá phải có bằng chứng, và adapter DB phải ưu tiên bản ghi ex-VAT active.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_normalize.py",
+    "name": "test_normalize.py",
+    "filePath": "tests/test_normalize.py",
+    "summary": "Bộ test bảo vệ tầng chuẩn hóa: normalize_text phải an toàn với Unicode tiếng Việt và ký hiệu kỹ thuật, canonical_key loại khoảng trắng trang trí, parse_number chấp nhận định dạng số Việt/Excel, và technical_attributes trích đúng thông số cáp/ống kể cả ký hiệu lồng nhau.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_reports.py",
+    "name": "test_reports.py",
+    "filePath": "tests/test_reports.py",
+    "summary": "Test tích hợp cho tầng báo cáo benchmark trên DB cô lập: normalize_category phải ổn định và generic, báo cáo phải phân biệt rõ thiếu nguồn dữ liệu với thất bại matching, và writer phải tạo đủ artifact yêu cầu.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_round2_report.py",
+    "name": "test_round2_report.py",
+    "filePath": "tests/test_round2_report.py",
+    "summary": "Test bảo đảm báo cáo Round 2 không bóp méo dữ liệu: metric Round 1 chưa đo phải giữ null, bản compact của report chính phải bỏ được các mảng dòng nặng, và writer phải sinh đủ JSON + Markdown.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_row_audit.py",
+    "name": "test_row_audit.py",
+    "filePath": "tests/test_row_audit.py",
+    "summary": "Test cho lớp audit phân loại dòng BOQ: phân biệt hạng mục định giá được với tiêu đề, đọc nhãn tổng từ ô raw chưa map, không coi mục con một ô là header, giữ dòng thiếu khối lượng vẫn hiển thị là priceable, và xác nhận pricing engine bỏ qua dòng cấu trúc tường minh.",
+    "type": "file"
+  },
+  {
+    "id": "file:app/ai.py",
+    "name": "ai.py",
+    "filePath": "app/ai.py",
+    "summary": "Lớp semantic AI tùy chọn của engine pricing: gọi provider LLM tương thích OpenAI qua HTTP để rerank candidate và classify nhãn, có budget số lần gọi, validate ID trả về và fallback deterministic khi bị tắt hoặc lỗi. Prompt chỉ chứa identity và technical attributes, không bao giờ chứa giá.",
+    "type": "file"
+  },
+  {
+    "id": "file:app/labor_policy.py",
+    "name": "labor_policy.py",
+    "filePath": "app/labor_policy.py",
+    "summary": "Chính sách chọn đơn giá nhân công deterministic từ các observation trong catalog: chuẩn hóa policy và adjustment, tính thống kê spread-variance-recency, rồi chọn rate kèm provenance đầy đủ.",
+    "type": "file"
+  },
+  {
+    "id": "file:app/price_policy.py",
+    "name": "price_policy.py",
+    "filePath": "app/price_policy.py",
+    "summary": "Chính sách giá nhà cung cấp tường minh: chuẩn hóa nhãn thuế, price basis và discount, nạp manual pricing rule từ cấu hình rồi chọn observation giá phù hợp mà không tự phát minh nguồn.",
+    "type": "file"
+  },
+  {
+    "id": "file:app/pricing.py",
+    "name": "pricing.py",
+    "filePath": "app/pricing.py",
+    "summary": "Engine matching và pricing BOQ deterministic của hệ thống: truy hồi và scoring candidate vật tư/nhân công, chọn giá kèm provenance workbook-sheet-row, cảnh báo price drift, phân loại trạng thái auto-apply hay review, ghi kết quả run và xử lý review thủ công.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_ai.py",
+    "name": "test_ai.py",
+    "filePath": "tests/test_ai.py",
+    "summary": "Bộ test cho lớp semantic AI: kiểm chứng fallback deterministic khi AI tắt, prompt chỉ mang field an toàn, validate ID trả về, enforce budget gọi và giới hạn nhãn phân loại, dùng FakeClient thay vì network thật.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_labor_policy.py",
+    "name": "test_labor_policy.py",
+    "filePath": "tests/test_labor_policy.py",
+    "summary": "Bộ test chính sách nhân công: chuẩn hóa policy và adjustment, thống kê spread-variance-recency, thứ tự ưu tiên master rate, cảnh báo chặn auto-approve và luồng choose_labor_rate với provenance SQL.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_pricing_lifecycle_hardening.py",
+    "name": "test_pricing_lifecycle_hardening.py",
+    "filePath": "tests/test_pricing_lifecycle_hardening.py",
+    "summary": "Bộ test làm cứng vòng đời nguồn giá và pricing: chọn observation ex-VAT để tính drift, ưu tiên tier supplier đã chọn, loại nguồn đã archive, giữ quyết định review qua các lần chạy lại và tạo observation manual khi engineer nhập giá.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_pricing_llm.py",
+    "name": "test_pricing_llm.py",
+    "filePath": "tests/test_pricing_llm.py",
+    "summary": "Test tích hợp xác nhận run_pricing chỉ gọi lớp LLM cho các dòng có candidate nhập nhằng và ghi lại model usage của lần chạy, dùng StubProvider không có network client.",
+    "type": "file"
+  },
+  {
+    "id": "file:app/cli.py",
+    "name": "cli.py",
+    "filePath": "app/cli.py",
+    "summary": "CLI quản trị của Pricing Hub, cung cấp các lệnh init-db, ingest, seed, price, stats, reset và benchmark để chạy pipeline định giá bên ngoài giao diện web.",
+    "type": "file"
+  },
+  {
+    "id": "file:app/config.py",
+    "name": "config.py",
+    "filePath": "app/config.py",
+    "summary": "Trung tâm cấu hình: xác định các đường dẫn lưu trữ (storage/raw/exports/pricing.db), nạp file .env dạng loose và expose dataclass Settings chứa toàn bộ tham số runtime, kể cả ngân sách LLM và ngưỡng price drift.",
+    "type": "file"
+  },
+  {
+    "id": "file:app/db.py",
+    "name": "db.py",
+    "filePath": "app/db.py",
+    "summary": "Lớp truy cập dữ liệu SQLite: giữ SCHEMA_SQL, mở kết nối có bật foreign keys/WAL/busy timeout, chạy migration bù cột cho database cũ và cung cấp context manager db_session cùng các helper JSON.",
+    "type": "file"
+  },
+  {
+    "id": "file:app/export.py",
+    "name": "export.py",
+    "filePath": "app/export.py",
+    "summary": "Xuất báo giá ra workbook Excel: chỉ ghi đè các ô đơn giá vật tư/nhân công, giữ nguyên số lượng, thành tiền, công thức và layout gốc, đồng thời khôi phục và tính lại formula cache trong file .xlsx.",
+    "type": "file"
+  },
+  {
+    "id": "file:app/ingest.py",
+    "name": "ingest.py",
+    "filePath": "app/ingest.py",
+    "summary": "Pipeline nhập workbook: tính checksum, chống trùng, phân loại dòng BOQ, upsert catalog vật tư/nhân công, ghi price observation theo price policy và dựng bridge provenance tới từng file/sheet/row nguồn.",
+    "type": "file"
+  },
+  {
+    "id": "file:app/main.py",
+    "name": "main.py",
+    "filePath": "app/main.py",
+    "summary": "Điểm vào FastAPI của toàn hệ thống: khởi tạo app, mount static và định nghĩa 27 route REST cho health, import, sources, catalog, quotations, review BOQ, export và benchmark.",
+    "type": "file"
+  },
+  {
+    "id": "endpoint:app/main.py:GET-/",
+    "name": "GET /",
+    "filePath": "app/main.py",
+    "summary": "Trả về trang SPA tĩnh index.html của giao diện Pricing Hub.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:GET-/api/health",
+    "name": "GET /api/health",
+    "filePath": "app/main.py",
+    "summary": "Health check trả về trạng thái app, thông tin phiên bản và cờ bật/tắt LLM mà không để lộ API key.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:GET-/api/sources",
+    "name": "GET /api/sources",
+    "filePath": "app/main.py",
+    "summary": "Liệt kê các file nguồn đã nhập, hỗ trợ lọc theo trạng thái vòng đời và tìm kiếm theo từ khoá.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:GET-/api/sources/{source_id}",
+    "name": "GET /api/sources/{source_id}",
+    "filePath": "app/main.py",
+    "summary": "Trả về chi tiết một source file gồm danh sách sheet, thống kê tham chiếu và tuỳ chọn raw rows có phân trang.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:POST-/api/sources/{source_id}/archive",
+    "name": "POST /api/sources/{source_id}/archive",
+    "filePath": "app/main.py",
+    "summary": "Archive một source kèm lý do thay vì xoá, giữ nguyên provenance cho các giá đã phát sinh từ nó.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:POST-/api/sources/{source_id}/restore",
+    "name": "POST /api/sources/{source_id}/restore",
+    "filePath": "app/main.py",
+    "summary": "Khôi phục một source đã archive về trạng thái hoạt động để tiếp tục dùng cho việc định giá.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:DELETE-/api/sources/{source_id}",
+    "name": "DELETE /api/sources/{source_id}",
+    "filePath": "app/main.py",
+    "summary": "Xoá an toàn một source: chỉ cho phép khi không còn tham chiếu, trừ khi truyền force, nhằm bảo vệ chuỗi provenance.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:POST-/api/sources/{source_id}/reprocess",
+    "name": "POST /api/sources/{source_id}/reprocess",
+    "filePath": "app/main.py",
+    "summary": "Nhập lại một source đã lưu từ bản raw để áp dụng logic parse và price policy mới nhất.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:POST-/api/import/preview",
+    "name": "POST /api/import/preview",
+    "filePath": "app/main.py",
+    "summary": "Parse thử workbook được upload và trả về kết quả phân loại tài liệu/sheet để người dùng xác nhận trước khi nhập thật.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:POST-/api/import",
+    "name": "POST /api/import",
+    "filePath": "app/main.py",
+    "summary": "Nhập chính thức một hoặc nhiều workbook đã upload, cho phép ép kiểu phân loại theo xác nhận của người dùng.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:POST-/api/seed",
+    "name": "POST /api/seed",
+    "filePath": "app/main.py",
+    "summary": "Nạp dữ liệu mẫu từ thư mục input cho môi trường dev, mặc định loại trừ file holdout.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:GET-/api/catalog/stats",
+    "name": "GET /api/catalog/stats",
+    "filePath": "app/main.py",
+    "summary": "Trả về thống kê tổng quan catalog: số sản phẩm, số hạng mục nhân công và độ phủ giá.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:GET-/api/catalog/items",
+    "name": "GET /api/catalog/items",
+    "filePath": "app/main.py",
+    "summary": "Endpoint tra cứu catalog hợp nhất vật tư và nhân công, hỗ trợ lọc theo kind/category/source/status, tìm kiếm và phân trang toàn cục ổn định.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:GET-/api/catalog/products/{product_id}",
+    "name": "GET /api/catalog/products/{product_id}",
+    "filePath": "app/main.py",
+    "summary": "Trả về chi tiết một sản phẩm trong catalog kèm provenance và lịch sử giá.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:GET-/api/catalog/labor/{labor_id}",
+    "name": "GET /api/catalog/labor/{labor_id}",
+    "filePath": "app/main.py",
+    "summary": "Trả về chi tiết một hạng mục nhân công trong catalog kèm provenance và lịch sử đơn giá.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:POST-/api/catalog/items/{kind}/{item_id}/archive",
+    "name": "POST /api/catalog/items/{kind}/{item_id}/archive",
+    "filePath": "app/main.py",
+    "summary": "Archive một mục catalog kèm lý do, loại nó khỏi kết quả matching nhưng giữ nguyên dữ liệu lịch sử.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:POST-/api/catalog/items/{kind}/{item_id}/restore",
+    "name": "POST /api/catalog/items/{kind}/{item_id}/restore",
+    "filePath": "app/main.py",
+    "summary": "Khôi phục một mục catalog đã archive để tiếp tục tham gia matching và định giá.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:DELETE-/api/catalog/items/{kind}/{item_id}",
+    "name": "DELETE /api/catalog/items/{kind}/{item_id}",
+    "filePath": "app/main.py",
+    "summary": "Xoá an toàn một mục catalog, từ chối khi còn BOQ item hoặc observation tham chiếu, trừ khi truyền force.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:GET-/api/quotations",
+    "name": "GET /api/quotations",
+    "filePath": "app/main.py",
+    "summary": "Liệt kê các project báo giá đã tạo cùng thông tin run gần nhất.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:POST-/api/quotations",
+    "name": "POST /api/quotations",
+    "filePath": "app/main.py",
+    "summary": "Tạo project báo giá mới từ workbook BOQ được upload, kèm thông tin khách hàng, ngày báo giá, pricing policy và ghi chú.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:GET-/api/quotations/{project_id}",
+    "name": "GET /api/quotations/{project_id}",
+    "filePath": "app/main.py",
+    "summary": "Trả về kết quả định giá của một project theo run được chỉ định hoặc run mới nhất.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:POST-/api/quotations/{project_id}/run",
+    "name": "POST /api/quotations/{project_id}/run",
+    "filePath": "app/main.py",
+    "summary": "Chạy pipeline định giá deterministic cho project, tạo run mới và tính lại toàn bộ candidate cùng tổng tiền.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:GET-/api/quotations/{project_id}/review",
+    "name": "GET /api/quotations/{project_id}/review",
+    "filePath": "app/main.py",
+    "summary": "Trả về danh sách BOQ item cần rà soát cùng candidate và cảnh báo để người duyệt ra quyết định.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:POST-/api/boq-items/{item_id}/review",
+    "name": "POST /api/boq-items/{item_id}/review",
+    "filePath": "app/main.py",
+    "summary": "Ghi nhận quyết định rà soát cho một BOQ item: chọn candidate, nhập đơn giá thủ công hoặc từ chối, và lưu lại để không bị ghi đè khi chạy lại pipeline.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:GET-/api/quotations/{project_id}/export",
+    "name": "GET /api/quotations/{project_id}/export",
+    "filePath": "app/main.py",
+    "summary": "Xuất workbook báo giá đã điền đơn giá cho project và trả file về trình duyệt.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:GET-/api/benchmark",
+    "name": "GET /api/benchmark",
+    "filePath": "app/main.py",
+    "summary": "Trả về trạng thái và metric mới nhất của benchmark holdout, dùng để theo dõi chất lượng định giá.",
+    "type": "endpoint"
+  },
+  {
+    "id": "endpoint:app/main.py:GET-/benchmark-report",
+    "name": "GET /benchmark-report",
+    "filePath": "app/main.py",
+    "summary": "Trả về báo cáo benchmark dạng HTML để xem trực tiếp trên trình duyệt.",
+    "type": "endpoint"
+  },
+  {
+    "id": "file:tests/test_security.py",
+    "name": "test_security.py",
+    "filePath": "tests/test_security.py",
+    "summary": "Test bảo mật kiểm tra _save_upload từ chối payload vượt MAX_UPLOAD_BYTES bằng HTTP 413 và dọn sạch thư mục tạm upload-*, không để lại file rác trong storage.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_source_lifecycle_api.py",
+    "name": "test_source_lifecycle_api.py",
+    "filePath": "tests/test_source_lifecycle_api.py",
+    "summary": "Bộ test tích hợp cho vòng đời source và catalog qua API: archive/safe-delete, giới hạn raw row theo phạm vi workbook, phân trang catalog toàn cục, ưu tiên observation bất biến và force re-import không phá provenance.",
+    "type": "file"
+  },
+  {
+    "id": "file:app/__init__.py",
+    "name": "__init__.py",
+    "filePath": "app/__init__.py",
+    "summary": "Package barrel của ứng dụng, chỉ chứa docstring mô tả nền tảng báo giá và định giá M&E. Đóng vai trò điểm gốc để các module app.* được import.",
+    "type": "file"
+  },
+  {
+    "id": "file:app/excel.py",
+    "name": "excel.py",
+    "filePath": "app/excel.py",
+    "summary": "Lớp đọc workbook Excel M&E: dùng openpyxl cho .xlsx và xlrd cho .xls để snapshot cả giá trị lẫn công thức, rồi suy luận loại tài liệu, hàng header, mapping cột, cột giá theo tier và phân loại từng dòng. Mọi dòng trích xuất đều giữ provenance sheet/row để pipeline định giá không bao giờ áp giá thiếu nguồn.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/conftest.py",
+    "name": "conftest.py",
+    "filePath": "tests/conftest.py",
+    "summary": "Cấu hình pytest dùng chung cho toàn bộ test suite: cưỡng chế ENABLE_LLM=false trước khi import app để test luôn deterministic và không gọi mạng, cung cấp helper tìm workbook mẫu và fixture `isolated_db` tạo SQLite/storage riêng cho từng test.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_excel.py",
+    "name": "test_excel.py",
+    "filePath": "tests/test_excel.py",
+    "summary": "Test cho lớp parser Excel: chạy trên workbook mẫu thật (cả .xls và .xlsx) để kiểm tra phân loại loại tài liệu, đồng thời dựng workbook tổng hợp có hàng tiêu đề, cột bị đảo và ô công thức để chứng minh header detector cùng column mapper không bị cố định vào các dòng đầu.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_export.py",
+    "name": "test_export.py",
+    "filePath": "tests/test_export.py",
+    "summary": "Test bảo vệ hợp đồng cốt lõi của lớp export: chỉ các ô đơn giá vật tư và nhân công được ghi, còn mọi giá trị khác, công thức và layout của workbook gốc phải được giữ nguyên.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_price_policy.py",
+    "name": "test_price_policy.py",
+    "filePath": "tests/test_price_policy.py",
+    "summary": "Test tích hợp cho price policy: xác nhận bảng giá cáp/thang máng thật giữ đủ bậc giá gốc, VAT và chiết khấu; manual rule chỉ chọn tier đã công bố chứ không tự sinh giá; và workbook holdout không bao giờ publish price observation.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_pricing.py",
+    "name": "test_pricing.py",
+    "filePath": "tests/test_pricing.py",
+    "summary": "Bộ test tích hợp lớn nhất cho pipeline định giá: kiểm tra ingest idempotent theo checksum, provenance đầy đủ trên mọi dòng giá, matching candidate ưu tiên tên đã normalize, chỉ áp giá có nguồn khi tính tổng, và các trạng thái cần review thủ công (conflict, price drift) không được auto-approve.",
+    "type": "file"
+  },
+  {
+    "id": "table:migrations/001_initial.sql",
+    "name": "001_initial.sql",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Migration khởi tạo toàn bộ schema SQLite của DH M&E Pricing Hub gồm 16 bảng và 13 index, phản chiếu đúng DDL runtime trong app/db.py. Thiết kế xoay quanh chuỗi provenance source_files → source_sheets → source_rows để mọi giá vật tư/nhân công đều truy vết được về workbook, sheet và dòng gốc.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:source_files",
+    "name": "source_files",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Bảng gốc của chuỗi provenance, lưu mỗi workbook Excel đã upload cùng storage_key, sha256 nội dung và trạng thái xử lý. Các cột lifecycle_status, archived_at, superseded_by_source_file_id và version_no cho phép archive/reprocess theo phiên bản thay vì xóa cứng, nhờ đó provenance luôn được bảo toàn.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:source_sheets",
+    "name": "source_sheets",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Lưu từng sheet của một source_file kèm sheet_index, detected_type, header_row và table_range đã dò được. Cột mapping_json giữ kết quả ánh xạ cột để bước parsing tái lập chính xác cách đọc bảng.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:source_rows",
+    "name": "source_rows",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Mức chi tiết nhất của provenance: mỗi dòng thô trong sheet được lưu nguyên trạng ở raw_cells_json cùng row_kind phân loại và parse_warnings_json. Đây là đích tham chiếu của mọi bản ghi giá để chứng minh nguồn gốc tới từng ô.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:products",
+    "name": "products",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Catalog vật tư đã chuẩn hóa, định danh bằng canonical_key duy nhất kèm normalized_name, product_code, brand, origin và đơn vị. Các thuộc tính kỹ thuật và alias lưu dạng JSON để phục vụ matching BOQ; lifecycle_status hỗ trợ archive thay vì xóa.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:product_prices",
+    "name": "product_prices",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Giá vật tư đang được vận hành (selection layer) với list_price, discount, net_price, currency, tax_mode và khoảng hiệu lực. Ba khóa ngoại source_file_id/source_sheet_id/source_row_id gắn provenance, còn calc_json ghi lại cách tính giá net.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:price_observations",
+    "name": "price_observations",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Kho quan sát giá bất biến, giữ lại mọi bậc list/discount/VAT từ nhà cung cấp và từ báo giá lịch sử (source_project_id, observation_type, price_basis). Là nguồn dữ liệu cho policy historical_median trong khi product_prices chỉ là giá đã chọn để dùng.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:labor_items",
+    "name": "labor_items",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Catalog hạng mục nhân công chuẩn hóa với canonical_key duy nhất, normalized_name, code, category và unit. Song song với products nhưng dành cho phần nhân công của BOQ, cũng có lifecycle_status để archive.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:catalog_source_links",
+    "name": "catalog_source_links",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Bảng liên kết đa hình nối một mục catalog (product hoặc labor_item, phân biệt bằng entity_type) tới file/sheet/row nguồn kèm relation_type. Cho phép một mục catalog tích lũy nhiều bằng chứng nguồn qua nhiều lần ingest.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:projects",
+    "name": "projects",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Đại diện một dự án/báo giá với project_name, customer, quotation_date và source_file_id của workbook BOQ gốc. Là điểm neo cho pricing_runs, boq_items và các quan sát giá lịch sử.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:labor_rates",
+    "name": "labor_rates",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Đơn giá nhân công theo labor_item và dự án nguồn, kèm effective_date, confidence và policy_json mô tả cách suy ra đơn giá. Giữ đầy đủ provenance file/sheet/row giống các bảng giá vật tư.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:pricing_runs",
+    "name": "pricing_runs",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Ghi nhận mỗi lần chạy định giá cho một project: policy_json đã áp dụng, status, metrics_json và model_usage_json cùng mốc started_at/finished_at. Cho phép so sánh và tái lập kết quả giữa các lần chạy khác nhau.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:boq_items",
+    "name": "boq_items",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Bảng trung tâm và rộng nhất của schema (33 cột), lưu từng dòng BOQ đã parse cùng kết quả matching và định giá: matched_product_id, matched_labor_item_id, độ tin cậy, đơn giá và thành tiền cho vật tư lẫn nhân công. Các cột material_source_json, labor_source_json, explanation, risk và alternatives_json mang provenance cùng lý do cho từng con số xuất ra báo giá.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:match_candidates",
+    "name": "match_candidates",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Danh sách candidate xếp hạng cho mỗi boq_item trong một pricing_run, gồm candidate_type/candidate_id, rank_no, score và score_components_json chi tiết. Phục vụ màn hình rà soát để người dùng chọn lại phương án phù hợp.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:corrections",
+    "name": "corrections",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Lưu lại các lần người dùng sửa kết quả matching: old_candidate, selected_candidate, rule_type và context_json kèm created_by. Là dữ liệu phản hồi để cải thiện độ chính xác matching cho những lần chạy sau.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:aliases",
+    "name": "aliases",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Từ điển ánh xạ alias sang canonical dùng khi chuẩn hóa mô tả vật tư/nhân công, có rule_type và context_json để giới hạn phạm vi áp dụng. Giúp matching deterministic nhận diện được các cách viết khác nhau của cùng một mục.",
+    "type": "table"
+  },
+  {
+    "id": "table:migrations/001_initial.sql:audit_events",
+    "name": "audit_events",
+    "filePath": "migrations/001_initial.sql",
+    "summary": "Nhật ký sự kiện chung theo dạng event_type kết hợp entity_type/entity_id và payload_json. Ghi lại các thao tác quan trọng như upload, archive, reprocess và pricing run để phục vụ truy vết vận hành.",
+    "type": "table"
+  },
+  {
+    "id": "config:.env.example",
+    "name": ".env.example",
+    "filePath": ".env.example",
+    "summary": "Template biến môi trường (chỉ chứa giá trị placeholder) mô tả toàn bộ bề mặt cấu hình của ứng dụng: host/port server, DATABASE_URL, bật/tắt lớp LLM cùng các hạn mức timeout/retry/budget, đường dẫn manual pricing rules và ngưỡng cảnh báo price drift. Người dùng sao chép thành .env và không commit vào Git.",
+    "type": "config"
+  },
+  {
+    "id": "document:AGENTS.md",
+    "name": "AGENTS.md",
+    "filePath": "AGENTS.md",
+    "summary": "Tài liệu hướng dẫn dành cho AI coding agent, mô tả thứ tự đọc tài liệu bắt buộc, các lệnh runtime (cài requirements, init-db, chạy run.ps1, pytest), lệnh kiểm thử/biên dịch theo từng file và các quy ước bất biến của nghiệp vụ pricing (deterministic, provenance, phạm vi ghi cell khi export).",
+    "type": "document"
+  },
+  {
+    "id": "document:ARCHITECTURE.md",
+    "name": "ARCHITECTURE.md",
+    "filePath": "ARCHITECTURE.md",
+    "summary": "Ghi chú kiến trúc trình bày phạm vi hệ thống, sơ đồ runtime topology (browser đến FastAPI modular monolith đến SQLite), pipeline ingestion từ workbook snapshot tới normalization, cơ chế matching/pricing, data model có provenance, lớp AI provider và các điểm mở rộng độ tin cậy.",
+    "type": "document"
+  },
+  {
+    "id": "document:CLAUDE.md",
+    "name": "CLAUDE.md",
+    "filePath": "CLAUDE.md",
+    "summary": "File entry point cực ngắn cho agent, chỉ trỏ sang AGENTS.md như tài liệu chỉ dẫn canonical của repository.",
+    "type": "document"
+  },
+  {
+    "id": "document:KNOWN_LIMITATIONS.md",
+    "name": "KNOWN_LIMITATIONS.md",
+    "filePath": "KNOWN_LIMITATIONS.md",
+    "summary": "Liệt kê các giới hạn đã biết của bản MVP local: SQLite và pricing chạy đồng bộ in-process, cách xử lý workbook .xls/.xlsx, việc phụ thuộc cached value của công thức Excel, thiếu labor rate trong master, LLM chỉ là opt-in, và việc chưa có authentication/RBAC/PostgreSQL/job queue.",
+    "type": "document"
+  },
+  {
+    "id": "document:PLAN.md",
+    "name": "PLAN.md",
+    "filePath": "PLAN.md",
+    "summary": "Kế hoạch triển khai nêu mục tiêu sản phẩm, các quyết định công nghệ (Python/FastAPI, SQLite portable sang PostgreSQL, openpyxl/xlrd, AI provider tùy chọn), sáu delivery slice từ workbook inspector đến UI, kèm danh sách acceptance check nghiệm thu.",
+    "type": "document"
+  },
+  {
+    "id": "document:README.md",
+    "name": "README.md",
+    "filePath": "README.md",
+    "summary": "Tài liệu tổng quan và hướng dẫn khởi động dự án bằng tiếng Việt: cài dependency, init-db, chạy server port 3000, truy cập qua LAN hoặc Cloudflare tunnel, cấu hình .env, năm bước luồng nghiệp vụ, ba pricing policy, danh sách API chính, cách chạy test, bản đồ tài liệu và cấu trúc code.",
+    "type": "document"
+  },
+  {
+    "id": "document:ROUND2-FINAL-REPORT.md",
+    "name": "ROUND2-FINAL-REPORT.md",
+    "filePath": "ROUND2-FINAL-REPORT.md",
+    "summary": "Báo cáo kỹ thuật 19 mục cho vòng 2: tái lập baseline, root cause, danh sách bug và vấn đề thiết kế đã sửa, cách phân loại dòng BOQ, pricing policy, benchmark vật tư và nhân công trước/sau, coverage theo category, capture rate của engine, phân tích data gap, phát hiện về discount/VAT/net price, thí nghiệm LLM, trạng thái test và bước kỹ thuật đề xuất tiếp theo.",
+    "type": "document"
+  },
+  {
+    "id": "config:requirements.txt",
+    "name": "requirements.txt",
+    "filePath": "requirements.txt",
+    "summary": "Manifest dependency Python của dự án: FastAPI và uvicorn[standard] cho web server, python-multipart cho upload file, openpyxl và xlrd để đọc workbook .xlsx/.xls, httpx cho AI provider client và pytest cho test suite.",
+    "type": "config"
+  },
+  {
+    "id": "file:run.ps1",
+    "name": "run.ps1",
+    "filePath": "run.ps1",
+    "summary": "Script PowerShell khởi động server phát triển: đặt ErrorActionPreference thành Stop, đọc PYTHON/APP_HOST/APP_PORT từ biến môi trường với mặc định python và 0.0.0.0:3000, rồi chạy uvicorn với target app.main:app ở chế độ reload.",
+    "type": "file"
+  },
+  {
+    "id": "document:deliverables/ARCH-DHBG1.md",
+    "name": "ARCH-DHBG1.md",
+    "filePath": "deliverables/ARCH-DHBG1.md",
+    "summary": "Tài liệu kiến trúc DHBG1: mô tả modular monolith FastAPI chạy trên port 3000 với sơ đồ tổng quan, trách nhiệm từng module trong app/, luồng request từ upload đến export, cách triển khai LAN/Cloudflare Tunnel và các ràng buộc an toàn (không áp giá thiếu provenance, không xóa cứng nguồn đã tham chiếu).",
+    "type": "document"
+  },
+  {
+    "id": "document:deliverables/MODULEMAP-DHBG1.md",
+    "name": "MODULEMAP-DHBG1.md",
+    "filePath": "deliverables/MODULEMAP-DHBG1.md",
+    "summary": "Bản đồ module DHBG1: bảng 10 module logic (runtime-config, intake, normalization, provenance-store, pricing-engine, ai-provider, review-workspace, quotation-api, excel-export, web-ui) kèm trách nhiệm và các REQ mà từng module sở hữu, cộng luồng chính và ranh giới dữ liệu giữa các module.",
+    "type": "document"
+  },
+  {
+    "id": "document:deliverables/SCOPE-DHBG1.md",
+    "name": "SCOPE-DHBG1.md",
+    "filePath": "deliverables/SCOPE-DHBG1.md",
+    "summary": "Tài liệu phạm vi dự án DH-Baogia (DHBG1): mục tiêu nền tảng web nội bộ nhập workbook Excel M&E, danh sách trong/ngoài phạm vi, vai trò người dùng và tiêu chí thành công (không có giá thiếu provenance, ngưỡng candidate 90%, export giữ nguyên công thức, pytest -q xanh).",
+    "type": "document"
+  },
+  {
+    "id": "document:deliverables/SPEC-DHBG1.md",
+    "name": "SPEC-DHBG1.md",
+    "filePath": "deliverables/SPEC-DHBG1.md",
+    "summary": "Đặc tả yêu cầu DHBG1: 16 yêu cầu chức năng mã REQ-DHBG1-001..016 (intake .xls/.xlsx, provenance từng dòng, normalization, catalog lifecycle, matching material/labor độc lập, ngưỡng 90%, ba pricing policy, bounded AI rerank, export chỉ ghi unit price, REST API, UI, audit) cùng 6 yêu cầu phi chức năng kèm cách kiểm chứng.",
+    "type": "document"
+  },
+  {
+    "id": "document:deliverables/WBS-DHBG1.md",
+    "name": "WBS-DHBG1.md",
+    "filePath": "deliverables/WBS-DHBG1.md",
+    "summary": "Work breakdown structure DHBG1: 20 task chia bốn nhóm (nền tảng và dữ liệu, pricing và AI, review-API-export, vận hành và bàn giao) với bảng tiến độ 10 hoàn thành / 2 chờ xác nhận / 8 chưa làm; mỗi task gắn module, REQ và trạng thái. Đây là trạng thái dẫn xuất từ DECISIONS, SCOPE, SPEC, MODULEMAP, ARCH và các ADR.",
+    "type": "document"
+  },
+  {
+    "id": "document:deliverables/adr/ADR-001-modular-monolith.md",
+    "name": "ADR-001-modular-monolith.md",
+    "filePath": "deliverables/adr/ADR-001-modular-monolith.md",
+    "summary": "ADR ghi nhận quyết định dùng một FastAPI application dạng modular monolith, chia module theo ranh giới nghiệp vụ và gọi nội bộ qua function contracts. Nêu bối cảnh MVP một máy, trade-off về single point of failure và điều kiện để tách service sau này.",
+    "type": "document"
+  },
+  {
+    "id": "document:deliverables/adr/ADR-002-sqlite-provenance.md",
+    "name": "ADR-002-sqlite-provenance.md",
+    "filePath": "deliverables/adr/ADR-002-sqlite-provenance.md",
+    "summary": "ADR chọn SQLite làm operational store theo hướng provenance-first: raw workbook giữ riêng, mọi canonical record đều lưu tham chiếu source file/sheet/row. Ghi nhận giới hạn concurrent write và trigger chuyển sang PostgreSQL khi cần HA.",
+    "type": "document"
+  },
+  {
+    "id": "document:deliverables/adr/ADR-003-bounded-ai-rerank.md",
+    "name": "ADR-003-bounded-ai-rerank.md",
+    "filePath": "deliverables/adr/ADR-003-bounded-ai-rerank.md",
+    "summary": "ADR giới hạn vai trò AI ở mức rerank: deterministic engine truy xuất candidate, provider tùy chọn chỉ trả về thứ tự ID trong top-N với timeout/retry/budget và audit. Model không được quyết định giá thương mại.",
+    "type": "document"
+  },
+  {
+    "id": "document:deliverables/adr/ADR-004-formula-preserving-export.md",
+    "name": "ADR-004-formula-preserving-export.md",
+    "filePath": "deliverables/adr/ADR-004-formula-preserving-export.md",
+    "summary": "ADR quy định export bằng cách sao chép workbook nguồn và chỉ ghi unit price material/labor, giữ nguyên các ô còn lại cùng công thức và bật native recalculation khi cần. Chấp nhận giá trị cached có thể chậm cập nhật đến khi mở bằng Excel.",
+    "type": "document"
+  },
+  {
+    "id": "document:deliverables/adr/ADR-005-network-port-3000.md",
+    "name": "ADR-005-network-port-3000.md",
+    "filePath": "deliverables/adr/ADR-005-network-port-3000.md",
+    "summary": "ADR đặt mặc định bind APP_HOST=0.0.0.0 và APP_PORT=3000 để review từ máy khác và publish qua Cloudflare tunnel, cho phép override bằng environment. Ghi nhận yêu cầu firewall/authentication và điều kiện bắt buộc trước khi internet-facing.",
+    "type": "document"
+  },
+  {
+    "id": "file:app/static/app.js",
+    "name": "app.js",
+    "filePath": "app/static/app.js",
+    "summary": "Toàn bộ single-page frontend vanilla JavaScript của Pricing Hub: một IIFE chứa state tập trung, lớp client `api` gọi REST `/api/*`, bộ normalizer dữ liệu backend và các hàm render cho năm màn hình (Kho dữ liệu, Danh mục & Giá, Tạo báo giá, Bàn rà soát, Xuất Excel) cùng dashboard và benchmark. Điều hướng bằng hash route, không dùng framework và không có build step.",
+    "type": "file"
+  },
+  {
+    "id": "file:app/static/index.html",
+    "name": "index.html",
+    "filePath": "app/static/index.html",
+    "summary": "Shell HTML duy nhất của ứng dụng: khai báo sprite SVG icon, sidebar điều hướng năm màn hình chính, topbar với breadcrumb cùng nút refresh, và các container rỗng `#page-view`, `#toast-region`, `#modal-root` để app.js dựng nội dung động.",
+    "type": "file"
+  },
+  {
+    "id": "file:app/static/styles.css",
+    "name": "styles.css",
+    "filePath": "app/static/styles.css",
+    "summary": "Toàn bộ stylesheet của frontend, xây trên bộ CSS custom property (màu, surface, shadow, chiều rộng sidebar, chiều cao topbar) và định nghĩa mọi thành phần UI: app shell, card, bảng, badge trạng thái, dropzone, modal, toast, thanh coverage và các breakpoint responsive.",
+    "type": "file"
+  },
+  {
+    "id": "file:benchmarks/__init__.py",
+    "name": "__init__.py",
+    "filePath": "benchmarks/__init__.py",
+    "summary": "Package marker cho bộ benchmark chạy trên workbook thật, chỉ chứa docstring mô tả mục đích của package.",
+    "type": "file"
+  },
+  {
+    "id": "document:docs/DATA-REQUIREMENTS-NEXT.md",
+    "name": "DATA-REQUIREMENTS-NEXT.md",
+    "filePath": "docs/DATA-REQUIREMENTS-NEXT.md",
+    "summary": "Tài liệu data-gap được sinh tự động từ kết quả benchmark: liệt kê 2388 dòng có thể định giá so với 2273 dòng đang được nguồn hỗ trợ, và bảng 17 nhóm category (cáp, dây, ống luồn, máng cáp, chiếu sáng, MCB/MCCB, tủ điện, máy biến áp, tiếp địa, chống sét...) kèm nguyên nhân thiếu giá và loại dữ liệu cần bổ sung.",
+    "type": "document"
+  },
+  {
+    "id": "document:docs/DECISIONS.md",
+    "name": "DECISIONS.md",
+    "filePath": "docs/DECISIONS.md",
+    "summary": "Sổ quyết định nghiệp vụ/phạm vi của dự án, ghi sáu quyết định QĐ-01 đến QĐ-06: chọn modular monolith cho MVP, SQLite làm kho vận hành mặc định, giá deterministic với AI chỉ rerank có giới hạn, provenance và vòng đời nguồn là bắt buộc, export chỉ điền đơn giá và giữ công thức gốc, cùng bind mặc định `0.0.0.0:3000`. Mỗi quyết định kèm lý do và đánh đổi, và tài liệu tự khai báo mình là tầng gốc trong thứ tự tài liệu của dự án.",
+    "type": "document"
+  },
+  {
+    "id": "file:tests/__init__.py",
+    "name": "__init__.py",
+    "filePath": "tests/__init__.py",
+    "summary": "Package marker cho bộ test regression và integration của nền tảng định giá DH, chỉ chứa một docstring.",
+    "type": "file"
+  },
+  {
+    "id": "file:tests/test_config.py",
+    "name": "test_config.py",
+    "filePath": "tests/test_config.py",
+    "summary": "Test regression bảo vệ cấu hình mặc định của server: xác nhận `app.config.settings` cho ra bind `0.0.0.0:3000` khi không có biến môi trường `APP_HOST`/`APP_PORT`, đúng theo quyết định QĐ-06.",
+    "type": "file"
+  }
+]

@@ -1,0 +1,82 @@
+{
+  "projectRoot": "E:/Desktop/DH-company",
+  "batchFiles": [
+    {
+      "path": "app/__init__.py",
+      "language": "python",
+      "sizeLines": 2,
+      "fileCategory": "code"
+    },
+    {
+      "path": "app/excel.py",
+      "language": "python",
+      "sizeLines": 694,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/conftest.py",
+      "language": "python",
+      "sizeLines": 64,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_excel.py",
+      "language": "python",
+      "sizeLines": 160,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_export.py",
+      "language": "python",
+      "sizeLines": 102,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_price_policy.py",
+      "language": "python",
+      "sizeLines": 171,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_pricing.py",
+      "language": "python",
+      "sizeLines": 411,
+      "fileCategory": "code"
+    }
+  ],
+  "batchImportData": {
+    "app/__init__.py": [],
+    "app/excel.py": [
+      "app/normalize.py"
+    ],
+    "tests/conftest.py": [
+      "app/__init__.py",
+      "app/config.py",
+      "app/db.py",
+      "app/ingest.py"
+    ],
+    "tests/test_excel.py": [
+      "app/excel.py",
+      "tests/conftest.py"
+    ],
+    "tests/test_export.py": [
+      "app/__init__.py",
+      "app/export.py"
+    ],
+    "tests/test_price_policy.py": [
+      "app/__init__.py",
+      "app/db.py",
+      "app/excel.py",
+      "app/ingest.py",
+      "app/price_policy.py",
+      "tests/conftest.py"
+    ],
+    "tests/test_pricing.py": [
+      "app/__init__.py",
+      "app/db.py",
+      "app/ingest.py",
+      "app/pricing.py",
+      "tests/conftest.py"
+    ]
+  }
+}

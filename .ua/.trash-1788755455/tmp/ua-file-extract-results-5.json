@@ -1,0 +1,450 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 1,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 1,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 0,
+      "failed": 0,
+      "skipped": 1
+    }
+  },
+  "results": [
+    {
+      "path": "migrations/001_initial.sql",
+      "language": "sql",
+      "fileCategory": "data",
+      "totalLines": 294,
+      "nonEmptyLines": 270,
+      "definitions": [
+        {
+          "name": "source_files",
+          "kind": "table",
+          "fields": [
+            "id",
+            "filename",
+            "storage_key",
+            "sha256",
+            "content_sha256",
+            "extension",
+            "size_bytes",
+            "detected_type",
+            "confirmed_type",
+            "metadata_json",
+            "parsing_version",
+            "processing_status",
+            "lifecycle_status",
+            "status_reason",
+            "archived_at",
+            "superseded_by_source_file_id",
+            "supersedes_source_file_id",
+            "version_no",
+            "uploaded_at"
+          ],
+          "startLine": 17,
+          "endLine": 37
+        },
+        {
+          "name": "source_sheets",
+          "kind": "table",
+          "fields": [
+            "id",
+            "source_file_id",
+            "sheet_name",
+            "sheet_index",
+            "detected_type",
+            "header_row",
+            "table_range",
+            "mapping_json",
+            "metadata_json"
+          ],
+          "startLine": 39,
+          "endLine": 50
+        },
+        {
+          "name": "source_rows",
+          "kind": "table",
+          "fields": [
+            "id",
+            "source_sheet_id",
+            "row_no",
+            "raw_cells_json",
+            "row_kind",
+            "parse_warnings_json"
+          ],
+          "startLine": 52,
+          "endLine": 60
+        },
+        {
+          "name": "products",
+          "kind": "table",
+          "fields": [
+            "id",
+            "canonical_key",
+            "normalized_name",
+            "product_code",
+            "category",
+            "subcategory",
+            "brand",
+            "origin",
+            "unit",
+            "technical_attributes_json",
+            "aliases_json",
+            "lifecycle_status",
+            "status_reason",
+            "archived_at",
+            "created_at"
+          ],
+          "startLine": 62,
+          "endLine": 78
+        },
+        {
+          "name": "product_prices",
+          "kind": "table",
+          "fields": [
+            "id",
+            "product_id",
+            "source_file_id",
+            "source_sheet_id",
+            "source_row_id",
+            "supplier",
+            "list_price",
+            "discount",
+            "net_price",
+            "currency",
+            "tax_mode",
+            "effective_date",
+            "valid_to",
+            "confidence",
+            "calc_json",
+            "is_approved",
+            "created_at"
+          ],
+          "startLine": 86,
+          "endLine": 104
+        },
+        {
+          "name": "price_observations",
+          "kind": "table",
+          "fields": [
+            "id",
+            "product_id",
+            "source_file_id",
+            "source_sheet_id",
+            "source_row_id",
+            "source_project_id",
+            "supplier",
+            "observation_type",
+            "list_price",
+            "discount",
+            "net_price",
+            "currency",
+            "tax_mode",
+            "price_basis",
+            "effective_date",
+            "valid_to",
+            "confidence",
+            "context_json",
+            "calc_json",
+            "is_approved",
+            "created_at"
+          ],
+          "startLine": 111,
+          "endLine": 133
+        },
+        {
+          "name": "labor_items",
+          "kind": "table",
+          "fields": [
+            "id",
+            "canonical_key",
+            "normalized_name",
+            "code",
+            "category",
+            "unit",
+            "technical_attributes_json",
+            "lifecycle_status",
+            "status_reason",
+            "archived_at",
+            "created_at"
+          ],
+          "startLine": 138,
+          "endLine": 150
+        },
+        {
+          "name": "catalog_source_links",
+          "kind": "table",
+          "fields": [
+            "id",
+            "entity_type",
+            "product_id",
+            "labor_item_id",
+            "source_file_id",
+            "source_sheet_id",
+            "source_row_id",
+            "relation_type",
+            "created_at"
+          ],
+          "startLine": 154,
+          "endLine": 164
+        },
+        {
+          "name": "projects",
+          "kind": "table",
+          "fields": [
+            "id",
+            "project_name",
+            "customer",
+            "quotation_date",
+            "source_file_id",
+            "metadata_json",
+            "created_at"
+          ],
+          "startLine": 172,
+          "endLine": 180
+        },
+        {
+          "name": "labor_rates",
+          "kind": "table",
+          "fields": [
+            "id",
+            "labor_item_id",
+            "source_project_id",
+            "source_file_id",
+            "source_sheet_id",
+            "source_row_id",
+            "rate",
+            "effective_date",
+            "policy_json",
+            "confidence",
+            "created_at"
+          ],
+          "startLine": 182,
+          "endLine": 194
+        },
+        {
+          "name": "pricing_runs",
+          "kind": "table",
+          "fields": [
+            "id",
+            "project_id",
+            "policy_json",
+            "status",
+            "metrics_json",
+            "model_usage_json",
+            "started_at",
+            "finished_at",
+            "created_at"
+          ],
+          "startLine": 199,
+          "endLine": 209
+        },
+        {
+          "name": "boq_items",
+          "kind": "table",
+          "fields": [
+            "id",
+            "project_id",
+            "pricing_run_id",
+            "source_file_id",
+            "source_sheet_id",
+            "source_row_id",
+            "section",
+            "raw_description",
+            "normalized_description",
+            "raw_cells_json",
+            "product_code",
+            "brand",
+            "origin",
+            "unit",
+            "quantity",
+            "material_price",
+            "labor_price",
+            "material_total",
+            "labor_total",
+            "matched_product_id",
+            "matched_labor_item_id",
+            "material_confidence",
+            "labor_confidence",
+            "material_source_json",
+            "labor_source_json",
+            "status",
+            "line_class",
+            "status_reason",
+            "risk",
+            "explanation",
+            "alternatives_json",
+            "reviewed",
+            "created_at"
+          ],
+          "startLine": 211,
+          "endLine": 245
+        },
+        {
+          "name": "match_candidates",
+          "kind": "table",
+          "fields": [
+            "id",
+            "pricing_run_id",
+            "boq_item_id",
+            "candidate_type",
+            "candidate_id",
+            "rank_no",
+            "score",
+            "score_components_json",
+            "explanation"
+          ],
+          "startLine": 250,
+          "endLine": 260
+        },
+        {
+          "name": "corrections",
+          "kind": "table",
+          "fields": [
+            "id",
+            "boq_item_id",
+            "raw_description",
+            "context_json",
+            "old_candidate",
+            "selected_candidate",
+            "rule_type",
+            "created_by",
+            "created_at"
+          ],
+          "startLine": 262,
+          "endLine": 272
+        },
+        {
+          "name": "aliases",
+          "kind": "table",
+          "fields": [
+            "id",
+            "alias",
+            "canonical",
+            "rule_type",
+            "context_json",
+            "created_at"
+          ],
+          "startLine": 274,
+          "endLine": 282
+        },
+        {
+          "name": "audit_events",
+          "kind": "table",
+          "fields": [
+            "id",
+            "event_type",
+            "entity_type",
+            "entity_id",
+            "payload_json",
+            "created_at"
+          ],
+          "startLine": 284,
+          "endLine": 291
+        },
+        {
+          "name": "idx_products_code",
+          "kind": "index",
+          "fields": [],
+          "startLine": 80,
+          "endLine": 80
+        },
+        {
+          "name": "idx_products_name",
+          "kind": "index",
+          "fields": [],
+          "startLine": 81,
+          "endLine": 81
+        },
+        {
+          "name": "idx_source_files_sha256",
+          "kind": "index",
+          "fields": [],
+          "startLine": 82,
+          "endLine": 82
+        },
+        {
+          "name": "idx_source_files_content_sha256",
+          "kind": "index",
+          "fields": [],
+          "startLine": 83,
+          "endLine": 83
+        },
+        {
+          "name": "idx_source_files_lifecycle",
+          "kind": "index",
+          "fields": [],
+          "startLine": 84,
+          "endLine": 84
+        },
+        {
+          "name": "idx_prices_product_date",
+          "kind": "index",
+          "fields": [],
+          "startLine": 106,
+          "endLine": 106
+        },
+        {
+          "name": "idx_price_observations_product_date",
+          "kind": "index",
+          "fields": [],
+          "startLine": 135,
+          "endLine": 135
+        },
+        {
+          "name": "idx_labor_name",
+          "kind": "index",
+          "fields": [],
+          "startLine": 152,
+          "endLine": 152
+        },
+        {
+          "name": "idx_catalog_source_links_product",
+          "kind": "index",
+          "fields": [],
+          "startLine": 165,
+          "endLine": 165
+        },
+        {
+          "name": "idx_catalog_source_links_labor",
+          "kind": "index",
+          "fields": [],
+          "startLine": 167,
+          "endLine": 167
+        },
+        {
+          "name": "idx_catalog_source_links_source",
+          "kind": "index",
+          "fields": [],
+          "startLine": 169,
+          "endLine": 169
+        },
+        {
+          "name": "idx_labor_rates_item_date",
+          "kind": "index",
+          "fields": [],
+          "startLine": 196,
+          "endLine": 196
+        },
+        {
+          "name": "idx_boq_project_status",
+          "kind": "index",
+          "fields": [],
+          "startLine": 247,
+          "endLine": 247
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 29
+      }
+    }
+  ]
+}

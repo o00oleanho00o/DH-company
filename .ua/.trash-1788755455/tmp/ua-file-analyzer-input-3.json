@@ -1,0 +1,96 @@
+{
+ "projectRoot": "E:/Desktop/DH-company",
+ "batchFiles": [
+  {
+   "path": "app/cli.py",
+   "language": "python",
+   "sizeLines": 155,
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/config.py",
+   "language": "python",
+   "sizeLines": 119,
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/db.py",
+   "language": "python",
+   "sizeLines": 421,
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/export.py",
+   "language": "python",
+   "sizeLines": 466,
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/ingest.py",
+   "language": "python",
+   "sizeLines": 1534,
+   "fileCategory": "code"
+  },
+  {
+   "path": "app/main.py",
+   "language": "python",
+   "sizeLines": 1765,
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_security.py",
+   "language": "python",
+   "sizeLines": 26,
+   "fileCategory": "code"
+  },
+  {
+   "path": "tests/test_source_lifecycle_api.py",
+   "language": "python",
+   "sizeLines": 405,
+   "fileCategory": "code"
+  }
+ ],
+ "batchImportData": {
+  "app/cli.py": [
+   "app/config.py",
+   "app/db.py",
+   "app/ingest.py",
+   "app/pricing.py"
+  ],
+  "app/config.py": [],
+  "app/db.py": [
+   "app/config.py"
+  ],
+  "app/export.py": [
+   "app/config.py",
+   "app/db.py",
+   "app/pricing.py"
+  ],
+  "app/ingest.py": [
+   "app/config.py",
+   "app/db.py",
+   "app/excel.py",
+   "app/normalize.py",
+   "app/price_policy.py"
+  ],
+  "app/main.py": [
+   "app/ai.py",
+   "app/config.py",
+   "app/db.py",
+   "app/excel.py",
+   "app/export.py",
+   "app/ingest.py",
+   "app/normalize.py",
+   "app/pricing.py"
+  ],
+  "tests/test_security.py": [
+   "app/main.py"
+  ],
+  "tests/test_source_lifecycle_api.py": [
+   "app/db.py",
+   "app/ingest.py",
+   "app/main.py",
+   "tests/conftest.py"
+  ]
+ }
+}

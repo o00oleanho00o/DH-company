@@ -1,0 +1,2165 @@
+{
+  "nodes": [
+    {
+      "id": "file:app/static/app.js",
+      "type": "file",
+      "name": "app.js",
+      "filePath": "app/static/app.js",
+      "summary": "Toàn bộ single-page frontend vanilla JavaScript của Pricing Hub: một IIFE chứa state tập trung, lớp client `api` gọi REST `/api/*`, bộ normalizer dữ liệu backend và các hàm render cho năm màn hình (Kho dữ liệu, Danh mục & Giá, Tạo báo giá, Bàn rà soát, Xuất Excel) cùng dashboard và benchmark. Điều hướng bằng hash route, không dùng framework và không có build step.",
+      "tags": [
+        "frontend",
+        "single-page-app",
+        "vanilla-js",
+        "api-client",
+        "entry-point"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Toàn bộ file bọc trong IIFE `(() => { \"use strict\"; ... })()` nên không rò rỉ biến ra global scope; UI được dựng bằng template literal HTML kèm `escapeHtml`/`safeHref` để chống XSS, và mọi tương tác đi qua event delegation trên `document` với thuộc tính `data-action`/`data-route`."
+    },
+    {
+      "id": "function:app/static/app.js:safeHref",
+      "type": "function",
+      "name": "safeHref",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        105,
+        115
+      ],
+      "summary": "Kiểm tra một URL do backend trả về và chỉ trả lại giá trị khi scheme thuộc danh sách an toàn, tránh chèn `javascript:` vào thuộc tính href.",
+      "tags": [
+        "validation",
+        "security",
+        "utility",
+        "xss-prevention"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:formatDateTime",
+      "type": "function",
+      "name": "formatDateTime",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        138,
+        149
+      ],
+      "summary": "Định dạng giá trị ngày-giờ thành chuỗi hiển thị theo locale Việt Nam, trả về fallback khi giá trị rỗng hoặc không parse được.",
+      "tags": [
+        "utility",
+        "formatting",
+        "date"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:fileSize",
+      "type": "function",
+      "name": "fileSize",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        151,
+        161
+      ],
+      "summary": "Chuyển kích thước file dạng byte sang chuỗi người đọc được (KB/MB) dùng cho danh sách workbook đang chọn để upload.",
+      "tags": [
+        "utility",
+        "formatting",
+        "import"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:normalizeSource",
+      "type": "function",
+      "name": "normalizeSource",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        191,
+        268
+      ],
+      "summary": "Chuẩn hóa một bản ghi nguồn dữ liệu (workbook đã import) từ nhiều biến thể payload backend về một shape ổn định cho UI, gồm loại nguồn, trạng thái vòng đời, thống kê sheet/row và thông tin provenance.",
+      "tags": [
+        "normalization",
+        "data-model",
+        "provenance",
+        "import"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Dùng helper `pick(obj, keys)` để dò nhiều tên field thay thế nhau — cách phòng vệ cho việc backend đổi tên khoá giữa các phiên bản API."
+    },
+    {
+      "id": "function:app/static/app.js:normalizeCatalogItem",
+      "type": "function",
+      "name": "normalizeCatalogItem",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        270,
+        320
+      ],
+      "summary": "Chuẩn hóa một dòng catalog (vật tư hoặc nhân công) về shape thống nhất: mã, mô tả, đơn vị, giá, category, nguồn và trạng thái, suy ra `kind` từ hint khi payload không nói rõ.",
+      "tags": [
+        "normalization",
+        "data-model",
+        "catalog"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:normalizeQuotation",
+      "type": "function",
+      "name": "normalizeQuotation",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        322,
+        363
+      ],
+      "summary": "Chuẩn hóa một bản ghi báo giá về shape UI: tên dự án, khách hàng, file BOQ nguồn, trạng thái pipeline, số dòng và các chỉ số coverage/tổng tiền.",
+      "tags": [
+        "normalization",
+        "data-model",
+        "quotation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:normalizeReviewItem",
+      "type": "function",
+      "name": "normalizeReviewItem",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        365,
+        417
+      ],
+      "summary": "Chuẩn hóa một dòng BOQ cần rà soát về shape của review desk, gồm mô tả gốc, khối lượng, trạng thái review, danh sách candidate và provenance của candidate được đề xuất.",
+      "tags": [
+        "normalization",
+        "data-model",
+        "review-desk",
+        "provenance"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/static/app.js:sourceStatus",
+      "type": "function",
+      "name": "sourceStatus",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        426,
+        447
+      ],
+      "summary": "Ánh xạ trạng thái vòng đời của nguồn dữ liệu sang nhãn tiếng Việt và class badge tương ứng để hiển thị trong bảng Kho dữ liệu.",
+      "tags": [
+        "presentation",
+        "status-mapping",
+        "import"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:quotationStatus",
+      "type": "function",
+      "name": "quotationStatus",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        449,
+        464
+      ],
+      "summary": "Ánh xạ trạng thái báo giá (draft, running, review, completed...) sang nhãn tiếng Việt và tone badge dùng chung cho danh sách và trang chi tiết.",
+      "tags": [
+        "presentation",
+        "status-mapping",
+        "quotation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:reviewStatus",
+      "type": "function",
+      "name": "reviewStatus",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        466,
+        481
+      ],
+      "summary": "Ánh xạ trạng thái của một dòng review (đã chốt, cần rà soát, thiếu nguồn, cần báo giá ngoài...) sang nhãn và badge hiển thị.",
+      "tags": [
+        "presentation",
+        "status-mapping",
+        "review-desk"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:setAIHealth",
+      "type": "function",
+      "name": "setAIHealth",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        498,
+        508
+      ],
+      "summary": "Cập nhật chỉ báo tình trạng lớp AI trên sidebar với trạng thái, nhãn và phần chi tiết tooltip.",
+      "tags": [
+        "ui-state",
+        "health-check",
+        "ai"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:toast",
+      "type": "function",
+      "name": "toast",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        510,
+        526
+      ],
+      "summary": "Hiển thị thông báo toast vào vùng aria-live với loại info/success/error và tự động gỡ khỏi DOM sau thời gian chờ.",
+      "tags": [
+        "ui-feedback",
+        "notification",
+        "accessibility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:request",
+      "type": "function",
+      "name": "request",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        535,
+        570
+      ],
+      "summary": "Wrapper `fetch` trung tâm cho mọi lời gọi REST tới backend: ghép API_BASE, tự set header JSON khi body không phải FormData, parse lỗi thành Error có kèm `status`, và cập nhật chỉ báo health khi thành công hoặc thất bại.",
+      "tags": [
+        "api-client",
+        "http",
+        "error-handling",
+        "utility"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Gắn `error.status` lên đối tượng Error để các hàm gọi phía trên phân biệt 404 (fallback sang endpoint API cũ) với lỗi thật."
+    },
+    {
+      "id": "function:app/static/app.js:describeAIStatus",
+      "type": "function",
+      "name": "describeAIStatus",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        733,
+        760
+      ],
+      "summary": "Diễn giải payload health của lớp AI thành trạng thái, nhãn và mô tả ngân sách/số lần gọi để hiển thị trên sidebar và hộp hướng dẫn.",
+      "tags": [
+        "ai",
+        "health-check",
+        "presentation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:loadAIHealth",
+      "type": "function",
+      "name": "loadAIHealth",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        762,
+        772
+      ],
+      "summary": "Gọi `/api/health` khi khởi động, lưu trạng thái AI vào state và cập nhật hai chỉ báo health của API và lớp AI.",
+      "tags": [
+        "api-client",
+        "health-check",
+        "bootstrap"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:routeFromHash",
+      "type": "function",
+      "name": "routeFromHash",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        774,
+        783
+      ],
+      "summary": "Phân tích `location.hash` thành route cơ sở kèm id tài nguyên, làm nền cho router phía client.",
+      "tags": [
+        "routing",
+        "utility",
+        "navigation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:emptyState",
+      "type": "function",
+      "name": "emptyState",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        809,
+        818
+      ],
+      "summary": "Sinh markup khối empty-state dùng chung với icon, tiêu đề, mô tả và nút hành động điều hướng.",
+      "tags": [
+        "ui-component",
+        "template",
+        "presentation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:pageIntro",
+      "type": "function",
+      "name": "pageIntro",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        820,
+        831
+      ],
+      "summary": "Sinh markup phần header trang gồm eyebrow, tiêu đề, mô tả và vùng chứa các nút hành động, dùng lại ở mọi màn hình.",
+      "tags": [
+        "ui-component",
+        "template",
+        "presentation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:statCard",
+      "type": "function",
+      "name": "statCard",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        833,
+        844
+      ],
+      "summary": "Sinh markup thẻ số liệu (KPI) với nhãn, giá trị, dòng meta, icon và tone màu dùng cho dashboard và các trang thống kê.",
+      "tags": [
+        "ui-component",
+        "template",
+        "dashboard"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:loadDashboard",
+      "type": "function",
+      "name": "loadDashboard",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        850,
+        861
+      ],
+      "summary": "Tải song song nguồn dữ liệu, danh sách báo giá và thống kê catalog cho trang Tổng quan rồi render lại dashboard.",
+      "tags": [
+        "api-client",
+        "data-loading",
+        "dashboard"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderDashboard",
+      "type": "function",
+      "name": "renderDashboard",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        869,
+        943
+      ],
+      "summary": "Dựng toàn bộ trang Tổng quan: các thẻ KPI về nguồn, catalog và báo giá, danh sách báo giá gần nhất và các lối vào nhanh tới những màn hình chính.",
+      "tags": [
+        "ui-render",
+        "dashboard",
+        "template"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/static/app.js:renderQuotationListRow",
+      "type": "function",
+      "name": "renderQuotationListRow",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        945,
+        957
+      ],
+      "summary": "Sinh markup một dòng báo giá trong danh sách, hỗ trợ chế độ compact dùng trên dashboard.",
+      "tags": [
+        "ui-component",
+        "template",
+        "quotation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:loadSources",
+      "type": "function",
+      "name": "loadSources",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        959,
+        972
+      ],
+      "summary": "Gọi `/api/sources`, chuẩn hóa từng nguồn qua `normalizeSource`, lưu vào state và render lại trang Kho dữ liệu.",
+      "tags": [
+        "api-client",
+        "data-loading",
+        "import"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderImport",
+      "type": "function",
+      "name": "renderImport",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        974,
+        1074
+      ],
+      "summary": "Dựng màn hình Kho dữ liệu: dropzone upload workbook, danh sách file đang chọn kèm phân loại loại nguồn, và bảng tất cả nguồn đã import với hành động archive/restore/xóa.",
+      "tags": [
+        "ui-render",
+        "import",
+        "template",
+        "file-upload"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/static/app.js:renderSelectedFile",
+      "type": "function",
+      "name": "renderSelectedFile",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1076,
+        1087
+      ],
+      "summary": "Sinh markup một file đang chờ import với tên, kích thước và nút bỏ chọn.",
+      "tags": [
+        "ui-component",
+        "template",
+        "file-upload"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderClassificationItem",
+      "type": "function",
+      "name": "renderClassificationItem",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1089,
+        1106
+      ],
+      "summary": "Sinh markup phần xác nhận phân loại cho một file preview: loại nguồn hệ thống đoán được cùng select cho người dùng ghi đè trước khi import.",
+      "tags": [
+        "ui-component",
+        "import",
+        "classification"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:canonicalSourceType",
+      "type": "function",
+      "name": "canonicalSourceType",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1108,
+        1122
+      ],
+      "summary": "Chuẩn hóa các biến thể tên loại nguồn từ backend về đúng một giá trị canonical khớp với danh sách option của UI.",
+      "tags": [
+        "normalization",
+        "classification",
+        "import"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderSourcesTable",
+      "type": "function",
+      "name": "renderSourcesTable",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1124,
+        1162
+      ],
+      "summary": "Dựng bảng danh sách nguồn dữ liệu với loại, trạng thái, số sheet/row, ngày import và menu hành động cho từng nguồn.",
+      "tags": [
+        "ui-render",
+        "table",
+        "import"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:bindDropzone",
+      "type": "function",
+      "name": "bindDropzone",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1164,
+        1184
+      ],
+      "summary": "Gắn các handler drag-and-drop và click cho dropzone của Kho dữ liệu, đưa file được thả vào luồng preview import.",
+      "tags": [
+        "event-handler",
+        "file-upload",
+        "import"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:addImportFiles",
+      "type": "function",
+      "name": "addImportFiles",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1186,
+        1209
+      ],
+      "summary": "Thêm file vào danh sách chờ import sau khi lọc trùng và chặn file vượt hạn mức 50 MB, rồi kích hoạt preview.",
+      "tags": [
+        "validation",
+        "file-upload",
+        "import"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:previewImportFiles",
+      "type": "function",
+      "name": "previewImportFiles",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1211,
+        1245
+      ],
+      "summary": "Gọi `/api/import/preview` cho từng file để lấy phân loại đoán trước và thông tin sheet, lưu kết quả vào state phục vụ bước xác nhận phân loại.",
+      "tags": [
+        "api-client",
+        "import",
+        "classification"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:submitImport",
+      "type": "function",
+      "name": "submitImport",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1247,
+        1269
+      ],
+      "summary": "Gửi các file đã chọn cùng phân loại đã xác nhận tới `/api/import`, thông báo kết quả và tải lại danh sách nguồn.",
+      "tags": [
+        "api-client",
+        "import",
+        "file-upload",
+        "mutation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:loadQuotations",
+      "type": "function",
+      "name": "loadQuotations",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1271,
+        1282
+      ],
+      "summary": "Tải danh sách báo giá từ `/api/quotations`, chuẩn hóa và render lại trang Báo giá.",
+      "tags": [
+        "api-client",
+        "data-loading",
+        "quotation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderQuotations",
+      "type": "function",
+      "name": "renderQuotations",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1284,
+        1328
+      ],
+      "summary": "Dựng trang danh sách báo giá gồm ô tìm kiếm, bộ lọc trạng thái, bảng báo giá và lối vào tạo báo giá mới.",
+      "tags": [
+        "ui-render",
+        "quotation",
+        "template"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:renderQuotationTable",
+      "type": "function",
+      "name": "renderQuotationTable",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1330,
+        1357
+      ],
+      "summary": "Dựng thân bảng báo giá với dự án, khách hàng, trạng thái, coverage và hành động mở chi tiết hoặc bàn rà soát.",
+      "tags": [
+        "ui-render",
+        "table",
+        "quotation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:renderNewQuotation",
+      "type": "function",
+      "name": "renderNewQuotation",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1359,
+        1454
+      ],
+      "summary": "Dựng màn hình Tạo báo giá: form thông tin dự án/khách hàng, dropzone tải BOQ mới và phần giải thích quy trình định giá deterministic sẽ chạy sau khi submit.",
+      "tags": [
+        "ui-render",
+        "quotation",
+        "form",
+        "file-upload"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/static/app.js:renderSelectedQuotationFile",
+      "type": "function",
+      "name": "renderSelectedQuotationFile",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1456,
+        1467
+      ],
+      "summary": "Sinh markup một file BOQ đang chọn trong form tạo báo giá, kèm kích thước và nút bỏ chọn.",
+      "tags": [
+        "ui-component",
+        "template",
+        "file-upload"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:bindQuotationDropzone",
+      "type": "function",
+      "name": "bindQuotationDropzone",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1469,
+        1487
+      ],
+      "summary": "Gắn handler drag-and-drop và click cho dropzone BOQ trên form tạo báo giá.",
+      "tags": [
+        "event-handler",
+        "file-upload",
+        "quotation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:addQuotationFiles",
+      "type": "function",
+      "name": "addQuotationFiles",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1489,
+        1501
+      ],
+      "summary": "Thêm file BOQ vào state của form tạo báo giá sau khi lọc trùng và kiểm tra hạn mức kích thước.",
+      "tags": [
+        "validation",
+        "file-upload",
+        "quotation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:submitQuotation",
+      "type": "function",
+      "name": "submitQuotation",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1503,
+        1538
+      ],
+      "summary": "Thu thập dữ liệu form, gửi báo giá mới kèm file BOQ tới `/api/quotations`, rồi tự động chạy pipeline định giá và điều hướng sang trang chi tiết.",
+      "tags": [
+        "api-client",
+        "quotation",
+        "mutation",
+        "form"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:loadQuotation",
+      "type": "function",
+      "name": "loadQuotation",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1540,
+        1559
+      ],
+      "summary": "Tải chi tiết một báo giá theo id, tuỳ chọn tự kích hoạt pipeline định giá nếu báo giá còn ở trạng thái draft.",
+      "tags": [
+        "api-client",
+        "data-loading",
+        "quotation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:runQuotation",
+      "type": "function",
+      "name": "runQuotation",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1561,
+        1581
+      ],
+      "summary": "Gọi `/api/quotations/{id}/run` để chạy pipeline matching và áp giá, hiển thị thông báo và tải lại chi tiết báo giá.",
+      "tags": [
+        "api-client",
+        "quotation",
+        "pricing-pipeline",
+        "mutation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderQuotationDetail",
+      "type": "function",
+      "name": "renderQuotationDetail",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1583,
+        1651
+      ],
+      "summary": "Dựng trang chi tiết báo giá với các chỉ số coverage và tổng tiền, trạng thái pipeline, và các hành động chạy lại, mở bàn rà soát hoặc xuất Excel.",
+      "tags": [
+        "ui-render",
+        "quotation",
+        "template"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/static/app.js:openReview",
+      "type": "function",
+      "name": "openReview",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1663,
+        1675
+      ],
+      "summary": "Mở bàn rà soát cho một báo giá: tải chi tiết báo giá và danh sách dòng cần review rồi render màn hình.",
+      "tags": [
+        "review-desk",
+        "data-loading",
+        "navigation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:filteredReviewItems",
+      "type": "function",
+      "name": "filteredReviewItems",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1677,
+        1688
+      ],
+      "summary": "Lọc danh sách dòng review theo từ khoá tìm kiếm và bộ lọc trạng thái hiện hành trong state.",
+      "tags": [
+        "filtering",
+        "review-desk",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderReview",
+      "type": "function",
+      "name": "renderReview",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1690,
+        1742
+      ],
+      "summary": "Dựng màn hình Bàn rà soát dạng hai cột: danh sách dòng BOQ cần xử lý bên trái và khung chi tiết candidate/provenance bên phải.",
+      "tags": [
+        "ui-render",
+        "review-desk",
+        "template"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/static/app.js:updateReviewSelection",
+      "type": "function",
+      "name": "updateReviewSelection",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1744,
+        1773
+      ],
+      "summary": "Cập nhật dòng review đang chọn: đổi highlight trong danh sách và render lại chỉ khung chi tiết thay vì dựng lại toàn trang.",
+      "tags": [
+        "ui-state",
+        "review-desk",
+        "performance"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:renderReviewListItem",
+      "type": "function",
+      "name": "renderReviewListItem",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1775,
+        1794
+      ],
+      "summary": "Sinh markup một dòng trong danh sách review với mô tả BOQ, khối lượng, badge trạng thái và dấu hiệu đang được chọn.",
+      "tags": [
+        "ui-component",
+        "template",
+        "review-desk"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderReviewDetail",
+      "type": "function",
+      "name": "renderReviewDetail",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1796,
+        1847
+      ],
+      "summary": "Dựng khung chi tiết của một dòng review: thuộc tính BOQ gốc, candidate được đề xuất kèm provenance workbook → sheet → row, và các nút chấp nhận, đổi candidate hoặc nhập giá tay.",
+      "tags": [
+        "ui-render",
+        "review-desk",
+        "provenance",
+        "template"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/static/app.js:renderCandidate",
+      "type": "function",
+      "name": "renderCandidate",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1853,
+        1863
+      ],
+      "summary": "Sinh markup một candidate matching với mô tả, đơn giá, điểm tin cậy và cờ đánh dấu candidate được hệ thống đề xuất.",
+      "tags": [
+        "ui-component",
+        "template",
+        "matching"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:reviewAction",
+      "type": "function",
+      "name": "reviewAction",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1877,
+        1922
+      ],
+      "summary": "Gửi quyết định rà soát (accept, chọn candidate khác, nhập giá tay, đánh dấu cần báo giá ngoài) tới `/api/boq-items/{id}/review` rồi cập nhật lại danh sách review và báo giá.",
+      "tags": [
+        "api-client",
+        "review-desk",
+        "mutation"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:openCandidateModal",
+      "type": "function",
+      "name": "openCandidateModal",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1924,
+        1957
+      ],
+      "summary": "Mở modal cho phép người rà soát chọn một candidate khác trong danh sách đã match cho dòng BOQ hiện tại.",
+      "tags": [
+        "ui-component",
+        "modal",
+        "review-desk"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:openManualPriceModal",
+      "type": "function",
+      "name": "openManualPriceModal",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1959,
+        1984
+      ],
+      "summary": "Mở modal nhập đơn giá thủ công kèm ghi chú lý do cho dòng BOQ không tìm được nguồn giá phù hợp.",
+      "tags": [
+        "ui-component",
+        "modal",
+        "review-desk",
+        "form"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:bindModalDismiss",
+      "type": "function",
+      "name": "bindModalDismiss",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        1986,
+        2002
+      ],
+      "summary": "Gắn cơ chế đóng modal dùng chung qua backdrop, nút `data-modal-dismiss` và phím Escape, đồng thời gọi callback dọn dẹp.",
+      "tags": [
+        "event-handler",
+        "modal",
+        "ui-component",
+        "accessibility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:loadCatalog",
+      "type": "function",
+      "name": "loadCatalog",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2004,
+        2013
+      ],
+      "summary": "Tải thống kê catalog và trang dữ liệu đầu tiên cho màn hình Danh mục & Giá.",
+      "tags": [
+        "api-client",
+        "data-loading",
+        "catalog"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:normalizeCatalogPayload",
+      "type": "function",
+      "name": "normalizeCatalogPayload",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2015,
+        2047
+      ],
+      "summary": "Chuẩn hóa payload catalog từ backend thành danh sách item, tổng số dòng, các facet lọc và cờ cho biết việc lọc đã được server thực hiện hay chưa.",
+      "tags": [
+        "normalization",
+        "catalog",
+        "pagination"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:applyCatalogFilters",
+      "type": "function",
+      "name": "applyCatalogFilters",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2049,
+        2063
+      ],
+      "summary": "Lọc catalog phía client theo từ khoá, kind, category, nguồn và trạng thái — dùng làm dự phòng khi server không tự lọc.",
+      "tags": [
+        "filtering",
+        "catalog",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:loadCatalogItems",
+      "type": "function",
+      "name": "loadCatalogItems",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2065,
+        2090
+      ],
+      "summary": "Tải một trang dữ liệu catalog theo bộ lọc và phân trang hiện tại, cập nhật state cùng facet rồi render lại bảng.",
+      "tags": [
+        "api-client",
+        "data-loading",
+        "catalog",
+        "pagination"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:catalogFacetValues",
+      "type": "function",
+      "name": "catalogFacetValues",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2113,
+        2127
+      ],
+      "summary": "Chuẩn hóa danh sách giá trị facet (category hoặc nguồn) thành các cặp value/label để dựng dropdown lọc catalog.",
+      "tags": [
+        "normalization",
+        "catalog",
+        "filtering"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderCatalog",
+      "type": "function",
+      "name": "renderCatalog",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2129,
+        2233
+      ],
+      "summary": "Dựng màn hình Danh mục & Giá: thẻ thống kê catalog, thanh bộ lọc đa chiều, bảng vật tư/nhân công và phân trang.",
+      "tags": [
+        "ui-render",
+        "catalog",
+        "template",
+        "filtering"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/static/app.js:renderCatalogPagination",
+      "type": "function",
+      "name": "renderCatalogPagination",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2235,
+        2253
+      ],
+      "summary": "Sinh markup thanh phân trang catalog với vị trí trang hiện tại, tổng số dòng và nút trước/sau.",
+      "tags": [
+        "ui-component",
+        "pagination",
+        "catalog"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderCatalogTable",
+      "type": "function",
+      "name": "renderCatalogTable",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2255,
+        2304
+      ],
+      "summary": "Dựng bảng catalog với mã, mô tả, đơn vị, đơn giá, nguồn, trạng thái và menu hành động archive/restore/xóa cho từng dòng.",
+      "tags": [
+        "ui-render",
+        "table",
+        "catalog"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:loadBenchmark",
+      "type": "function",
+      "name": "loadBenchmark",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2306,
+        2317
+      ],
+      "summary": "Tải kết quả holdout benchmark từ `/api/benchmark` với chỉ báo loading và thông báo lỗi khi thất bại.",
+      "tags": [
+        "api-client",
+        "data-loading",
+        "benchmark"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderBenchmark",
+      "type": "function",
+      "name": "renderBenchmark",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2323,
+        2364
+      ],
+      "summary": "Dựng trang Đánh giá độ phủ với các thanh coverage cho parse, vật tư, nhân công và độ chính xác ở confidence cao, kèm hướng dẫn đọc kết quả và raw response để audit.",
+      "tags": [
+        "ui-render",
+        "benchmark",
+        "template",
+        "metrics"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:exportQuotation",
+      "type": "function",
+      "name": "exportQuotation",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2372,
+        2387
+      ],
+      "summary": "Gọi endpoint export để lấy workbook đã điền đơn giá dưới dạng blob, suy tên file từ header content-disposition và kích hoạt tải xuống trên trình duyệt.",
+      "tags": [
+        "api-client",
+        "export",
+        "file-download",
+        "quotation"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:sourceDetailRecords",
+      "type": "function",
+      "name": "sourceDetailRecords",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2389,
+        2407
+      ],
+      "summary": "Trích danh sách bản ghi con của một nguồn (sản phẩm, nhân công, dòng BOQ) từ payload chi tiết bằng cách dò nhiều tên field thay thế.",
+      "tags": [
+        "normalization",
+        "import",
+        "utility"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:sourcePointerFromRecord",
+      "type": "function",
+      "name": "sourcePointerFromRecord",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2413,
+        2426
+      ],
+      "summary": "Dựng con trỏ provenance workbook → sheet → row cho một bản ghi để hiển thị trong modal chi tiết nguồn.",
+      "tags": [
+        "provenance",
+        "normalization",
+        "import"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderSourceDetailModal",
+      "type": "function",
+      "name": "renderSourceDetailModal",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2446,
+        2560
+      ],
+      "summary": "Dựng modal chi tiết nguồn dữ liệu: các ô tổng hợp, danh sách sheet, raw row đã parse, nhóm bản ghi giá/nhân công/BOQ và hành động vòng đời của nguồn — cùng xử lý trạng thái loading và lỗi.",
+      "tags": [
+        "ui-render",
+        "modal",
+        "import",
+        "provenance"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/static/app.js:renderSourceSheets",
+      "type": "function",
+      "name": "renderSourceSheets",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2566,
+        2588
+      ],
+      "summary": "Sinh markup danh sách sheet của workbook nguồn kèm số dòng và loại nội dung nhận diện được.",
+      "tags": [
+        "ui-component",
+        "template",
+        "import"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderSourceRawRows",
+      "type": "function",
+      "name": "renderSourceRawRows",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2590,
+        2620
+      ],
+      "summary": "Dựng bảng xem trước các dòng thô đã đọc từ workbook, giúp đối chiếu dữ liệu parse với file Excel gốc.",
+      "tags": [
+        "ui-render",
+        "table",
+        "import",
+        "provenance"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:renderSourceRecordGroups",
+      "type": "function",
+      "name": "renderSourceRecordGroups",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2622,
+        2647
+      ],
+      "summary": "Dựng các nhóm bản ghi đã chuẩn hóa của một nguồn, tách riêng vật tư và nhân công để dễ kiểm tra sau khi import.",
+      "tags": [
+        "ui-render",
+        "import",
+        "catalog"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:app/static/app.js:renderSourcePriceRecords",
+      "type": "function",
+      "name": "renderSourcePriceRecords",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2649,
+        2665
+      ],
+      "summary": "Dựng bảng các bản ghi giá thuộc một nguồn kèm con trỏ provenance tới đúng sheet và dòng gốc.",
+      "tags": [
+        "ui-render",
+        "table",
+        "provenance",
+        "pricing"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:showSourceDetail",
+      "type": "function",
+      "name": "showSourceDetail",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2674,
+        2689
+      ],
+      "summary": "Mở modal chi tiết nguồn theo id: hiển thị trạng thái loading, gọi `/api/sources/{id}` rồi render nội dung hoặc thông báo lỗi.",
+      "tags": [
+        "api-client",
+        "modal",
+        "import"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:previewSourceRows",
+      "type": "function",
+      "name": "previewSourceRows",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2691,
+        2707
+      ],
+      "summary": "Tải lại chi tiết nguồn với tham số `include_rows` để bổ sung phần xem trước dòng thô vào modal đang mở.",
+      "tags": [
+        "api-client",
+        "import",
+        "provenance"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:refreshSourceAfterMutation",
+      "type": "function",
+      "name": "refreshSourceAfterMutation",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2709,
+        2729
+      ],
+      "summary": "Sau một thao tác thay đổi nguồn, hiển thị toast xác nhận rồi tải lại đồng thời chi tiết nguồn và danh sách Kho dữ liệu để UI khớp trạng thái server.",
+      "tags": [
+        "api-client",
+        "mutation",
+        "ui-state",
+        "import"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:archiveSource",
+      "type": "function",
+      "name": "archiveSource",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2731,
+        2740
+      ],
+      "summary": "Archive một nguồn dữ liệu qua API rồi làm mới UI — phù hợp quy tắc không xóa cứng nguồn đã được tham chiếu.",
+      "tags": [
+        "api-client",
+        "mutation",
+        "import",
+        "lifecycle"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:deleteSource",
+      "type": "function",
+      "name": "deleteSource",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2751,
+        2763
+      ],
+      "summary": "Xóa một nguồn dữ liệu sau khi hỏi xác nhận, đóng modal và làm mới danh sách Kho dữ liệu.",
+      "tags": [
+        "api-client",
+        "mutation",
+        "import",
+        "lifecycle"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderCatalogItemModal",
+      "type": "function",
+      "name": "renderCatalogItemModal",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2765,
+        2840
+      ],
+      "summary": "Dựng modal chi tiết một dòng catalog: thuộc tính chuẩn hóa, lịch sử observation giá theo nguồn, và các hành động archive/restore/xóa, kèm xử lý loading và lỗi.",
+      "tags": [
+        "ui-render",
+        "modal",
+        "catalog",
+        "provenance"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:app/static/app.js:showCatalogDetail",
+      "type": "function",
+      "name": "showCatalogDetail",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2849,
+        2864
+      ],
+      "summary": "Mở modal chi tiết cho một item catalog theo kind và id, tải dữ liệu từ API và render kết quả hoặc lỗi.",
+      "tags": [
+        "api-client",
+        "modal",
+        "catalog"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:archiveCatalogItem",
+      "type": "function",
+      "name": "archiveCatalogItem",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2866,
+        2877
+      ],
+      "summary": "Archive một item catalog qua API rồi tải lại trang danh mục và modal đang mở.",
+      "tags": [
+        "api-client",
+        "mutation",
+        "catalog",
+        "lifecycle"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:restoreCatalogItem",
+      "type": "function",
+      "name": "restoreCatalogItem",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2879,
+        2890
+      ],
+      "summary": "Phục hồi một item catalog đã archive rồi làm mới danh sách và modal.",
+      "tags": [
+        "api-client",
+        "mutation",
+        "catalog",
+        "lifecycle"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:deleteCatalogItem",
+      "type": "function",
+      "name": "deleteCatalogItem",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2892,
+        2903
+      ],
+      "summary": "Xóa một item catalog sau khi hỏi xác nhận, đóng modal và tải lại danh mục.",
+      "tags": [
+        "api-client",
+        "mutation",
+        "catalog",
+        "lifecycle"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:showGuide",
+      "type": "function",
+      "name": "showGuide",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2905,
+        2925
+      ],
+      "summary": "Mở modal hướng dẫn nhanh ba bước (nhập dữ liệu → tạo báo giá → rà soát) và nhắc rõ rằng AI chỉ rerank candidate, còn giá cùng provenance luôn do pipeline deterministic quyết định.",
+      "tags": [
+        "ui-component",
+        "modal",
+        "documentation",
+        "onboarding"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:app/static/app.js:renderRoute",
+      "type": "function",
+      "name": "renderRoute",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2927,
+        2958
+      ],
+      "summary": "Router trung tâm của ứng dụng: đọc hash route rồi render và tải dữ liệu cho đúng màn hình (dashboard, import, quotations, quotation, review, catalog, benchmark), cập nhật breadcrumb và highlight nav.",
+      "tags": [
+        "routing",
+        "navigation",
+        "orchestration",
+        "entry-point"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Mẫu render-then-load: dựng skeleton trước rồi mới await dữ liệu, giúp màn hình phản hồi ngay khi đổi route."
+    },
+    {
+      "id": "function:app/static/app.js:filterQuotations",
+      "type": "function",
+      "name": "filterQuotations",
+      "filePath": "app/static/app.js",
+      "lineRange": [
+        2960,
+        2976
+      ],
+      "summary": "Lọc danh sách báo giá phía client theo từ khoá và nhóm trạng thái (completed, review, running, draft) rồi cập nhật lại bảng.",
+      "tags": [
+        "filtering",
+        "quotation",
+        "ui-state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:app/static/index.html",
+      "type": "file",
+      "name": "index.html",
+      "filePath": "app/static/index.html",
+      "summary": "Shell HTML duy nhất của ứng dụng: khai báo sprite SVG icon, sidebar điều hướng năm màn hình chính, topbar với breadcrumb cùng nút refresh, và các container rỗng `#page-view`, `#toast-region`, `#modal-root` để app.js dựng nội dung động.",
+      "tags": [
+        "markup",
+        "app-shell",
+        "entry-point",
+        "frontend"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "Dùng một `<svg class=\"icon-sprite\">` chứa các `<symbol id=\"i-*\">` để mọi icon tái sử dụng qua `<use href=\"#i-...\">`, tránh phải tải icon font hay nhiều file SVG rời."
+    },
+    {
+      "id": "file:app/static/styles.css",
+      "type": "file",
+      "name": "styles.css",
+      "filePath": "app/static/styles.css",
+      "summary": "Toàn bộ stylesheet của frontend, xây trên bộ CSS custom property (màu, surface, shadow, chiều rộng sidebar, chiều cao topbar) và định nghĩa mọi thành phần UI: app shell, card, bảng, badge trạng thái, dropzone, modal, toast, thanh coverage và các breakpoint responsive.",
+      "tags": [
+        "markup",
+        "stylesheet",
+        "design-system",
+        "frontend",
+        "responsive"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Thiết kế theo design token bằng CSS variable trên `:root` nên đổi theme chỉ cần sửa một chỗ; chỉ có bốn `@media` query và một `@keyframes`, không phụ thuộc framework CSS nào."
+    },
+    {
+      "id": "file:benchmarks/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "benchmarks/__init__.py",
+      "summary": "Package marker cho bộ benchmark chạy trên workbook thật, chỉ chứa docstring mô tả mục đích của package.",
+      "tags": [
+        "package-marker",
+        "entry-point",
+        "benchmark"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:safeHref",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:formatDateTime",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:fileSize",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:normalizeSource",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:normalizeCatalogItem",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:normalizeQuotation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:normalizeReviewItem",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:sourceStatus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:quotationStatus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:reviewStatus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:setAIHealth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:toast",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:request",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:describeAIStatus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:loadAIHealth",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:routeFromHash",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:emptyState",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:pageIntro",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:statCard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:loadDashboard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderDashboard",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderQuotationListRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:loadSources",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderImport",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderSelectedFile",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderClassificationItem",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:canonicalSourceType",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderSourcesTable",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:bindDropzone",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:addImportFiles",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:previewImportFiles",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:submitImport",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:loadQuotations",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderQuotations",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderQuotationTable",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderNewQuotation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderSelectedQuotationFile",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:bindQuotationDropzone",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:addQuotationFiles",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:submitQuotation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:loadQuotation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:runQuotation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderQuotationDetail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:openReview",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:filteredReviewItems",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderReview",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:updateReviewSelection",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderReviewListItem",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderReviewDetail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderCandidate",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:reviewAction",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:openCandidateModal",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:openManualPriceModal",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:bindModalDismiss",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:loadCatalog",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:normalizeCatalogPayload",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:applyCatalogFilters",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:loadCatalogItems",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:catalogFacetValues",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderCatalog",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderCatalogPagination",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderCatalogTable",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:loadBenchmark",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderBenchmark",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:exportQuotation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:sourceDetailRecords",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:sourcePointerFromRecord",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderSourceDetailModal",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderSourceSheets",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderSourceRawRows",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderSourceRecordGroups",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderSourcePriceRecords",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:showSourceDetail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:previewSourceRows",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:refreshSourceAfterMutation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:archiveSource",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:deleteSource",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderCatalogItemModal",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:showCatalogDetail",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:archiveCatalogItem",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:restoreCatalogItem",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:deleteCatalogItem",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:showGuide",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:renderRoute",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "function:app/static/app.js:filterQuotations",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:app/static/app.js",
+      "target": "file:app/main.py",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:app/static/index.html",
+      "target": "file:app/static/app.js",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:app/static/index.html",
+      "target": "file:app/static/styles.css",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:app/static/index.html",
+      "target": "file:app/main.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

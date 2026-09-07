@@ -1,0 +1,23 @@
+{
+  "projectRoot": "E:/Desktop/DH-company",
+  "batchFiles": [
+    {"path": "app/static/app.js", "language": "javascript", "sizeLines": 3115, "fileCategory": "code"},
+    {"path": "app/static/index.html", "language": "html", "sizeLines": 229, "fileCategory": "markup"},
+    {"path": "app/static/styles.css", "language": "css", "sizeLines": 2704, "fileCategory": "markup"},
+    {"path": "benchmarks/__init__.py", "language": "python", "sizeLines": 2, "fileCategory": "code"},
+    {"path": "docs/DATA-REQUIREMENTS-NEXT.md", "language": "markdown", "sizeLines": 29, "fileCategory": "docs"},
+    {"path": "docs/DECISIONS.md", "language": "markdown", "sizeLines": 50, "fileCategory": "docs"},
+    {"path": "tests/__init__.py", "language": "python", "sizeLines": 1, "fileCategory": "code"},
+    {"path": "tests/test_config.py", "language": "python", "sizeLines": 25, "fileCategory": "code"}
+  ],
+  "batchImportData": {
+    "app/static/app.js": [],
+    "app/static/index.html": [],
+    "app/static/styles.css": [],
+    "benchmarks/__init__.py": [],
+    "docs/DATA-REQUIREMENTS-NEXT.md": [],
+    "docs/DECISIONS.md": [],
+    "tests/__init__.py": [],
+    "tests/test_config.py": []
+  }
+}

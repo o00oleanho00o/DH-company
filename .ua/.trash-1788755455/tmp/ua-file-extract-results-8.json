@@ -1,0 +1,248 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 5,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 5,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 0,
+      "failed": 0,
+      "skipped": 5
+    }
+  },
+  "results": [
+    {
+      "path": "deliverables/adr/ADR-001-modular-monolith.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 16,
+      "nonEmptyLines": 11,
+      "sections": [
+        {
+          "heading": "ADR-001: FastAPI modular monolith",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Status",
+          "level": 2,
+          "line": 3
+        },
+        {
+          "heading": "Context",
+          "level": 2,
+          "line": 6
+        },
+        {
+          "heading": "Decision",
+          "level": 2,
+          "line": 9
+        },
+        {
+          "heading": "Trade-offs",
+          "level": 2,
+          "line": 12
+        },
+        {
+          "heading": "Revisit trigger",
+          "level": 2,
+          "line": 15
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 6
+      }
+    },
+    {
+      "path": "deliverables/adr/ADR-002-sqlite-provenance.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 16,
+      "nonEmptyLines": 11,
+      "sections": [
+        {
+          "heading": "ADR-002: SQLite và provenance-first storage",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Status",
+          "level": 2,
+          "line": 3
+        },
+        {
+          "heading": "Context",
+          "level": 2,
+          "line": 6
+        },
+        {
+          "heading": "Decision",
+          "level": 2,
+          "line": 9
+        },
+        {
+          "heading": "Trade-offs",
+          "level": 2,
+          "line": 12
+        },
+        {
+          "heading": "Revisit trigger",
+          "level": 2,
+          "line": 15
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 6
+      }
+    },
+    {
+      "path": "deliverables/adr/ADR-003-bounded-ai-rerank.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 16,
+      "nonEmptyLines": 11,
+      "sections": [
+        {
+          "heading": "ADR-003: AI chỉ rerank candidate có giới hạn",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Status",
+          "level": 2,
+          "line": 3
+        },
+        {
+          "heading": "Context",
+          "level": 2,
+          "line": 6
+        },
+        {
+          "heading": "Decision",
+          "level": 2,
+          "line": 9
+        },
+        {
+          "heading": "Trade-offs",
+          "level": 2,
+          "line": 12
+        },
+        {
+          "heading": "Revisit trigger",
+          "level": 2,
+          "line": 15
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 6
+      }
+    },
+    {
+      "path": "deliverables/adr/ADR-004-formula-preserving-export.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 16,
+      "nonEmptyLines": 11,
+      "sections": [
+        {
+          "heading": "ADR-004: Giữ công thức workbook khi export",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Status",
+          "level": 2,
+          "line": 3
+        },
+        {
+          "heading": "Context",
+          "level": 2,
+          "line": 6
+        },
+        {
+          "heading": "Decision",
+          "level": 2,
+          "line": 9
+        },
+        {
+          "heading": "Trade-offs",
+          "level": 2,
+          "line": 12
+        },
+        {
+          "heading": "Revisit trigger",
+          "level": 2,
+          "line": 15
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 6
+      }
+    },
+    {
+      "path": "deliverables/adr/ADR-005-network-port-3000.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 16,
+      "nonEmptyLines": 11,
+      "sections": [
+        {
+          "heading": "ADR-005: Bind `0.0.0.0:3000`",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Status",
+          "level": 2,
+          "line": 3
+        },
+        {
+          "heading": "Context",
+          "level": 2,
+          "line": 6
+        },
+        {
+          "heading": "Decision",
+          "level": 2,
+          "line": 9
+        },
+        {
+          "heading": "Trade-offs",
+          "level": 2,
+          "line": 12
+        },
+        {
+          "heading": "Revisit trigger",
+          "level": 2,
+          "line": 15
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 6
+      }
+    }
+  ]
+}

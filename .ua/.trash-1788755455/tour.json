@@ -1,0 +1,123 @@
+[
+  {
+    "order": 1,
+    "title": "Tổng quan dự án",
+    "description": "README.md là điểm xuất phát bắt buộc: nó nêu mục tiêu của DH M&E Pricing Hub — nhập workbook Excel M&E, chuẩn hóa catalog, matching BOQ, rà soát candidate và xuất báo giá có provenance. Năm bước nghiệp vụ (Kho dữ liệu → Danh mục & Giá → Tạo báo giá → Bàn rà soát → Xuất Excel) và ba pricing policy (latest_supplier_net, approved_internal, historical_median) được giới thiệu ở đây sẽ là sợi chỉ xuyên suốt toàn bộ tour. Ghi nhớ nguyên tắc cốt lõi: core pipeline deterministic, AI chỉ là lớp semantic tùy chọn và không bao giờ được tạo giá.",
+    "nodeIds": [
+      "document:README.md"
+    ]
+  },
+  {
+    "order": 2,
+    "title": "Kiến trúc & quyết định nền tảng",
+    "description": "ARCHITECTURE.md và ARCH-DHBG1.md vẽ ra sơ đồ runtime: trình duyệt gọi vào một FastAPI modular monolith duy nhất, phía sau là SQLite, không có microservice hay hàng đợi job riêng. ADR-001 giải thích lý do chọn kiến trúc này cho giai đoạn MVP một máy — các module trong app/ giao tiếp qua function contract nội bộ thay vì network call, đổi lấy sự đơn giản với đánh đổi là single point of failure. Đây là bộ khung để hiểu vì sao các bước tiếp theo (entry point, data model, pricing engine) đều nằm chung trong một process.",
+    "nodeIds": [
+      "document:ARCHITECTURE.md",
+      "document:deliverables/ARCH-DHBG1.md",
+      "document:deliverables/adr/ADR-001-modular-monolith.md"
+    ]
+  },
+  {
+    "order": 3,
+    "title": "Điểm vào & bề mặt API",
+    "description": "app/main.py là điểm vào FastAPI, định nghĩa toàn bộ 27 route trực tiếp trong một file duy nhất — đúng như ADR-001 mô tả, không tách thư mục routers/ riêng. Bốn endpoint được chọn ở đây tái hiện đúng vòng đời một báo giá: tạo project từ workbook BOQ (POST /api/quotations), chạy pricing engine deterministic (POST .../run), lấy danh sách cần rà soát (GET .../review) và cuối cùng xuất file Excel (GET .../export). Bốn lời gọi này chính là bốn bước nghiệp vụ 3–5–4–6 của README được hiện thực hóa thành HTTP contract.",
+    "nodeIds": [
+      "file:app/main.py",
+      "endpoint:app/main.py:POST-/api/quotations",
+      "endpoint:app/main.py:POST-/api/quotations/{project_id}/run",
+      "endpoint:app/main.py:GET-/api/quotations/{project_id}/review",
+      "endpoint:app/main.py:GET-/api/quotations/{project_id}/export"
+    ]
+  },
+  {
+    "order": 4,
+    "title": "Data model & chuỗi provenance",
+    "description": "migrations/001_initial.sql định nghĩa 16 bảng, xoay quanh chuỗi provenance source_files → source_sheets → source_rows: mọi con số giá trong hệ thống đều phải truy vết được về đúng workbook, sheet và dòng gốc. price_observations là kho quan sát giá bất biến (giữ mọi bậc list/discount/VAT), khác với product_prices chỉ là giá đã chọn để dùng — đây chính là nguồn dữ liệu nuôi policy historical_median nhắc ở Bước 1. app/db.py là lớp truy cập SQLite hiện thực hóa schema này: bật foreign keys/WAL, tự động migrate bù cột cho database cũ, và cấp context manager db_session mà mọi module phía sau đều dùng chung.",
+    "nodeIds": [
+      "table:migrations/001_initial.sql",
+      "table:migrations/001_initial.sql:source_files",
+      "table:migrations/001_initial.sql:source_rows",
+      "table:migrations/001_initial.sql:price_observations",
+      "file:app/db.py"
+    ],
+    "languageLesson": "SQL: chuẩn hóa dữ liệu qua khóa ngoại (source_file_id/source_sheet_id/source_row_id) giúp mọi bảng giá tham chiếu ngược về nguồn thay vì lưu trùng lặp; đây là cách 'provenance-first' được ADR-002 áp đặt ở tầng schema chứ không chỉ ở tầng code."
+  },
+  {
+    "order": 5,
+    "title": "Nhập workbook — Kho dữ liệu",
+    "description": "app/excel.py đọc workbook M&E bằng openpyxl (.xlsx) và xlrd (.xls), snapshot cả giá trị lẫn công thức rồi tự suy luận loại tài liệu, hàng header và mapping cột — mọi dòng trích xuất đều giữ provenance sheet/row để không bao giờ áp giá thiếu nguồn. app/ingest.py là pipeline điều phối phía trên: tính checksum chống trùng, phân loại dòng BOQ, upsert catalog vật tư/nhân công, ghi price observation theo price policy và dựng bridge provenance tới source_files/source_sheets/source_rows từ Bước 4. Đây chính là bước 'Kho dữ liệu' đầu tiên trong luồng nghiệp vụ README.",
+    "nodeIds": [
+      "file:app/excel.py",
+      "file:app/ingest.py"
+    ]
+  },
+  {
+    "order": 6,
+    "title": "Nền chuẩn hóa dùng chung",
+    "description": "app/normalize.py có fan-in cao nhất trong toàn bộ codebase (14 module phụ thuộc) vì nó là primitive deterministic gốc: bỏ dấu tiếng Việt, sinh canonical_key, chuẩn hóa đơn vị đo, parse số kiểu Việt/Excel và trích xuất thuộc tính kỹ thuật (số lõi, tiết diện, cấp điện áp) bằng regex. Cả ingest.py (Bước 5) lẫn pricing.py (Bước 7) đều dựa vào cùng một hàm chuẩn hóa này để đảm bảo hai tên gọi khác nhau của cùng một vật tư luôn quy về một canonical key duy nhất — không có sự tùy tiện nào giữa các module.",
+    "nodeIds": [
+      "file:app/normalize.py"
+    ],
+    "languageLesson": "Python: đây là ví dụ tốt về 'pure function' deterministic — không side-effect, không I/O, chỉ dựa vào regex và bảng ánh xạ tĩnh, nên có thể unit-test độc lập và tái sử dụng an toàn ở mọi tầng."
+  },
+  {
+    "order": 7,
+    "title": "Lõi pricing — Tạo báo giá",
+    "description": "app/pricing.py là engine matching và pricing BOQ deterministic: truy hồi, chấm điểm candidate vật tư/nhân công, chọn giá kèm provenance workbook-sheet-row, cảnh báo price drift và phân loại trạng thái auto-apply hay chuyển sang review. Hai module con price_policy.py (chính sách giá nhà cung cấp, không tự phát minh nguồn) và labor_policy.py (chính sách nhân công dựa trên spread-variance-recency) là ba mảnh ghép có liên kết chặt nhất trong toàn hệ thống (45 cạnh giữa nhóm này). Đây là bước 'Tạo báo giá' — nơi ba pricing policy nhắc ở Bước 1 thực sự được áp dụng để chọn candidate cao nhất vượt ngưỡng 90%.",
+    "nodeIds": [
+      "file:app/pricing.py",
+      "file:app/price_policy.py",
+      "file:app/labor_policy.py"
+    ]
+  },
+  {
+    "order": 8,
+    "title": "Ranh giới AI — chỉ rerank, không định giá",
+    "description": "app/ai.py là lớp semantic AI tùy chọn duy nhất trong hệ thống: gọi provider LLM tương thích OpenAI để rerank candidate hoặc classify nhãn, có budget số lần gọi, validate ID trả về và fallback deterministic khi tắt hoặc lỗi. ADR-003 khóa chặt vai trò này bằng kiến trúc một chiều — pricing.py gọi ai.py chứ không có chiều ngược lại — và prompt gửi đi chỉ chứa identity/thuộc tính kỹ thuật, tuyệt đối không chứa giá. Đây là lý do lớp AI được tách hẳn thành một layer riêng (layer:ai) thay vì trộn vào engine pricing deterministic ở Bước 7.",
+    "nodeIds": [
+      "file:app/ai.py",
+      "document:deliverables/adr/ADR-003-bounded-ai-rerank.md"
+    ]
+  },
+  {
+    "order": 9,
+    "title": "Xuất Excel giữ nguyên công thức",
+    "description": "app/export.py hiện thực hóa bước cuối 'Xuất Excel' của README: chỉ ghi đè các ô đơn giá vật tư/nhân công đã chọn ở Bước 7, còn số lượng, thành tiền, công thức và layout gốc của workbook được giữ nguyên tuyệt đối. ADR-004 giải thích cách làm — sao chép workbook nguồn rồi khôi phục/tính lại formula cache — và chấp nhận đánh đổi rằng giá trị cached có thể chậm cập nhật cho đến khi người dùng mở lại bằng Excel.",
+    "nodeIds": [
+      "file:app/export.py",
+      "document:deliverables/adr/ADR-004-formula-preserving-export.md"
+    ],
+    "languageLesson": "openpyxl chỉ lưu cached value của công thức, không tự tính lại; vì vậy export.py phải chủ động can thiệp vào formula cache để tránh hiển thị số liệu cũ khi file được mở lần đầu."
+  },
+  {
+    "order": 10,
+    "title": "Bàn rà soát — giao diện frontend",
+    "description": "app/static/app.js là toàn bộ single-page frontend vanilla JavaScript: một IIFE giữ state tập trung, một lớp client gọi REST /api/* từ Bước 3, và các hàm render cho đúng năm màn hình nghiệp vụ (Kho dữ liệu, Danh mục & Giá, Tạo báo giá, Bàn rà soát, Xuất Excel) — điều hướng bằng hash route, không framework, không build step. index.html chỉ là shell rỗng với sidebar và các container để app.js dựng nội dung động, còn styles.css định nghĩa toàn bộ UI qua CSS custom property. Đây là nơi người dùng thực sự tương tác với candidate, confidence và provenance sinh ra từ engine ở Bước 7.",
+    "nodeIds": [
+      "file:app/static/app.js",
+      "file:app/static/index.html",
+      "file:app/static/styles.css"
+    ],
+    "languageLesson": "JavaScript: mẫu IIFE (Immediately Invoked Function Expression) tạo một closure duy nhất để giữ state module-scope mà không rò rỉ biến toàn cục — cách làm phổ biến trước khi ES module trở thành chuẩn, phù hợp cho một SPA không cần build step."
+  },
+  {
+    "order": 11,
+    "title": "Vận hành & cấu hình",
+    "description": "app/cli.py cấp các lệnh init-db, ingest, seed, price, stats, reset và benchmark để chạy pipeline bên ngoài giao diện web, còn app/config.py là trung tâm cấu hình: xác định đường dẫn storage/raw/exports/pricing.db và expose dataclass Settings chứa toàn bộ tham số runtime kể cả ngân sách LLM và ngưỡng price drift. run.ps1 khởi động uvicorn với app.main:app ở chế độ reload trên 0.0.0.0:3000, còn .env.example là template liệt kê toàn bộ bề mặt cấu hình mà người dùng copy thành .env — không commit vào Git. Đây là lớp 'Config & Utility' mà hầu như mọi module khác trong tour đều phụ thuộc để chạy được.",
+    "nodeIds": [
+      "file:app/cli.py",
+      "file:app/config.py",
+      "file:run.ps1",
+      "config:.env.example"
+    ]
+  },
+  {
+    "order": 12,
+    "title": "Kiểm chứng bằng test — deterministic bắt buộc",
+    "description": "tests/conftest.py cưỡng chế ENABLE_LLM=false trước khi import app, đảm bảo toàn bộ test suite luôn deterministic và không gọi mạng thật — đúng tinh thần 'AI không được tạo giá' đã nhấn mạnh từ Bước 1 và Bước 8. tests/test_pricing.py là bộ test tích hợp lớn nhất, xác nhận ingest idempotent theo checksum, provenance đầy đủ trên mọi dòng giá, và các trạng thái cần review thủ công (conflict, price drift) không bao giờ được tự động auto-approve. Đây là điểm khép lại tour: mọi bất biến nghiệp vụ đi qua các bước trước đều được test suite này bảo vệ khỏi regression.",
+    "nodeIds": [
+      "file:tests/conftest.py",
+      "file:tests/test_pricing.py"
+    ]
+  }
+]

@@ -1,0 +1,7106 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "af94f8e0bdb00db078384cf89d02a0c1cd03ded5",
+  "generatedAt": "2026-09-07T04:30:42.606Z",
+  "files": {
+    ".env.example": {
+      "filePath": ".env.example",
+      "contentHash": "8b31d84c37b2ae040009fcdf77a5bd7c860dcfc945c7647a4e6f699de62c0477",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 24,
+      "hasStructuralAnalysis": false
+    },
+    "AGENTS.md": {
+      "filePath": "AGENTS.md",
+      "contentHash": "590cdbedd298b1e40fbaf96977522e4ed319bda9a842434f058fe83ef1ff7940",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 37,
+      "hasStructuralAnalysis": false
+    },
+    "ARCHITECTURE.md": {
+      "filePath": "ARCHITECTURE.md",
+      "contentHash": "40d6ef8b07db63db60a4b2c32a33d4ab7d3d1360f9870d89ca5405532b135e41",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 91,
+      "hasStructuralAnalysis": false
+    },
+    "CLAUDE.md": {
+      "filePath": "CLAUDE.md",
+      "contentHash": "0d37b4d4eeb304dc6c4b41ba98121759301775fa7df1045efc113c870e3fa82d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 4,
+      "hasStructuralAnalysis": false
+    },
+    "KNOWN_LIMITATIONS.md": {
+      "filePath": "KNOWN_LIMITATIONS.md",
+      "contentHash": "3867948be022c011b8ea515d2b93606672518a34e3261375c67602deebe3f83a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 20,
+      "hasStructuralAnalysis": false
+    },
+    "PLAN.md": {
+      "filePath": "PLAN.md",
+      "contentHash": "0fb88d9a86a39f942a586bf781be7609c56d5a3d3b86b1685c7e035c159a68ce",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 34,
+      "hasStructuralAnalysis": false
+    },
+    "README.md": {
+      "filePath": "README.md",
+      "contentHash": "269d0b0edcb748fdafec69b7761174effd49cbfae2131932bc188ed4ed4ee2ad",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 134,
+      "hasStructuralAnalysis": false
+    },
+    "ROUND2-FINAL-REPORT.md": {
+      "filePath": "ROUND2-FINAL-REPORT.md",
+      "contentHash": "202abb100127c194616d7c1283dbf5f4cfe03e42851a8a819249c1fd82a80c07",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 291,
+      "hasStructuralAnalysis": false
+    },
+    "app/__init__.py": {
+      "filePath": "app/__init__.py",
+      "contentHash": "d76eddcf19ba322de2c012aa8d042d5091f0d7f03cdddc9c9cff76009d320c1b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 3,
+      "hasStructuralAnalysis": true
+    },
+    "app/ai.py": {
+      "filePath": "app/ai.py",
+      "contentHash": "5ec5824666f552c7147996963bb21928d3f437a4e9127e22ab10ee7c5fd8d513",
+      "functions": [
+        {
+          "name": "_sensitive_key",
+          "params": [
+            "value"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "_clip_text",
+          "params": [
+            "value",
+            "limit"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "_safe_json_value",
+          "params": [
+            "value",
+            "depth",
+            "budget"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 35
+        },
+        {
+          "name": "_id_key",
+          "params": [
+            "value"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "_candidate_value",
+          "params": [
+            "candidate",
+            "key",
+            "default"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "_safe_candidate",
+          "params": [
+            "candidate"
+          ],
+          "returnType": "dict[str, Any] | None",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "_candidate_dict",
+          "params": [
+            "candidate"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 23
+        },
+        {
+          "name": "_strip_code_fence",
+          "params": [
+            "content"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "_parse_json_content",
+          "params": [
+            "content"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "_message_content",
+          "params": [
+            "body"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 30
+        },
+        {
+          "name": "_as_bool",
+          "params": [
+            "value"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "_as_confidence",
+          "params": [
+            "value"
+          ],
+          "returnType": "float",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "_is_ambiguous",
+          "params": [
+            "candidates",
+            "margin"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "safe_rerank",
+          "params": [
+            "description",
+            "technical_attributes",
+            "candidates",
+            "provider",
+            "only_if_ambiguous",
+            "ambiguity_margin",
+            "max_candidates"
+          ],
+          "returnType": "RerankResult",
+          "exported": true,
+          "lineCount": 95
+        },
+        {
+          "name": "safe_classify",
+          "params": [
+            "text",
+            "labels",
+            "provider",
+            "context"
+          ],
+          "returnType": "ClassificationResult",
+          "exported": true,
+          "lineCount": 41
+        },
+        {
+          "name": "_run_coro_sync",
+          "params": [
+            "coro"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 23
+        },
+        {
+          "name": "safe_rerank_sync",
+          "params": [
+            "description",
+            "technical_attributes",
+            "candidates"
+          ],
+          "returnType": "RerankResult",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "safe_classify_sync",
+          "params": [
+            "text",
+            "labels"
+          ],
+          "returnType": "ClassificationResult",
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "classes": [
+        {
+          "name": "AIProviderError",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "AIDisabledError",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "AIBudgetExceeded",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "AIProtocolError",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "AIResponse",
+          "methods": [],
+          "properties": [
+            "content",
+            "model",
+            "usage",
+            "request_id",
+            "attempts",
+            "latency_ms",
+            "needs_review",
+            "explanation",
+            "metadata"
+          ],
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "RerankResult",
+          "methods": [],
+          "properties": [
+            "candidates",
+            "applied",
+            "needs_review",
+            "explanation",
+            "response",
+            "reason",
+            "ranked_candidates"
+          ],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "ClassificationResult",
+          "methods": [],
+          "properties": [
+            "label",
+            "confidence",
+            "needs_review",
+            "explanation",
+            "response",
+            "applied",
+            "reason"
+          ],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "AIProvider",
+          "methods": [
+            "__init__",
+            "configured",
+            "calls_made",
+            "remaining_calls",
+            "reset_budget",
+            "status",
+            "_endpoint",
+            "_reserve_call",
+            "_post",
+            "_request_json",
+            "complete_json",
+            "_prepare_candidates",
+            "rerank_with_metadata",
+            "rerank",
+            "classify_with_metadata",
+            "classify"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 482
+        }
+      ],
+      "imports": [
+        {
+          "source": "asyncio",
+          "specifiers": [
+            "asyncio"
+          ]
+        },
+        {
+          "source": "inspect",
+          "specifiers": [
+            "inspect"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "math",
+          "specifiers": [
+            "math"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "threading",
+          "specifiers": [
+            "threading"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        },
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Mapping",
+            "Sequence"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass",
+            "field"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        },
+        {
+          "source": "httpx",
+          "specifiers": [
+            "httpx"
+          ]
+        },
+        {
+          "source": ".config",
+          "specifiers": [
+            "settings"
+          ]
+        }
+      ],
+      "exports": [
+        "AIProviderError",
+        "AIDisabledError",
+        "AIBudgetExceeded",
+        "AIProtocolError",
+        "AIResponse",
+        "RerankResult",
+        "ClassificationResult",
+        "_sensitive_key",
+        "_clip_text",
+        "_safe_json_value",
+        "_id_key",
+        "_candidate_value",
+        "_safe_candidate",
+        "_candidate_dict",
+        "_strip_code_fence",
+        "_parse_json_content",
+        "_message_content",
+        "_as_bool",
+        "_as_confidence",
+        "AIProvider",
+        "_is_ambiguous",
+        "safe_rerank",
+        "safe_classify",
+        "_run_coro_sync",
+        "safe_rerank_sync",
+        "safe_classify_sync"
+      ],
+      "totalLines": 1042,
+      "hasStructuralAnalysis": true
+    },
+    "app/cli.py": {
+      "filePath": "app/cli.py",
+      "contentHash": "1ae93c9a41ae473e41e8960cc712432f6420d3484e5a742a6dcd65ead45994ae",
+      "functions": [
+        {
+          "name": "_print",
+          "params": [
+            "value"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "cmd_init_db",
+          "params": [
+            "_"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "cmd_ingest",
+          "params": [
+            "args"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "cmd_seed",
+          "params": [
+            "args"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "cmd_price",
+          "params": [
+            "args"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "cmd_stats",
+          "params": [
+            "_"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "cmd_reset",
+          "params": [
+            "_"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "cmd_benchmark",
+          "params": [
+            "args"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "build_parser",
+          "params": [],
+          "returnType": "argparse.ArgumentParser",
+          "exported": true,
+          "lineCount": 43
+        },
+        {
+          "name": "main",
+          "params": [
+            "argv"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "argparse",
+          "specifiers": [
+            "argparse"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "shutil",
+          "specifiers": [
+            "shutil"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": ".config",
+          "specifiers": [
+            "DB_PATH",
+            "ROOT_DIR",
+            "STORAGE_DIR"
+          ]
+        },
+        {
+          "source": ".db",
+          "specifiers": [
+            "init_db"
+          ]
+        },
+        {
+          "source": ".ingest",
+          "specifiers": [
+            "ingest_directory",
+            "ingest_workbook"
+          ]
+        },
+        {
+          "source": ".pricing",
+          "specifiers": [
+            "catalog_stats",
+            "run_pricing"
+          ]
+        }
+      ],
+      "exports": [
+        "_print",
+        "cmd_init_db",
+        "cmd_ingest",
+        "cmd_seed",
+        "cmd_price",
+        "cmd_stats",
+        "cmd_reset",
+        "cmd_benchmark",
+        "build_parser",
+        "main"
+      ],
+      "totalLines": 156,
+      "hasStructuralAnalysis": true
+    },
+    "app/config.py": {
+      "filePath": "app/config.py",
+      "contentHash": "c130fbd51831641d5a5db3d174ed0ea05c710381175a2de97c8dcb57d06af008",
+      "functions": [
+        {
+          "name": "_load_loose_env",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 44
+        },
+        {
+          "name": "_env_int",
+          "params": [
+            "name",
+            "default",
+            "minimum"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "_env_float",
+          "params": [
+            "name",
+            "default",
+            "minimum"
+          ],
+          "returnType": "float",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "ensure_directories",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [
+        {
+          "name": "Settings",
+          "methods": [],
+          "properties": [
+            "app_name",
+            "host",
+            "port",
+            "database_url",
+            "claude_base_url",
+            "claude_api_key",
+            "claude_model",
+            "enable_llm",
+            "llm_timeout_seconds",
+            "llm_max_calls",
+            "llm_max_candidates",
+            "llm_max_retries",
+            "llm_max_prompt_chars",
+            "llm_max_tokens",
+            "llm_rerank_margin",
+            "price_drift_warning_threshold"
+          ],
+          "exported": true,
+          "lineCount": 26
+        }
+      ],
+      "imports": [
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        }
+      ],
+      "exports": [
+        "_load_loose_env",
+        "_env_int",
+        "_env_float",
+        "Settings",
+        "ensure_directories"
+      ],
+      "totalLines": 120,
+      "hasStructuralAnalysis": true
+    },
+    "app/db.py": {
+      "filePath": "app/db.py",
+      "contentHash": "73b3d4ba173a0490207ec67310f871ddf30aa0cee89ee98edcfc9b285ddc4112",
+      "functions": [
+        {
+          "name": "utc_now",
+          "params": [],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "get_db_path",
+          "params": [],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "connect",
+          "params": [],
+          "returnType": "sqlite3.Connection",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "init_db",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 77
+        },
+        {
+          "name": "db_session",
+          "params": [],
+          "returnType": "Iterator[sqlite3.Connection]",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "dumps",
+          "params": [
+            "value"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "loads",
+          "params": [
+            "value",
+            "default"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "row_dict",
+          "params": [
+            "row"
+          ],
+          "returnType": "dict[str, Any] | None",
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "sqlite3",
+          "specifiers": [
+            "sqlite3"
+          ]
+        },
+        {
+          "source": "contextlib",
+          "specifiers": [
+            "contextmanager"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Iterator"
+          ]
+        },
+        {
+          "source": ".config",
+          "specifiers": [
+            "DB_PATH",
+            "ensure_directories"
+          ]
+        }
+      ],
+      "exports": [
+        "utc_now",
+        "get_db_path",
+        "connect",
+        "init_db",
+        "db_session",
+        "dumps",
+        "loads",
+        "row_dict"
+      ],
+      "totalLines": 422,
+      "hasStructuralAnalysis": true
+    },
+    "app/excel.py": {
+      "filePath": "app/excel.py",
+      "contentHash": "50a3cb68d0185ff4bdb788e164d1fb07090c649f49c34108f98b41602bf8e306",
+      "functions": [
+        {
+          "name": "sha256_file",
+          "params": [
+            "path"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "infer_effective_date",
+          "params": [
+            "filename"
+          ],
+          "returnType": "tuple[str | None, bool]",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "_safe_cell",
+          "params": [
+            "value"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "load_workbook_snapshots",
+          "params": [
+            "path"
+          ],
+          "returnType": "list[SheetSnapshot]",
+          "exported": true,
+          "lineCount": 43
+        },
+        {
+          "name": "_row_text",
+          "params": [
+            "row"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "detect_document_type",
+          "params": [
+            "filename",
+            "snapshots"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 23
+        },
+        {
+          "name": "detect_sheet_type",
+          "params": [
+            "snapshot",
+            "workbook_type"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "find_header_row",
+          "params": [
+            "snapshot",
+            "sheet_type"
+          ],
+          "returnType": "int | None",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "map_columns",
+          "params": [
+            "snapshot",
+            "header_row",
+            "sheet_type"
+          ],
+          "returnType": "dict[str, int]",
+          "exported": true,
+          "lineCount": 76
+        },
+        {
+          "name": "_header_number",
+          "params": [
+            "value"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "detect_price_columns",
+          "params": [
+            "snapshot",
+            "header_row",
+            "sheet_type"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 100
+        },
+        {
+          "name": "_context_value",
+          "params": [
+            "rows",
+            "labels"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "detect_sheet_metadata",
+          "params": [
+            "snapshot",
+            "header_row",
+            "sheet_type"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 48
+        },
+        {
+          "name": "_cell_at",
+          "params": [
+            "row",
+            "col"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "classify_row",
+          "params": [
+            "row",
+            "fields",
+            "sheet_type"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "extract_rows",
+          "params": [
+            "snapshot",
+            "sheet_type",
+            "header_row",
+            "mapping",
+            "metadata"
+          ],
+          "returnType": "list[dict[str, Any]]",
+          "exported": true,
+          "lineCount": 125
+        },
+        {
+          "name": "parse_workbook",
+          "params": [
+            "path"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 39
+        }
+      ],
+      "classes": [
+        {
+          "name": "SheetSnapshot",
+          "methods": [],
+          "properties": [
+            "name",
+            "index",
+            "rows",
+            "formulas",
+            "max_row",
+            "max_col",
+            "merged_ranges"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "ParsedSheet",
+          "methods": [],
+          "properties": [
+            "snapshot",
+            "detected_type",
+            "header_row",
+            "mapping",
+            "rows",
+            "warnings",
+            "metadata"
+          ],
+          "exported": true,
+          "lineCount": 12
+        }
+      ],
+      "imports": [
+        {
+          "source": "hashlib",
+          "specifiers": [
+            "hashlib"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass",
+            "field"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Iterable"
+          ]
+        },
+        {
+          "source": "openpyxl",
+          "specifiers": [
+            "load_workbook"
+          ]
+        },
+        {
+          "source": "xlrd",
+          "specifiers": [
+            "xlrd"
+          ]
+        },
+        {
+          "source": ".normalize",
+          "specifiers": [
+            "normalize_text",
+            "normalize_unit",
+            "parse_number"
+          ]
+        }
+      ],
+      "exports": [
+        "SheetSnapshot",
+        "ParsedSheet",
+        "sha256_file",
+        "infer_effective_date",
+        "_safe_cell",
+        "load_workbook_snapshots",
+        "_row_text",
+        "detect_document_type",
+        "detect_sheet_type",
+        "find_header_row",
+        "map_columns",
+        "_header_number",
+        "detect_price_columns",
+        "_context_value",
+        "detect_sheet_metadata",
+        "_cell_at",
+        "classify_row",
+        "extract_rows",
+        "parse_workbook"
+      ],
+      "totalLines": 695,
+      "hasStructuralAnalysis": true
+    },
+    "app/export.py": {
+      "filePath": "app/export.py",
+      "contentHash": "5dff55695ae5b8312ff5512314f1fcb4a4dfcf91e30b02c480ef605ec316f872",
+      "functions": [
+        {
+          "name": "_column",
+          "params": [
+            "mapping",
+            "key"
+          ],
+          "returnType": "int | None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_write_cell",
+          "params": [
+            "ws",
+            "row_no",
+            "col_no",
+            "value"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "_audit_rows",
+          "params": [
+            "result"
+          ],
+          "returnType": "list[list[Any]]",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "_source_label",
+          "params": [
+            "source"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "_style_audit",
+          "params": [
+            "ws"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "_formula_cache_map",
+          "params": [
+            "path"
+          ],
+          "returnType": "dict[str, dict[str, tuple[str | None, str | None, str | None]]]",
+          "exported": true,
+          "lineCount": 33
+        },
+        {
+          "name": "_restore_formula_caches",
+          "params": [
+            "source_path",
+            "output_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 59
+        },
+        {
+          "name": "_recalculate_formula_caches",
+          "params": [
+            "output_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 153
+        },
+        {
+          "name": "export_project",
+          "params": [
+            "project_id",
+            "run_id"
+          ],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 107
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "shutil",
+          "specifiers": [
+            "shutil"
+          ]
+        },
+        {
+          "source": "tempfile",
+          "specifiers": [
+            "tempfile"
+          ]
+        },
+        {
+          "source": "zipfile",
+          "specifiers": [
+            "zipfile"
+          ]
+        },
+        {
+          "source": "xml.etree",
+          "specifiers": [
+            "ET"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        },
+        {
+          "source": "openpyxl",
+          "specifiers": [
+            "Workbook",
+            "load_workbook"
+          ]
+        },
+        {
+          "source": "openpyxl.styles",
+          "specifiers": [
+            "Font",
+            "PatternFill"
+          ]
+        },
+        {
+          "source": ".config",
+          "specifiers": [
+            "EXPORT_DIR",
+            "ensure_directories"
+          ]
+        },
+        {
+          "source": ".db",
+          "specifiers": [
+            "db_session",
+            "dumps",
+            "loads",
+            "utc_now"
+          ]
+        },
+        {
+          "source": ".pricing",
+          "specifiers": [
+            "get_project_result"
+          ]
+        }
+      ],
+      "exports": [
+        "_column",
+        "_write_cell",
+        "_audit_rows",
+        "_source_label",
+        "_style_audit",
+        "_formula_cache_map",
+        "_restore_formula_caches",
+        "_recalculate_formula_caches",
+        "export_project"
+      ],
+      "totalLines": 467,
+      "hasStructuralAnalysis": true
+    },
+    "app/ingest.py": {
+      "filePath": "app/ingest.py",
+      "contentHash": "7fbc84937e1436ffe51bd8de2c1bc2416471cfb12866685b9848985e8d4cab3b",
+      "functions": [
+        {
+          "name": "_classify_boq_row",
+          "params": [
+            "row",
+            "sheet_type",
+            "previous_class"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "_source_file_record",
+          "params": [
+            "conn",
+            "sha256"
+          ],
+          "returnType": "dict[str, Any] | None",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "_link_catalog_source",
+          "params": [
+            "conn",
+            "entity_type",
+            "product_id",
+            "labor_item_id",
+            "source_file_id",
+            "source_sheet_id",
+            "source_row_id",
+            "relation_type"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 67
+        },
+        {
+          "name": "_upsert_product",
+          "params": [
+            "conn",
+            "description",
+            "code",
+            "brand",
+            "origin",
+            "unit",
+            "category",
+            "context_attributes"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 46
+        },
+        {
+          "name": "_merge_product_context",
+          "params": [
+            "conn",
+            "product_id",
+            "context_attributes",
+            "category",
+            "brand",
+            "origin"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 53
+        },
+        {
+          "name": "_upsert_labor_item",
+          "params": [
+            "conn",
+            "description",
+            "code",
+            "unit",
+            "category"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "_project_name_from_filename",
+          "params": [
+            "filename"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_supplier_name",
+          "params": [
+            "path",
+            "sheet",
+            "supplier_hint"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "_sheet_context_attributes",
+          "params": [
+            "sheet"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "ingest_workbook",
+          "params": [
+            "path",
+            "source_filename",
+            "confirmed_type",
+            "exclude_prices",
+            "force",
+            "allow_duplicate"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 697
+        },
+        {
+          "name": "_decode_json_field",
+          "params": [
+            "value",
+            "default"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "_source_ref_payload",
+          "params": [
+            "conn",
+            "source_file_id",
+            "sheet_id",
+            "row_id"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 41
+        },
+        {
+          "name": "source_file_detail",
+          "params": [
+            "conn",
+            "source_file_id",
+            "include_rows",
+            "limit"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 442
+        },
+        {
+          "name": "ingest_directory",
+          "params": [
+            "input_dir",
+            "holdout_filename",
+            "skip_holdout",
+            "force"
+          ],
+          "returnType": "list[dict[str, Any]]",
+          "exported": true,
+          "lineCount": 30
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "hashlib",
+          "specifiers": [
+            "hashlib"
+          ]
+        },
+        {
+          "source": "shutil",
+          "specifiers": [
+            "shutil"
+          ]
+        },
+        {
+          "source": "uuid",
+          "specifiers": [
+            "uuid"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        },
+        {
+          "source": ".config",
+          "specifiers": [
+            "RAW_DIR",
+            "ensure_directories"
+          ]
+        },
+        {
+          "source": ".db",
+          "specifiers": [
+            "db_session",
+            "dumps",
+            "loads",
+            "row_dict",
+            "utc_now"
+          ]
+        },
+        {
+          "source": ".excel",
+          "specifiers": [
+            "ParsedSheet",
+            "parse_workbook"
+          ]
+        },
+        {
+          "source": ".normalize",
+          "specifiers": [
+            "canonical_key",
+            "normalize_text",
+            "normalize_unit",
+            "technical_attributes"
+          ]
+        },
+        {
+          "source": ".price_policy",
+          "specifiers": [
+            "load_manual_pricing_rules",
+            "select_manual_pricing_rule",
+            "select_price_observation"
+          ]
+        }
+      ],
+      "exports": [
+        "_classify_boq_row",
+        "_source_file_record",
+        "_link_catalog_source",
+        "_upsert_product",
+        "_merge_product_context",
+        "_upsert_labor_item",
+        "_project_name_from_filename",
+        "_supplier_name",
+        "_sheet_context_attributes",
+        "ingest_workbook",
+        "_decode_json_field",
+        "_source_ref_payload",
+        "source_file_detail",
+        "ingest_directory"
+      ],
+      "totalLines": 1535,
+      "hasStructuralAnalysis": true
+    },
+    "app/labor_policy.py": {
+      "filePath": "app/labor_policy.py",
+      "contentHash": "d5ac7ac13d8abc53c9626f3ea5b5e858ea33fb52da5a1d7c29640439cfdc7a3e",
+      "functions": [
+        {
+          "name": "_safe_float",
+          "params": [
+            "value"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_safe_int",
+          "params": [
+            "value"
+          ],
+          "returnType": "int | None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_parse_json",
+          "params": [
+            "value",
+            "default"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "_parse_date",
+          "params": [
+            "value"
+          ],
+          "returnType": "date | None",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "_date_text",
+          "params": [
+            "value"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "_normalise_adjustment",
+          "params": [
+            "value"
+          ],
+          "returnType": "float",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "normalise_labor_policy",
+          "params": [
+            "policy",
+            "adjustment",
+            "escalation_factor",
+            "max_spread_ratio",
+            "max_cv",
+            "min_observations"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 102
+        },
+        {
+          "name": "_observation",
+          "params": [
+            "row"
+          ],
+          "returnType": "dict[str, Any] | None",
+          "exported": true,
+          "lineCount": 44
+        },
+        {
+          "name": "normalise_observations",
+          "params": [
+            "rows"
+          ],
+          "returnType": "list[dict[str, Any]]",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "_public_provenance",
+          "params": [
+            "item"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "labor_rate_statistics",
+          "params": [
+            "rows",
+            "as_of",
+            "limit"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 79
+        },
+        {
+          "name": "_explanation",
+          "params": [
+            "strategy",
+            "base_rate",
+            "selected_rate",
+            "observations",
+            "adjustment",
+            "master",
+            "stats"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 35
+        },
+        {
+          "name": "select_labor_rate",
+          "params": [
+            "rows",
+            "policy",
+            "adjustment",
+            "escalation_factor",
+            "max_spread_ratio",
+            "max_cv",
+            "min_observations",
+            "as_of"
+          ],
+          "returnType": "tuple[float | None, dict[str, Any]]",
+          "exported": true,
+          "lineCount": 129
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "math",
+          "specifiers": [
+            "math"
+          ]
+        },
+        {
+          "source": "statistics",
+          "specifiers": [
+            "statistics"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date",
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Iterable",
+            "Mapping",
+            "Sequence"
+          ]
+        }
+      ],
+      "exports": [
+        "_safe_float",
+        "_safe_int",
+        "_parse_json",
+        "_parse_date",
+        "_date_text",
+        "_normalise_adjustment",
+        "normalise_labor_policy",
+        "_observation",
+        "normalise_observations",
+        "_public_provenance",
+        "labor_rate_statistics",
+        "_explanation",
+        "select_labor_rate"
+      ],
+      "totalLines": 578,
+      "hasStructuralAnalysis": true
+    },
+    "app/main.py": {
+      "filePath": "app/main.py",
+      "contentHash": "7308461b3e34ef66408d7664e41c2a0766f9e31ace2d7d2c18f7a69ef6f55794",
+      "functions": [
+        {
+          "name": "startup",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "_classification",
+          "params": [
+            "value"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_source_payload",
+          "params": [
+            "conn",
+            "source_row"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 70
+        },
+        {
+          "name": "_source_reference_counts",
+          "params": [
+            "conn",
+            "source_id"
+          ],
+          "returnType": "dict[str, int]",
+          "exported": true,
+          "lineCount": 65
+        },
+        {
+          "name": "_source_lifecycle_payload",
+          "params": [
+            "conn",
+            "source_id"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "_project_payload",
+          "params": [
+            "conn",
+            "project_row"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 34
+        },
+        {
+          "name": "_save_upload",
+          "params": [
+            "upload"
+          ],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 39
+        },
+        {
+          "name": "_cleanup_upload",
+          "params": [
+            "path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "index",
+          "params": [],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "health",
+          "params": [],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "list_sources",
+          "params": [
+            "status",
+            "q"
+          ],
+          "returnType": "list[dict[str, Any]]",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "get_source",
+          "params": [
+            "source_id",
+            "include_rows",
+            "limit"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "archive_source",
+          "params": [
+            "source_id",
+            "reason",
+            "payload"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 35
+        },
+        {
+          "name": "restore_source",
+          "params": [
+            "source_id"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 33
+        },
+        {
+          "name": "delete_source",
+          "params": [
+            "source_id",
+            "force"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 67
+        },
+        {
+          "name": "reprocess_source",
+          "params": [
+            "source_id"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "preview_import",
+          "params": [
+            "file"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "import_files",
+          "params": [
+            "files",
+            "confirm_classification"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 31
+        },
+        {
+          "name": "seed_samples",
+          "params": [
+            "include_holdout",
+            "force"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "get_catalog_stats",
+          "params": [],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_catalog_source_pointer",
+          "params": [
+            "conn",
+            "source_file_id",
+            "source_sheet_id",
+            "source_row_id"
+          ],
+          "returnType": "dict[str, Any] | None",
+          "exported": true,
+          "lineCount": 48
+        },
+        {
+          "name": "_dedupe_pointers",
+          "params": [
+            "pointers"
+          ],
+          "returnType": "list[dict[str, Any]]",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "_catalog_provenance",
+          "params": [
+            "conn",
+            "kind",
+            "entity_id"
+          ],
+          "returnType": "list[dict[str, Any]]",
+          "exported": true,
+          "lineCount": 57
+        },
+        {
+          "name": "_serialize_product_catalog",
+          "params": [
+            "conn",
+            "row",
+            "include_history"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 80
+        },
+        {
+          "name": "_product_price_history",
+          "params": [
+            "conn",
+            "product_id",
+            "limit"
+          ],
+          "returnType": "list[dict[str, Any]]",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "_product_observation_history",
+          "params": [
+            "conn",
+            "product_id",
+            "limit"
+          ],
+          "returnType": "list[dict[str, Any]]",
+          "exported": true,
+          "lineCount": 30
+        },
+        {
+          "name": "_serialize_labor_catalog",
+          "params": [
+            "conn",
+            "row",
+            "include_history"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 84
+        },
+        {
+          "name": "list_catalog_items",
+          "params": [
+            "kind",
+            "category",
+            "source_id",
+            "status",
+            "q",
+            "limit",
+            "offset"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 300
+        },
+        {
+          "name": "get_catalog_product",
+          "params": [
+            "product_id"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "get_catalog_labor",
+          "params": [
+            "labor_id"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "_normalise_catalog_kind",
+          "params": [
+            "kind"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_catalog_reference_counts",
+          "params": [
+            "conn",
+            "kind",
+            "entity_id"
+          ],
+          "returnType": "dict[str, int]",
+          "exported": true,
+          "lineCount": 30
+        },
+        {
+          "name": "_catalog_item_payload",
+          "params": [
+            "conn",
+            "kind",
+            "entity_id"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "archive_catalog_item",
+          "params": [
+            "kind",
+            "item_id",
+            "reason",
+            "payload"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 40
+        },
+        {
+          "name": "restore_catalog_item",
+          "params": [
+            "kind",
+            "item_id"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "delete_catalog_item",
+          "params": [
+            "kind",
+            "item_id",
+            "force"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 68
+        },
+        {
+          "name": "list_quotations",
+          "params": [],
+          "returnType": "list[dict[str, Any]]",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "create_quotation",
+          "params": [
+            "files",
+            "project_name",
+            "customer",
+            "quotation_date",
+            "pricing_policy",
+            "note"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 59
+        },
+        {
+          "name": "_result_payload",
+          "params": [
+            "project_id",
+            "run_id"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 32
+        },
+        {
+          "name": "get_quotation",
+          "params": [
+            "project_id",
+            "run_id"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "price_quotation",
+          "params": [
+            "project_id",
+            "force"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "quotation_review",
+          "params": [
+            "project_id"
+          ],
+          "returnType": "list[dict[str, Any]]",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "review_boq_item",
+          "params": [
+            "item_id",
+            "payload"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 90
+        },
+        {
+          "name": "export_quotation",
+          "params": [
+            "project_id",
+            "run_id"
+          ],
+          "returnType": "FileResponse",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "benchmark_status",
+          "params": [],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "benchmark_report",
+          "params": [],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 13
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "shutil",
+          "specifiers": [
+            "shutil"
+          ]
+        },
+        {
+          "source": "tempfile",
+          "specifiers": [
+            "tempfile"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        },
+        {
+          "source": "fastapi",
+          "specifiers": [
+            "Body",
+            "FastAPI",
+            "File",
+            "Form",
+            "HTTPException",
+            "Query",
+            "UploadFile"
+          ]
+        },
+        {
+          "source": "fastapi.responses",
+          "specifiers": [
+            "FileResponse",
+            "HTMLResponse"
+          ]
+        },
+        {
+          "source": "fastapi.staticfiles",
+          "specifiers": [
+            "StaticFiles"
+          ]
+        },
+        {
+          "source": ".ai",
+          "specifiers": [
+            "ai_provider"
+          ]
+        },
+        {
+          "source": ".config",
+          "specifiers": [
+            "EXPORT_DIR",
+            "RAW_DIR",
+            "ROOT_DIR",
+            "STORAGE_DIR",
+            "ensure_directories",
+            "settings"
+          ]
+        },
+        {
+          "source": ".db",
+          "specifiers": [
+            "db_session",
+            "dumps",
+            "init_db",
+            "loads",
+            "utc_now"
+          ]
+        },
+        {
+          "source": ".excel",
+          "specifiers": [
+            "parse_workbook"
+          ]
+        },
+        {
+          "source": ".export",
+          "specifiers": [
+            "export_project"
+          ]
+        },
+        {
+          "source": ".ingest",
+          "specifiers": [
+            "ingest_directory",
+            "ingest_workbook",
+            "source_file_detail"
+          ]
+        },
+        {
+          "source": ".pricing",
+          "specifiers": [
+            "catalog_stats",
+            "clear_runtime_caches",
+            "choose_product_price",
+            "get_project_result",
+            "review_item",
+            "run_pricing",
+            "serialize_boq_item"
+          ]
+        },
+        {
+          "source": ".normalize",
+          "specifiers": [
+            "parse_number"
+          ]
+        }
+      ],
+      "exports": [
+        "startup",
+        "_classification",
+        "_source_payload",
+        "_source_reference_counts",
+        "_source_lifecycle_payload",
+        "_project_payload",
+        "_save_upload",
+        "_cleanup_upload",
+        "index",
+        "health",
+        "list_sources",
+        "get_source",
+        "archive_source",
+        "restore_source",
+        "delete_source",
+        "reprocess_source",
+        "preview_import",
+        "import_files",
+        "seed_samples",
+        "get_catalog_stats",
+        "_catalog_source_pointer",
+        "_dedupe_pointers",
+        "_catalog_provenance",
+        "_serialize_product_catalog",
+        "_product_price_history",
+        "_product_observation_history",
+        "_serialize_labor_catalog",
+        "list_catalog_items",
+        "get_catalog_product",
+        "get_catalog_labor",
+        "_normalise_catalog_kind",
+        "_catalog_reference_counts",
+        "_catalog_item_payload",
+        "archive_catalog_item",
+        "restore_catalog_item",
+        "delete_catalog_item",
+        "list_quotations",
+        "create_quotation",
+        "_result_payload",
+        "get_quotation",
+        "price_quotation",
+        "quotation_review",
+        "review_boq_item",
+        "export_quotation",
+        "benchmark_status",
+        "benchmark_report"
+      ],
+      "totalLines": 1766,
+      "hasStructuralAnalysis": true
+    },
+    "app/normalize.py": {
+      "filePath": "app/normalize.py",
+      "contentHash": "cdd431075314f978889d413593ceed19a5c5e9cf41ca26ac46fb1cf6fe2c268b",
+      "functions": [
+        {
+          "name": "strip_accents",
+          "params": [
+            "value"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "normalize_text",
+          "params": [
+            "value"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "canonical_key",
+          "params": [
+            "value"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "normalize_unit",
+          "params": [
+            "value"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "parse_number",
+          "params": [
+            "value"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 36
+        },
+        {
+          "name": "_has_token",
+          "params": [
+            "text",
+            "token"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "technical_attributes",
+          "params": [
+            "description"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 217
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "unicodedata",
+          "specifiers": [
+            "unicodedata"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        }
+      ],
+      "exports": [
+        "strip_accents",
+        "normalize_text",
+        "canonical_key",
+        "normalize_unit",
+        "parse_number",
+        "_has_token",
+        "technical_attributes"
+      ],
+      "totalLines": 323,
+      "hasStructuralAnalysis": true
+    },
+    "app/price_policy.py": {
+      "filePath": "app/price_policy.py",
+      "contentHash": "272b07f80462712867d8fa8afe94e0999baf5cd98ef2b21e2fc9c04ba9018c8f",
+      "functions": [
+        {
+          "name": "_normalized_label",
+          "params": [
+            "value",
+            "default"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "normalize_tax_mode",
+          "params": [
+            "value",
+            "default"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 32
+        },
+        {
+          "name": "normalize_price_basis",
+          "params": [
+            "value",
+            "default"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "normalize_discount_rate",
+          "params": [
+            "value"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "_date_value",
+          "params": [
+            "value"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "_rule_id",
+          "params": [
+            "raw",
+            "index",
+            "source"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_coerce_rule",
+          "params": [
+            "raw",
+            "index",
+            "source"
+          ],
+          "returnType": "ManualPricingRule | None",
+          "exported": true,
+          "lineCount": 35
+        },
+        {
+          "name": "load_manual_pricing_rules",
+          "params": [
+            "raw"
+          ],
+          "returnType": "list[ManualPricingRule]",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "_matches",
+          "params": [
+            "value",
+            "expected"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "rule_matches",
+          "params": [
+            "rule",
+            "supplier",
+            "category",
+            "product_family",
+            "effective_date"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "select_manual_pricing_rule",
+          "params": [
+            "rules",
+            "supplier",
+            "category",
+            "product_family",
+            "effective_date"
+          ],
+          "returnType": "ManualPricingRule | None",
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "find_observation",
+          "params": [
+            "observations",
+            "tax_mode",
+            "discount_rate"
+          ],
+          "returnType": "dict[str, Any] | None",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "select_price_observation",
+          "params": [
+            "observations",
+            "rule"
+          ],
+          "returnType": "tuple[dict[str, Any] | None, dict[str, Any]]",
+          "exported": true,
+          "lineCount": 59
+        }
+      ],
+      "classes": [
+        {
+          "name": "ManualPricingRule",
+          "methods": [
+            "specificity",
+            "as_dict"
+          ],
+          "properties": [
+            "rule_id",
+            "supplier",
+            "category",
+            "product_family",
+            "discount_rate",
+            "tax_mode",
+            "effective_from",
+            "effective_to",
+            "priority",
+            "provenance"
+          ],
+          "exported": true,
+          "lineCount": 34
+        }
+      ],
+      "imports": [
+        {
+          "source": "hashlib",
+          "specifiers": [
+            "hashlib"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Iterable"
+          ]
+        },
+        {
+          "source": ".normalize",
+          "specifiers": [
+            "normalize_text"
+          ]
+        }
+      ],
+      "exports": [
+        "_normalized_label",
+        "normalize_tax_mode",
+        "normalize_price_basis",
+        "normalize_discount_rate",
+        "_date_value",
+        "ManualPricingRule",
+        "_rule_id",
+        "_coerce_rule",
+        "load_manual_pricing_rules",
+        "_matches",
+        "rule_matches",
+        "select_manual_pricing_rule",
+        "find_observation",
+        "select_price_observation"
+      ],
+      "totalLines": 374,
+      "hasStructuralAnalysis": true
+    },
+    "app/pricing.py": {
+      "filePath": "app/pricing.py",
+      "contentHash": "7b6364135c326f0f42b85316a66fc158574457e30b1f5fdfc8b0129afc576438",
+      "functions": [
+        {
+          "name": "clear_runtime_caches",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_line_class_value",
+          "params": [
+            "item"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "_is_non_priceable_line",
+          "params": [
+            "item"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "_source_warnings",
+          "params": [
+            "source"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "_pricing_status_reason",
+          "params": [
+            "status",
+            "material_source",
+            "labor_source"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "_normalise_drift_threshold",
+          "params": [
+            "value"
+          ],
+          "returnType": "float",
+          "exported": true,
+          "lineCount": 43
+        },
+        {
+          "name": "_price_source_type",
+          "params": [
+            "source"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "_price_source_tier",
+          "params": [
+            "source"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "_price_source_rank",
+          "params": [
+            "source"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_price_source_was_explicitly_selected",
+          "params": [
+            "source"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "_compact_price_source",
+          "params": [
+            "source"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "_price_source_explanation",
+          "params": [
+            "source"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "_decorate_price_source",
+          "params": [
+            "source"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "_db_identity",
+          "params": [
+            "conn"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "_tokens",
+          "params": [
+            "value"
+          ],
+          "returnType": "set[str]",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_technical_tokens",
+          "params": [
+            "value"
+          ],
+          "returnType": "set[str]",
+          "exported": true,
+          "lineCount": 46
+        },
+        {
+          "name": "_family_tokens",
+          "params": [
+            "value"
+          ],
+          "returnType": "set[str]",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "_jaccard",
+          "params": [
+            "a",
+            "b"
+          ],
+          "returnType": "float",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_family_compatible",
+          "params": [
+            "left",
+            "right"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "_normalized_category",
+          "params": [
+            "value"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "_is_meaningful_unit",
+          "params": [
+            "value"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_critical_missing",
+          "params": [
+            "query",
+            "candidate"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "_shape_tokens",
+          "params": [
+            "value"
+          ],
+          "returnType": "tuple[str, ...]",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "_safe_float",
+          "params": [
+            "value"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_attribute_score",
+          "params": [
+            "query",
+            "candidate"
+          ],
+          "returnType": "tuple[float, bool, list[str]]",
+          "exported": true,
+          "lineCount": 79
+        },
+        {
+          "name": "_candidate_from_product",
+          "params": [
+            "row"
+          ],
+          "returnType": "Candidate",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "_candidate_from_labor",
+          "params": [
+            "row"
+          ],
+          "returnType": "Candidate",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "_score_candidate",
+          "params": [
+            "description",
+            "code",
+            "unit",
+            "attrs",
+            "candidate",
+            "candidate_norm",
+            "candidate_tokens",
+            "candidate_family"
+          ],
+          "returnType": "Candidate",
+          "exported": true,
+          "lineCount": 145
+        },
+        {
+          "name": "_alias_matches",
+          "params": [
+            "conn",
+            "description"
+          ],
+          "returnType": "set[str]",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "_product_catalog",
+          "params": [
+            "conn"
+          ],
+          "returnType": "list[Any]",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_labor_catalog",
+          "params": [
+            "conn"
+          ],
+          "returnType": "list[Any]",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_prepared_catalog",
+          "params": [
+            "conn",
+            "kind"
+          ],
+          "returnType": "list[tuple[Any, str, set[str], set[str]]]",
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "_prefilter_rows",
+          "params": [
+            "rows",
+            "description",
+            "code",
+            "limit"
+          ],
+          "returnType": "list[tuple[Any, str, set[str], set[str]]]",
+          "exported": true,
+          "lineCount": 37
+        },
+        {
+          "name": "find_product_candidates",
+          "params": [
+            "conn",
+            "description",
+            "code",
+            "unit",
+            "limit"
+          ],
+          "returnType": "list[Candidate]",
+          "exported": true,
+          "lineCount": 43
+        },
+        {
+          "name": "find_labor_candidates",
+          "params": [
+            "conn",
+            "description",
+            "code",
+            "unit",
+            "limit"
+          ],
+          "returnType": "list[Candidate]",
+          "exported": true,
+          "lineCount": 38
+        },
+        {
+          "name": "_provenance",
+          "params": [
+            "conn",
+            "table",
+            "row_id"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 36
+        },
+        {
+          "name": "_observation_provenance",
+          "params": [
+            "conn",
+            "row_id"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "choose_product_price",
+          "params": [
+            "conn",
+            "product_id",
+            "quotation_date",
+            "drift_threshold"
+          ],
+          "returnType": "tuple[float | None, dict[str, Any]]",
+          "exported": true,
+          "lineCount": 211
+        },
+        {
+          "name": "_choose_product_price_with_policy",
+          "params": [
+            "conn",
+            "product_id",
+            "quotation_date",
+            "drift_threshold"
+          ],
+          "returnType": "tuple[float | None, dict[str, Any]]",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "_labor_policy_cache_key",
+          "params": [
+            "policy"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "choose_labor_rate",
+          "params": [
+            "conn",
+            "labor_item_id",
+            "quotation_date",
+            "policy"
+          ],
+          "returnType": "tuple[float | None, dict[str, Any]]",
+          "exported": true,
+          "lineCount": 49
+        },
+        {
+          "name": "_price_multiplier",
+          "params": [
+            "description",
+            "candidate"
+          ],
+          "returnType": "float",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "_candidate_signature",
+          "params": [
+            "candidate"
+          ],
+          "returnType": "tuple[Any, ...]",
+          "exported": true,
+          "lineCount": 29
+        },
+        {
+          "name": "_round_money",
+          "params": [
+            "value"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_pricing_scope_for_item",
+          "params": [
+            "conn",
+            "item"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 41
+        },
+        {
+          "name": "_historical_exact_reference",
+          "params": [
+            "conn",
+            "item"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 122
+        },
+        {
+          "name": "_status_for",
+          "params": [
+            "material_candidate",
+            "material_price",
+            "labor_candidate",
+            "labor_price",
+            "quantity",
+            "material_source",
+            "labor_source",
+            "pricing_scope"
+          ],
+          "returnType": "tuple[str, str, str]",
+          "exported": true,
+          "lineCount": 70
+        },
+        {
+          "name": "_candidate_json",
+          "params": [
+            "candidate",
+            "price",
+            "source",
+            "display_name"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "_policy_bool",
+          "params": [
+            "value",
+            "default"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "_llm_ambiguous",
+          "params": [
+            "candidates",
+            "margin"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "_reorder_candidates_from_llm",
+          "params": [
+            "original",
+            "result"
+          ],
+          "returnType": "tuple[list[Candidate], bool]",
+          "exported": true,
+          "lineCount": 32
+        },
+        {
+          "name": "_new_model_usage",
+          "params": [
+            "provider",
+            "enabled"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "_record_model_usage",
+          "params": [
+            "usage",
+            "result"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 44
+        },
+        {
+          "name": "_labor_run_policy",
+          "params": [
+            "policy"
+          ],
+          "returnType": "dict[str, Any] | str | None",
+          "exported": true,
+          "lineCount": 33
+        },
+        {
+          "name": "_preserve_reviewed_item",
+          "params": [
+            "conn",
+            "run_id",
+            "item",
+            "counts"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 48
+        },
+        {
+          "name": "run_pricing",
+          "params": [
+            "project_id",
+            "policy",
+            "force",
+            "llm_provider"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 591
+        },
+        {
+          "name": "serialize_boq_item",
+          "params": [
+            "conn",
+            "row"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 188
+        },
+        {
+          "name": "get_project_result",
+          "params": [
+            "project_id",
+            "run_id"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "review_item",
+          "params": [
+            "item_id",
+            "selected_product_id",
+            "selected_labor_item_id",
+            "material_price",
+            "labor_price",
+            "material_source",
+            "labor_source",
+            "status",
+            "add_alias",
+            "created_by"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 352
+        },
+        {
+          "name": "catalog_stats",
+          "params": [],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 44
+        }
+      ],
+      "classes": [
+        {
+          "name": "Candidate",
+          "methods": [],
+          "properties": [
+            "entity_id",
+            "name",
+            "code",
+            "unit",
+            "brand",
+            "origin",
+            "attrs",
+            "score",
+            "components",
+            "explanation"
+          ],
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "math",
+          "specifiers": [
+            "math"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date"
+          ]
+        },
+        {
+          "source": "difflib",
+          "specifiers": [
+            "SequenceMatcher"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Iterable"
+          ]
+        },
+        {
+          "source": ".ai",
+          "specifiers": [
+            "AIProvider",
+            "RerankResult",
+            "ai_provider",
+            "safe_rerank_sync"
+          ]
+        },
+        {
+          "source": ".config",
+          "specifiers": [
+            "settings"
+          ]
+        },
+        {
+          "source": ".db",
+          "specifiers": [
+            "db_session",
+            "dumps",
+            "loads",
+            "utc_now",
+            "row_dict"
+          ]
+        },
+        {
+          "source": ".labor_policy",
+          "specifiers": [
+            "normalise_labor_policy",
+            "select_labor_rate"
+          ]
+        },
+        {
+          "source": ".normalize",
+          "specifiers": [
+            "canonical_key",
+            "normalize_text",
+            "normalize_unit",
+            "technical_attributes"
+          ]
+        },
+        {
+          "source": ".price_policy",
+          "specifiers": [
+            "normalize_price_basis",
+            "normalize_tax_mode"
+          ]
+        }
+      ],
+      "exports": [
+        "Candidate",
+        "clear_runtime_caches",
+        "_line_class_value",
+        "_is_non_priceable_line",
+        "_source_warnings",
+        "_pricing_status_reason",
+        "_normalise_drift_threshold",
+        "_price_source_type",
+        "_price_source_tier",
+        "_price_source_rank",
+        "_price_source_was_explicitly_selected",
+        "_compact_price_source",
+        "_price_source_explanation",
+        "_decorate_price_source",
+        "_db_identity",
+        "_tokens",
+        "_technical_tokens",
+        "_family_tokens",
+        "_jaccard",
+        "_family_compatible",
+        "_normalized_category",
+        "_is_meaningful_unit",
+        "_critical_missing",
+        "_shape_tokens",
+        "_safe_float",
+        "_attribute_score",
+        "_candidate_from_product",
+        "_candidate_from_labor",
+        "_score_candidate",
+        "_alias_matches",
+        "_product_catalog",
+        "_labor_catalog",
+        "_prepared_catalog",
+        "_prefilter_rows",
+        "find_product_candidates",
+        "find_labor_candidates",
+        "_provenance",
+        "_observation_provenance",
+        "choose_product_price",
+        "_choose_product_price_with_policy",
+        "_labor_policy_cache_key",
+        "choose_labor_rate",
+        "_price_multiplier",
+        "_candidate_signature",
+        "_round_money",
+        "_pricing_scope_for_item",
+        "_historical_exact_reference",
+        "_status_for",
+        "_candidate_json",
+        "_policy_bool",
+        "_llm_ambiguous",
+        "_reorder_candidates_from_llm",
+        "_new_model_usage",
+        "_record_model_usage",
+        "_labor_run_policy",
+        "_preserve_reviewed_item",
+        "run_pricing",
+        "serialize_boq_item",
+        "get_project_result",
+        "review_item",
+        "catalog_stats"
+      ],
+      "totalLines": 3044,
+      "hasStructuralAnalysis": true
+    },
+    "app/static/app.js": {
+      "filePath": "app/static/app.js",
+      "contentHash": "a4d8efdf143ef215c96f684889d0d2db2c7769e53b390a79db76044b01d684c0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 3116,
+      "hasStructuralAnalysis": true
+    },
+    "app/static/index.html": {
+      "filePath": "app/static/index.html",
+      "contentHash": "7e1202791c7cb0c36bbd10ae6ec57eeef4bba2a8b008da4ec3072753485aadb1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 230,
+      "hasStructuralAnalysis": false
+    },
+    "app/static/styles.css": {
+      "filePath": "app/static/styles.css",
+      "contentHash": "656c83a64747eed7865afc5d61adb0f20e883cfc3fa8745f1c9ff9fb151f1665",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2705,
+      "hasStructuralAnalysis": false
+    },
+    "benchmarks/__init__.py": {
+      "filePath": "benchmarks/__init__.py",
+      "contentHash": "a8b648ec7c73d13681840d4fb611e8ecb42da71a0c4f7ebd577dd6638d384286",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 3,
+      "hasStructuralAnalysis": true
+    },
+    "benchmarks/holdout.py": {
+      "filePath": "benchmarks/holdout.py",
+      "contentHash": "c5e135465ffc962a11b2bcc322530920a8aa1fb21da8e9bf523ff4136dee0fda",
+      "functions": [
+        {
+          "name": "_portable_report_path",
+          "params": [
+            "value"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "_json_default",
+          "params": [
+            "value"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "_compact_data_gap",
+          "params": [
+            "data_gap"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "_compact_failure_analysis",
+          "params": [
+            "failure_analysis"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 47
+        },
+        {
+          "name": "_compact_temporal_modes",
+          "params": [
+            "temporal_modes"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 29
+        },
+        {
+          "name": "_compact_report_for_disk",
+          "params": [
+            "report"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "_utc_now",
+          "params": [],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_find_workbooks",
+          "params": [
+            "input_dir"
+          ],
+          "returnType": "list[Path]",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_resolve_holdout",
+          "params": [
+            "workbooks",
+            "requested"
+          ],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 39
+        },
+        {
+          "name": "_isolated_application_storage",
+          "params": [
+            "db_path",
+            "keep_storage"
+          ],
+          "returnType": "Iterator[Path]",
+          "exported": true,
+          "lineCount": 40
+        },
+        {
+          "name": "_safe_float",
+          "params": [
+            "value"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_relative_error",
+          "params": [
+            "predicted",
+            "actual"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_price_equal",
+          "params": [
+            "predicted",
+            "actual"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_token_set",
+          "params": [
+            "value"
+          ],
+          "returnType": "set[str]",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_technical_match_quality",
+          "params": [
+            "query_description",
+            "candidate_name",
+            "candidate_attrs"
+          ],
+          "returnType": "bool | None",
+          "exported": true,
+          "lineCount": 122
+        },
+        {
+          "name": "_count",
+          "params": [
+            "conn",
+            "table",
+            "where",
+            "params"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_snapshot_ground_truth",
+          "params": [
+            "conn",
+            "project_id"
+          ],
+          "returnType": "dict[int, dict[str, Any]]",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "_evaluate",
+          "params": [
+            "conn",
+            "project_id",
+            "holdout_source_id",
+            "ground_truth",
+            "run_result"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 246
+        },
+        {
+          "name": "_markdown_report",
+          "params": [
+            "report"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 136
+        },
+        {
+          "name": "run_benchmark",
+          "params": [
+            "input_dir",
+            "output_dir",
+            "holdout",
+            "holdout_filename",
+            "db_path",
+            "keep_storage",
+            "llm_enabled"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 270
+        },
+        {
+          "name": "_build_parser",
+          "params": [],
+          "returnType": "argparse.ArgumentParser",
+          "exported": true,
+          "lineCount": 34
+        },
+        {
+          "name": "main",
+          "params": [
+            "argv"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 39
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "argparse",
+          "specifiers": [
+            "argparse"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "math",
+          "specifiers": [
+            "math"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "shutil",
+          "specifiers": [
+            "shutil"
+          ]
+        },
+        {
+          "source": "statistics",
+          "specifiers": [
+            "statistics"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "tempfile",
+          "specifiers": [
+            "tempfile"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        },
+        {
+          "source": "contextlib",
+          "specifiers": [
+            "contextmanager"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "difflib",
+          "specifiers": [
+            "SequenceMatcher"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Iterator"
+          ]
+        },
+        {
+          "source": "app",
+          "specifiers": [
+            "config",
+            "db",
+            "ingest"
+          ]
+        },
+        {
+          "source": "app.excel",
+          "specifiers": [
+            "parse_workbook"
+          ]
+        },
+        {
+          "source": "app.ingest",
+          "specifiers": [
+            "ingest_workbook"
+          ]
+        },
+        {
+          "source": "app.normalize",
+          "specifiers": [
+            "canonical_key",
+            "normalize_text",
+            "technical_attributes"
+          ]
+        },
+        {
+          "source": "app.pricing",
+          "specifiers": [
+            "AUTO_THRESHOLD",
+            "run_pricing"
+          ]
+        },
+        {
+          "source": "benchmarks.row_audit",
+          "specifiers": [
+            "classify_parsed_workbook",
+            "_row_audit_markdown"
+          ]
+        },
+        {
+          "source": "benchmarks.modes",
+          "specifiers": [
+            "evaluate_db_modes",
+            "write_temporal_report"
+          ]
+        },
+        {
+          "source": "benchmarks.reports",
+          "specifiers": [
+            "build_data_gap_report",
+            "build_data_requirements",
+            "build_failure_analysis",
+            "write_report_files"
+          ]
+        }
+      ],
+      "exports": [
+        "_portable_report_path",
+        "_json_default",
+        "_compact_data_gap",
+        "_compact_failure_analysis",
+        "_compact_temporal_modes",
+        "_compact_report_for_disk",
+        "_utc_now",
+        "_find_workbooks",
+        "_resolve_holdout",
+        "_isolated_application_storage",
+        "_safe_float",
+        "_relative_error",
+        "_price_equal",
+        "_token_set",
+        "_technical_match_quality",
+        "_count",
+        "_snapshot_ground_truth",
+        "_evaluate",
+        "_markdown_report",
+        "run_benchmark",
+        "_build_parser",
+        "main"
+      ],
+      "totalLines": 1216,
+      "hasStructuralAnalysis": true
+    },
+    "benchmarks/modes.py": {
+      "filePath": "benchmarks/modes.py",
+      "contentHash": "db64e12c13eee5ea8c1abbdf25def03e4ba61296ec2e54f592cb24dfd8bc441b",
+      "functions": [
+        {
+          "name": "_safe_float",
+          "params": [
+            "value"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_row_get",
+          "params": [
+            "row",
+            "key",
+            "default"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_loads",
+          "params": [
+            "value",
+            "default"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "parse_date",
+          "params": [
+            "value"
+          ],
+          "returnType": "date | None",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "date_text",
+          "params": [
+            "value"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "normalize_mode",
+          "params": [
+            "mode"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "infer_benchmark_date",
+          "params": [
+            "explicit",
+            "project",
+            "source_file",
+            "filename"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 74
+        },
+        {
+          "name": "make_mode_spec",
+          "params": [
+            "mode",
+            "as_of",
+            "project",
+            "source_file",
+            "filename",
+            "current_date",
+            "allow_undated",
+            "strict_dates"
+          ],
+          "returnType": "BenchmarkModeSpec",
+          "exported": true,
+          "lineCount": 40
+        },
+        {
+          "name": "observation_date",
+          "params": [
+            "observation"
+          ],
+          "returnType": "date | None",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "observation_source_type",
+          "params": [
+            "observation"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "observation_selection_explicit",
+          "params": [
+            "observation"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "temporal_observation_status",
+          "params": [
+            "observation",
+            "spec"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "eligible_observations",
+          "params": [
+            "observations",
+            "spec"
+          ],
+          "returnType": "tuple[list[Mapping[str, Any]], dict[str, int]]",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "_lookup_observations",
+          "params": [
+            "source_observations",
+            "side",
+            "entity_id"
+          ],
+          "returnType": "list[Mapping[str, Any]]",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "_source_json",
+          "params": [
+            "row",
+            "side"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_truth_value",
+          "params": [
+            "ground_truth",
+            "row_id",
+            "key",
+            "row"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "_is_priceable",
+          "params": [
+            "row"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "_relative_error",
+          "params": [
+            "predicted",
+            "actual"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_price_equal",
+          "params": [
+            "predicted",
+            "actual"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "_source_date_for_row",
+          "params": [
+            "source"
+          ],
+          "returnType": "date | None",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "_source_temporal_status",
+          "params": [
+            "source",
+            "spec"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "observation_amount",
+          "params": [
+            "observation",
+            "side"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "_source_priority",
+          "params": [
+            "observation",
+            "side"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 35
+        },
+        {
+          "name": "select_mode_observation",
+          "params": [
+            "observations",
+            "side"
+          ],
+          "returnType": "tuple[float | None, Mapping[str, Any] | None]",
+          "exported": true,
+          "lineCount": 30
+        },
+        {
+          "name": "classify_price_error",
+          "params": [
+            "predicted",
+            "actual",
+            "source",
+            "alternatives",
+            "target_date"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 150
+        },
+        {
+          "name": "_side_source_key",
+          "params": [
+            "side"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_evaluate_side",
+          "params": [
+            "rows",
+            "side",
+            "spec",
+            "ground_truth",
+            "source_observations",
+            "auto_threshold"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 175
+        },
+        {
+          "name": "evaluate_mode_rows",
+          "params": [
+            "rows",
+            "mode",
+            "ground_truth",
+            "source_observations",
+            "as_of",
+            "project",
+            "source_file",
+            "filename",
+            "current_date",
+            "allow_undated",
+            "strict_dates",
+            "auto_threshold"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 77
+        },
+        {
+          "name": "compare_mode_metrics",
+          "params": [
+            "historical",
+            "current"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 70
+        },
+        {
+          "name": "evaluate_temporal_modes",
+          "params": [
+            "rows",
+            "ground_truth",
+            "source_observations",
+            "historical_as_of",
+            "current_as_of",
+            "project",
+            "source_file",
+            "filename",
+            "current_date",
+            "allow_undated",
+            "strict_historical_dates",
+            "auto_threshold"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 52
+        },
+        {
+          "name": "_db_rows",
+          "params": [
+            "conn",
+            "project_id",
+            "run_id"
+          ],
+          "returnType": "list[Any]",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_db_source_observations",
+          "params": [
+            "conn",
+            "rows"
+          ],
+          "returnType": "dict[Any, list[dict[str, Any]]]",
+          "exported": true,
+          "lineCount": 147
+        },
+        {
+          "name": "evaluate_db_modes",
+          "params": [
+            "conn",
+            "project_id",
+            "run_id",
+            "ground_truth",
+            "historical_as_of",
+            "current_as_of",
+            "current_date",
+            "strict_historical_dates",
+            "allow_undated",
+            "auto_threshold"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 40
+        },
+        {
+          "name": "render_temporal_markdown",
+          "params": [
+            "report"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 42
+        },
+        {
+          "name": "write_temporal_report",
+          "params": [
+            "output_dir",
+            "report",
+            "stem"
+          ],
+          "returnType": "dict[str, str]",
+          "exported": true,
+          "lineCount": 24
+        }
+      ],
+      "classes": [
+        {
+          "name": "BenchmarkModeSpec",
+          "methods": [
+            "historical",
+            "temporal_semantics",
+            "as_dict"
+          ],
+          "properties": [
+            "mode",
+            "as_of",
+            "as_of_source",
+            "allow_undated",
+            "strict_dates"
+          ],
+          "exported": true,
+          "lineCount": 33
+        }
+      ],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "math",
+          "specifiers": [
+            "math"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "statistics",
+          "specifiers": [
+            "statistics"
+          ]
+        },
+        {
+          "source": "collections",
+          "specifiers": [
+            "Counter"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date",
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Iterable",
+            "Mapping",
+            "Sequence"
+          ]
+        },
+        {
+          "source": "app.normalize",
+          "specifiers": [
+            "normalize_text",
+            "technical_attributes"
+          ]
+        },
+        {
+          "source": "app.price_policy",
+          "specifiers": [
+            "normalize_price_basis",
+            "normalize_tax_mode"
+          ]
+        }
+      ],
+      "exports": [
+        "_safe_float",
+        "_row_get",
+        "_loads",
+        "parse_date",
+        "date_text",
+        "normalize_mode",
+        "BenchmarkModeSpec",
+        "infer_benchmark_date",
+        "make_mode_spec",
+        "observation_date",
+        "observation_source_type",
+        "observation_selection_explicit",
+        "temporal_observation_status",
+        "eligible_observations",
+        "_lookup_observations",
+        "_source_json",
+        "_truth_value",
+        "_is_priceable",
+        "_relative_error",
+        "_price_equal",
+        "_source_date_for_row",
+        "_source_temporal_status",
+        "observation_amount",
+        "_source_priority",
+        "select_mode_observation",
+        "classify_price_error",
+        "_side_source_key",
+        "_evaluate_side",
+        "evaluate_mode_rows",
+        "compare_mode_metrics",
+        "evaluate_temporal_modes",
+        "_db_rows",
+        "_db_source_observations",
+        "evaluate_db_modes",
+        "render_temporal_markdown",
+        "write_temporal_report"
+      ],
+      "totalLines": 1419,
+      "hasStructuralAnalysis": true
+    },
+    "benchmarks/reports.py": {
+      "filePath": "benchmarks/reports.py",
+      "contentHash": "1802142ff460662127a4ef91c680f2cb8bbecfe8a56c462b537e85067c6f36c1",
+      "functions": [
+        {
+          "name": "_safe_float",
+          "params": [
+            "value"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_loads",
+          "params": [
+            "value",
+            "default"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "_row_get",
+          "params": [
+            "row",
+            "key",
+            "default"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "normalize_category",
+          "params": [
+            "description",
+            "explicit"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 39
+        },
+        {
+          "name": "_line_class",
+          "params": [
+            "row"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "is_priceable_row",
+          "params": [
+            "row"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 34
+        },
+        {
+          "name": "_status_reason",
+          "params": [
+            "row"
+          ],
+          "returnType": "tuple[str, str]",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "_catalog_source_index",
+          "params": [
+            "conn"
+          ],
+          "returnType": "dict[str, dict[str, int]]",
+          "exported": true,
+          "lineCount": 36
+        },
+        {
+          "name": "_row_record",
+          "params": [
+            "row"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 33
+        },
+        {
+          "name": "build_data_gap_report",
+          "params": [
+            "conn",
+            "project_id",
+            "run_id"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 163
+        },
+        {
+          "name": "_relative_error",
+          "params": [
+            "predicted",
+            "actual"
+          ],
+          "returnType": "float | None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_failure_code",
+          "params": [
+            "record",
+            "source_available"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "_side_failure_code",
+          "params": [
+            "record",
+            "side",
+            "source_available"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "_candidate_summary",
+          "params": [
+            "alternatives",
+            "side",
+            "limit"
+          ],
+          "returnType": "list[dict[str, Any]]",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "build_failure_analysis",
+          "params": [
+            "conn",
+            "project_id",
+            "run_id",
+            "ground_truth",
+            "limit"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 185
+        },
+        {
+          "name": "build_data_requirements",
+          "params": [
+            "data_gap",
+            "failure_analysis"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 55
+        },
+        {
+          "name": "render_data_gap_markdown",
+          "params": [
+            "report"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 43
+        },
+        {
+          "name": "render_failure_markdown",
+          "params": [
+            "report"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 94
+        },
+        {
+          "name": "render_data_requirements_markdown",
+          "params": [
+            "requirements"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 31
+        },
+        {
+          "name": "write_report_files",
+          "params": [
+            "output_dir",
+            "data_gap",
+            "failure_analysis",
+            "data_requirements"
+          ],
+          "returnType": "dict[str, str]",
+          "exported": true,
+          "lineCount": 40
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "math",
+          "specifiers": [
+            "math"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "statistics",
+          "specifiers": [
+            "statistics"
+          ]
+        },
+        {
+          "source": "collections",
+          "specifiers": [
+            "Counter",
+            "defaultdict"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Iterable",
+            "Mapping"
+          ]
+        },
+        {
+          "source": "app.normalize",
+          "specifiers": [
+            "normalize_text",
+            "technical_attributes"
+          ]
+        }
+      ],
+      "exports": [
+        "_safe_float",
+        "_loads",
+        "_row_get",
+        "normalize_category",
+        "_line_class",
+        "is_priceable_row",
+        "_status_reason",
+        "_catalog_source_index",
+        "_row_record",
+        "build_data_gap_report",
+        "_relative_error",
+        "_failure_code",
+        "_side_failure_code",
+        "_candidate_summary",
+        "build_failure_analysis",
+        "build_data_requirements",
+        "render_data_gap_markdown",
+        "render_failure_markdown",
+        "render_data_requirements_markdown",
+        "write_report_files"
+      ],
+      "totalLines": 993,
+      "hasStructuralAnalysis": true
+    },
+    "benchmarks/round2_report.py": {
+      "filePath": "benchmarks/round2_report.py",
+      "contentHash": "2169b1d882b1398471b9c7994ae10857077e51e75ab8376329d1670f5aa45b85",
+      "functions": [
+        {
+          "name": "load_report",
+          "params": [
+            "path"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "_get",
+          "params": [
+            "mapping",
+            "default"
+          ],
+          "returnType": "Any",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_number",
+          "params": [
+            "value"
+          ],
+          "returnType": "float | int | None",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "_delta",
+          "params": [
+            "before",
+            "after"
+          ],
+          "returnType": "float | int | None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_round",
+          "params": [
+            "value",
+            "places"
+          ],
+          "returnType": "float | int | None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_round1_snapshot",
+          "params": [
+            "baseline"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 41
+        },
+        {
+          "name": "_round2_snapshot",
+          "params": [
+            "current"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 61
+        },
+        {
+          "name": "build_round2_report",
+          "params": [
+            "baseline",
+            "current",
+            "baseline_path",
+            "current_path"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 47
+        },
+        {
+          "name": "_format_value",
+          "params": [
+            "value",
+            "kind"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "render_round2_markdown",
+          "params": [
+            "report"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 54
+        },
+        {
+          "name": "write_round2_report",
+          "params": [
+            "output_json",
+            "output_markdown",
+            "report"
+          ],
+          "returnType": "tuple[str, str]",
+          "exported": true,
+          "lineCount": 20
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Mapping",
+            "Sequence"
+          ]
+        }
+      ],
+      "exports": [
+        "load_report",
+        "_get",
+        "_number",
+        "_delta",
+        "_round",
+        "_round1_snapshot",
+        "_round2_snapshot",
+        "build_round2_report",
+        "_format_value",
+        "render_round2_markdown",
+        "write_round2_report"
+      ],
+      "totalLines": 343,
+      "hasStructuralAnalysis": true
+    },
+    "benchmarks/row_audit.py": {
+      "filePath": "benchmarks/row_audit.py",
+      "contentHash": "0c845f8ac07b5760ce1d8a156bea126aaa8e77dbef7804be5d19536f25d085ca",
+      "functions": [
+        {
+          "name": "_contains_phrase",
+          "params": [
+            "text",
+            "phrases"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_has_number",
+          "params": [
+            "text"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_contains_marker",
+          "params": [
+            "text",
+            "marker"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "_is_upper_title",
+          "params": [
+            "raw",
+            "normalized"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "_looks_like_header",
+          "params": [
+            "description",
+            "raw_cells"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "_description_signal",
+          "params": [
+            "text"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 84
+        },
+        {
+          "name": "classify_row",
+          "params": [
+            "row",
+            "sheet_type",
+            "previous_class"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 209
+        },
+        {
+          "name": "classify_parsed_workbook",
+          "params": [
+            "parsed",
+            "include_other_sheets",
+            "sample_limit"
+          ],
+          "returnType": "dict[str, Any]",
+          "exported": true,
+          "lineCount": 102
+        },
+        {
+          "name": "markdown_report",
+          "params": [
+            "report"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 59
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "collections",
+          "specifiers": [
+            "Counter",
+            "defaultdict"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any",
+            "Iterable",
+            "Mapping"
+          ]
+        },
+        {
+          "source": "app.normalize",
+          "specifiers": [
+            "normalize_text"
+          ]
+        }
+      ],
+      "exports": [
+        "_contains_phrase",
+        "_has_number",
+        "_contains_marker",
+        "_is_upper_title",
+        "_looks_like_header",
+        "_description_signal",
+        "classify_row",
+        "classify_parsed_workbook",
+        "markdown_report"
+      ],
+      "totalLines": 640,
+      "hasStructuralAnalysis": true
+    },
+    "deliverables/ARCH-DHBG1.md": {
+      "filePath": "deliverables/ARCH-DHBG1.md",
+      "contentHash": "54bae63022c93434966d8a9ef38fc331fb377a9d4595e2aaf4cd01690f047aa0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 54,
+      "hasStructuralAnalysis": false
+    },
+    "deliverables/MODULEMAP-DHBG1.md": {
+      "filePath": "deliverables/MODULEMAP-DHBG1.md",
+      "contentHash": "a07e2726269984f48805df90e04bbc3966a018dfa2d18a2fade9a449f44cca05",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 28,
+      "hasStructuralAnalysis": false
+    },
+    "deliverables/SCOPE-DHBG1.md": {
+      "filePath": "deliverables/SCOPE-DHBG1.md",
+      "contentHash": "59247699f8359a70e4ed2a3f76d3435aaf8ccf40238af24d54dd29dcea9fc0de",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 49,
+      "hasStructuralAnalysis": false
+    },
+    "deliverables/SPEC-DHBG1.md": {
+      "filePath": "deliverables/SPEC-DHBG1.md",
+      "contentHash": "c9bd28b1b12ba5ba85956214c1d07d60169b6fe2c53c1eead71bc2ad9389456a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 64,
+      "hasStructuralAnalysis": false
+    },
+    "deliverables/WBS-DHBG1.md": {
+      "filePath": "deliverables/WBS-DHBG1.md",
+      "contentHash": "ec5d6e210b782bd4b8c1ce22e9713ebc61be91f16c7477e45ef2d24115d4692b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 61,
+      "hasStructuralAnalysis": false
+    },
+    "deliverables/adr/ADR-001-modular-monolith.md": {
+      "filePath": "deliverables/adr/ADR-001-modular-monolith.md",
+      "contentHash": "64f47c70ce721aadafde1d5ab4fa1ed6759b4006c229203ee9274b7572e91a8a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 17,
+      "hasStructuralAnalysis": false
+    },
+    "deliverables/adr/ADR-002-sqlite-provenance.md": {
+      "filePath": "deliverables/adr/ADR-002-sqlite-provenance.md",
+      "contentHash": "12609b757e113a9cd644e799a634741c57d8d082b22ae30c352ea00a29d4d9d9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 17,
+      "hasStructuralAnalysis": false
+    },
+    "deliverables/adr/ADR-003-bounded-ai-rerank.md": {
+      "filePath": "deliverables/adr/ADR-003-bounded-ai-rerank.md",
+      "contentHash": "7408ea8f4c9b2f6b6d9c616badbe353266c71f532cabb0c245e5d5eeac16cc4f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 17,
+      "hasStructuralAnalysis": false
+    },
+    "deliverables/adr/ADR-004-formula-preserving-export.md": {
+      "filePath": "deliverables/adr/ADR-004-formula-preserving-export.md",
+      "contentHash": "556aec4ee844d735c0cf27e669daa42410fe82e986b6412febc45e92ca38ff63",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 17,
+      "hasStructuralAnalysis": false
+    },
+    "deliverables/adr/ADR-005-network-port-3000.md": {
+      "filePath": "deliverables/adr/ADR-005-network-port-3000.md",
+      "contentHash": "1419b3f4422362522a932ff1f950885f2e4611cd9a062082e0ac5eda4c15d517",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 17,
+      "hasStructuralAnalysis": false
+    },
+    "docs/DATA-REQUIREMENTS-NEXT.md": {
+      "filePath": "docs/DATA-REQUIREMENTS-NEXT.md",
+      "contentHash": "edc599803ef5df31f2ab4be4771137a86e4717ac3d2e7d6a565dd543f126334e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": false
+    },
+    "docs/DECISIONS.md": {
+      "filePath": "docs/DECISIONS.md",
+      "contentHash": "fccf1c05c6fef57239bddb55af0112bf57472f4407409331ea400a76df453a77",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 51,
+      "hasStructuralAnalysis": false
+    },
+    "migrations/001_initial.sql": {
+      "filePath": "migrations/001_initial.sql",
+      "contentHash": "a73c1135b0a7e05fa7e19b4472656a4447c75cf29c97699b7d7d128a5a372bd9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 295,
+      "hasStructuralAnalysis": false
+    },
+    "requirements.txt": {
+      "filePath": "requirements.txt",
+      "contentHash": "42ec662550f88665f45963265bb3fa06dc7469b4b892b5ab3701651dcfed1ef5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 8,
+      "hasStructuralAnalysis": false
+    },
+    "run.ps1": {
+      "filePath": "run.ps1",
+      "contentHash": "4640a59f2b45c05dc77132694465205ead2168be249d5ad0e7ae141088115575",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": false
+    },
+    "tests/__init__.py": {
+      "filePath": "tests/__init__.py",
+      "contentHash": "077d1708e7082bb78e102d7372b0165d3a7edc645b0b86689220be5ad8941566",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "tests/conftest.py": {
+      "filePath": "tests/conftest.py",
+      "contentHash": "45374b3760c371d9d1bca17a1f92aed43599a9776893fdf6015c2f113d621180",
+      "functions": [
+        {
+          "name": "find_input_file",
+          "params": [
+            "prefix"
+          ],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "isolated_db",
+          "params": [
+            "tmp_path",
+            "monkeypatch"
+          ],
+          "returnType": "Path",
+          "exported": true,
+          "lineCount": 24
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "app",
+          "specifiers": [
+            "config",
+            "db",
+            "ingest"
+          ]
+        }
+      ],
+      "exports": [
+        "find_input_file",
+        "isolated_db"
+      ],
+      "totalLines": 65,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_ai.py": {
+      "filePath": "tests/test_ai.py",
+      "contentHash": "66ffe23e02a99a7ab9850c7737e414bde415c82a68590589a725b69745babd78",
+      "functions": [
+        {
+          "name": "_provider",
+          "params": [
+            "client"
+          ],
+          "returnType": "AIProvider",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "_candidates",
+          "params": [],
+          "returnType": "list[dict[str, Any]]",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "test_safe_rerank_disabled_is_deterministic_and_does_not_call",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "test_rerank_sends_only_safe_fields_and_validates_supplied_ids",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 40
+        },
+        {
+          "name": "test_invalid_model_id_falls_back_and_marks_review",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "test_call_budget_is_enforced_without_network_or_retry_fanout",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "test_safe_rerank_skips_non_ambiguous_candidates",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "test_classification_is_limited_to_allowed_labels_and_confidence",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "test_classification_rejects_unknown_label_and_safe_fallback",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "test_provider_accepts_fenced_json_from_compatible_gateway",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "test_sync_wrappers_work_for_callers_in_sync_pricing_pipeline",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 23
+        }
+      ],
+      "classes": [
+        {
+          "name": "FakeResponse",
+          "methods": [
+            "__init__",
+            "json",
+            "raise_for_status"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "FakeClient",
+          "methods": [
+            "__init__",
+            "post"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 24
+        }
+      ],
+      "imports": [
+        {
+          "source": "asyncio",
+          "specifiers": [
+            "asyncio"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "app.ai",
+          "specifiers": [
+            "AIBudgetExceeded",
+            "AIProvider",
+            "safe_classify",
+            "safe_classify_sync",
+            "safe_rerank",
+            "safe_rerank_sync"
+          ]
+        }
+      ],
+      "exports": [
+        "FakeResponse",
+        "FakeClient",
+        "_provider",
+        "_candidates",
+        "test_safe_rerank_disabled_is_deterministic_and_does_not_call",
+        "test_rerank_sends_only_safe_fields_and_validates_supplied_ids",
+        "test_invalid_model_id_falls_back_and_marks_review",
+        "test_call_budget_is_enforced_without_network_or_retry_fanout",
+        "test_safe_rerank_skips_non_ambiguous_candidates",
+        "test_classification_is_limited_to_allowed_labels_and_confidence",
+        "test_classification_rejects_unknown_label_and_safe_fallback",
+        "test_provider_accepts_fenced_json_from_compatible_gateway",
+        "test_sync_wrappers_work_for_callers_in_sync_pricing_pipeline"
+      ],
+      "totalLines": 314,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_benchmark.py": {
+      "filePath": "tests/test_benchmark.py",
+      "contentHash": "f8010b6b2b90a389af5bd1fcf788e06247c3b624f4694a3066311f25153db42d",
+      "functions": [
+        {
+          "name": "test_benchmark_price_tolerance_is_small_and_deterministic",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_benchmark_match_quality_distinguishes_name_and_hard_conflict",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "test_holdout_selector_accepts_unique_prefix",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "benchmarks.holdout",
+          "specifiers": [
+            "_price_equal",
+            "_resolve_holdout",
+            "_technical_match_quality"
+          ]
+        }
+      ],
+      "exports": [
+        "test_benchmark_price_tolerance_is_small_and_deterministic",
+        "test_benchmark_match_quality_distinguishes_name_and_hard_conflict",
+        "test_holdout_selector_accepts_unique_prefix"
+      ],
+      "totalLines": 53,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_benchmark_modes.py": {
+      "filePath": "tests/test_benchmark_modes.py",
+      "contentHash": "c1afb496ac05038d3d58054fe8c5d423e1adee2c0904ae88283f167bb044c04b",
+      "functions": [
+        {
+          "name": "_row",
+          "params": [
+            "row_id",
+            "material_price",
+            "labor_price",
+            "matched_product_id",
+            "matched_labor_item_id",
+            "material_source",
+            "labor_source",
+            "confidence"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "test_mode_date_inference_requires_unambiguous_date",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "test_future_observations_are_excluded_only_by_temporal_cutoff",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "test_evaluate_temporal_modes_separates_historical_and_current_metrics",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 59
+        },
+        {
+          "name": "test_price_error_root_causes_are_evidence_backed",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 36
+        },
+        {
+          "name": "test_compare_mode_metrics_reports_current_minus_historical",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 42
+        },
+        {
+          "name": "test_db_source_observations_prefers_active_ex_vat_observations",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 83
+        },
+        {
+          "name": "test_mode_selector_prefers_explicit_tier_and_normalizes_tax_basis",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 34
+        },
+        {
+          "name": "test_db_legacy_price_fallback_prefers_ex_vat_rows",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 48
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "app",
+          "specifiers": [
+            "db"
+          ]
+        },
+        {
+          "source": "benchmarks.modes",
+          "specifiers": [
+            "CURRENT_REPRICING",
+            "HISTORICAL_REPRODUCTION",
+            "_db_source_observations",
+            "classify_price_error",
+            "compare_mode_metrics",
+            "eligible_observations",
+            "evaluate_temporal_modes",
+            "infer_benchmark_date",
+            "make_mode_spec",
+            "select_mode_observation",
+            "temporal_observation_status"
+          ]
+        }
+      ],
+      "exports": [
+        "_row",
+        "test_mode_date_inference_requires_unambiguous_date",
+        "test_future_observations_are_excluded_only_by_temporal_cutoff",
+        "test_evaluate_temporal_modes_separates_historical_and_current_metrics",
+        "test_price_error_root_causes_are_evidence_backed",
+        "test_compare_mode_metrics_reports_current_minus_historical",
+        "test_db_source_observations_prefers_active_ex_vat_observations",
+        "test_mode_selector_prefers_explicit_tier_and_normalizes_tax_basis",
+        "test_db_legacy_price_fallback_prefers_ex_vat_rows"
+      ],
+      "totalLines": 410,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_config.py": {
+      "filePath": "tests/test_config.py",
+      "contentHash": "d034d4f387309bb20ee4bf8667947696e7bf8a806b2ff354e4142f62005bb0a0",
+      "functions": [
+        {
+          "name": "test_default_server_bind_is_network_accessible_on_port_3000",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 14
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "subprocess",
+          "specifiers": [
+            "subprocess"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        }
+      ],
+      "exports": [
+        "test_default_server_bind_is_network_accessible_on_port_3000"
+      ],
+      "totalLines": 26,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_excel.py": {
+      "filePath": "tests/test_excel.py",
+      "contentHash": "d1a0f94dd942b150963f39d7a42a2be705aa55517215e10ec12f157f1deadd7b",
+      "functions": [
+        {
+          "name": "test_real_sample_workbooks_parse",
+          "params": [
+            "prefix"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "test_real_directory_covers_both_excel_extensions",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_expected_document_classification_signals",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 53
+        },
+        {
+          "name": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 27
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "openpyxl",
+          "specifiers": [
+            "Workbook"
+          ]
+        },
+        {
+          "source": "app.excel",
+          "specifiers": [
+            "detect_document_type",
+            "find_header_row",
+            "load_workbook_snapshots",
+            "map_columns",
+            "parse_workbook"
+          ]
+        },
+        {
+          "source": ".conftest",
+          "specifiers": [
+            "INPUT_DIR",
+            "find_input_file"
+          ]
+        }
+      ],
+      "exports": [
+        "test_real_sample_workbooks_parse",
+        "test_real_directory_covers_both_excel_extensions",
+        "test_expected_document_classification_signals",
+        "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+        "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows"
+      ],
+      "totalLines": 161,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_export.py": {
+      "filePath": "tests/test_export.py",
+      "contentHash": "89044d6137c7eb7dacffd2cb03adc42b41e109fe292b3d84b13c702929a77e68",
+      "functions": [
+        {
+          "name": "_template",
+          "params": [
+            "path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "test_export_only_updates_unit_price_columns",
+          "params": [
+            "monkeypatch",
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 73
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "sqlite3",
+          "specifiers": [
+            "sqlite3"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "openpyxl",
+          "specifiers": [
+            "Workbook",
+            "load_workbook"
+          ]
+        },
+        {
+          "source": "app",
+          "specifiers": [
+            "export"
+          ]
+        }
+      ],
+      "exports": [
+        "_template",
+        "test_export_only_updates_unit_price_columns"
+      ],
+      "totalLines": 103,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_labor_policy.py": {
+      "filePath": "tests/test_labor_policy.py",
+      "contentHash": "5a1431e299819767b009e3c8ac71b5dbe3f94a22529b4dec2f1e095936fc6dc9",
+      "functions": [
+        {
+          "name": "_row",
+          "params": [
+            "rate",
+            "when",
+            "row_id",
+            "source_type",
+            "project_id",
+            "confidence"
+          ],
+          "returnType": "dict[str, object]",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "test_normalise_policy_accepts_percent_adjustment_and_aliases",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "test_statistics_include_spread_variance_and_recency",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "test_median_last_3_with_adjustment_preserves_all_provenance",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "test_master_rate_wins_by_default_but_can_be_bypassed",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "test_high_spread_and_variance_become_review_warnings",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "test_invalid_or_empty_rates_are_not_selected",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "test_choose_labor_rate_wires_policy_and_sql_provenance",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 47
+        },
+        {
+          "name": "test_labor_warning_prevents_auto_approval",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "test_labor_only_exact_match_does_not_require_material_candidate",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 27
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "app",
+          "specifiers": [
+            "db"
+          ]
+        },
+        {
+          "source": "app.labor_policy",
+          "specifiers": [
+            "labor_rate_statistics",
+            "normalise_labor_policy",
+            "select_labor_rate"
+          ]
+        },
+        {
+          "source": "app.pricing",
+          "specifiers": [
+            "Candidate",
+            "_status_for",
+            "choose_labor_rate"
+          ]
+        }
+      ],
+      "exports": [
+        "_row",
+        "test_normalise_policy_accepts_percent_adjustment_and_aliases",
+        "test_statistics_include_spread_variance_and_recency",
+        "test_median_last_3_with_adjustment_preserves_all_provenance",
+        "test_master_rate_wins_by_default_but_can_be_bypassed",
+        "test_high_spread_and_variance_become_review_warnings",
+        "test_invalid_or_empty_rates_are_not_selected",
+        "test_choose_labor_rate_wires_policy_and_sql_provenance",
+        "test_labor_warning_prevents_auto_approval",
+        "test_labor_only_exact_match_does_not_require_material_candidate"
+      ],
+      "totalLines": 258,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_normalize.py": {
+      "filePath": "tests/test_normalize.py",
+      "contentHash": "beddaefb11afd210bf5412f2ea8961802ac10e589db1d1848cc6717f0684a1b8",
+      "functions": [
+        {
+          "name": "test_normalize_text_is_unicode_and_engineering_safe",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "test_canonical_key_removes_cosmetic_separator_whitespace",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_parse_number_handles_vietnamese_and_excel_values",
+          "params": [
+            "raw",
+            "expected"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_parse_number_rejects_non_numeric_cells",
+          "params": [
+            "raw"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_normalize_unit_aliases",
+          "params": [
+            "raw",
+            "expected"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_technical_attributes_extracts_cable_specification",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "test_technical_attributes_prefers_outer_core_count_for_parenthesized_spec",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "test_technical_attributes_extracts_pipe_diameter",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_technical_attributes_does_not_treat_cable_section_hyphen_as_voltage_pair",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_technical_attributes_handles_underscore_and_nested_core_notation",
+          "params": [
+            "description"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_technical_attributes_preserves_aluminium_family_tokens",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_technical_attributes_uses_token_boundaries_for_short_abbreviations",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "app.normalize",
+          "specifiers": [
+            "canonical_key",
+            "normalize_text",
+            "normalize_unit",
+            "parse_number",
+            "technical_attributes"
+          ]
+        }
+      ],
+      "exports": [
+        "test_normalize_text_is_unicode_and_engineering_safe",
+        "test_canonical_key_removes_cosmetic_separator_whitespace",
+        "test_parse_number_handles_vietnamese_and_excel_values",
+        "test_parse_number_rejects_non_numeric_cells",
+        "test_normalize_unit_aliases",
+        "test_technical_attributes_extracts_cable_specification",
+        "test_technical_attributes_prefers_outer_core_count_for_parenthesized_spec",
+        "test_technical_attributes_extracts_pipe_diameter",
+        "test_technical_attributes_does_not_treat_cable_section_hyphen_as_voltage_pair",
+        "test_technical_attributes_handles_underscore_and_nested_core_notation",
+        "test_technical_attributes_preserves_aluminium_family_tokens",
+        "test_technical_attributes_uses_token_boundaries_for_short_abbreviations"
+      ],
+      "totalLines": 142,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_price_policy.py": {
+      "filePath": "tests/test_price_policy.py",
+      "contentHash": "6cef055f0cd6a2dc722952fa7a28ea7a386ea65bdec6b55913c27df0c76b1e56",
+      "functions": [
+        {
+          "name": "test_real_cable_tong_preserves_base_vat_and_discount_tiers",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 40
+        },
+        {
+          "name": "test_manual_rule_selects_published_tier_without_inventing_price",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 36
+        },
+        {
+          "name": "test_ingest_keeps_observations_and_uses_configured_tier",
+          "params": [
+            "isolated_db",
+            "monkeypatch"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 38
+        },
+        {
+          "name": "test_supplier_detail_sheet_enriches_tong_product_identity",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "test_holdout_exclusion_does_not_publish_price_observations",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 12
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "app",
+          "specifiers": [
+            "db"
+          ]
+        },
+        {
+          "source": "app.excel",
+          "specifiers": [
+            "parse_workbook"
+          ]
+        },
+        {
+          "source": "app.ingest",
+          "specifiers": [
+            "ingest_workbook"
+          ]
+        },
+        {
+          "source": "app.price_policy",
+          "specifiers": [
+            "load_manual_pricing_rules",
+            "select_price_observation"
+          ]
+        },
+        {
+          "source": ".conftest",
+          "specifiers": [
+            "find_input_file"
+          ]
+        }
+      ],
+      "exports": [
+        "test_real_cable_tong_preserves_base_vat_and_discount_tiers",
+        "test_manual_rule_selects_published_tier_without_inventing_price",
+        "test_ingest_keeps_observations_and_uses_configured_tier",
+        "test_supplier_detail_sheet_enriches_tong_product_identity",
+        "test_holdout_exclusion_does_not_publish_price_observations"
+      ],
+      "totalLines": 172,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_pricing.py": {
+      "filePath": "tests/test_pricing.py",
+      "contentHash": "92d977c9f236e5f625acf453c5ae6dd6439442a0b9d5e9bc6e8ca89080b984a8",
+      "functions": [
+        {
+          "name": "_count",
+          "params": [
+            "conn",
+            "table",
+            "where",
+            "params"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_holdout_ingest_never_publishes_holdout_prices",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 36
+        },
+        {
+          "name": "test_ingest_is_idempotent_for_same_checksum",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "test_allow_duplicate_creates_distinct_source_and_project",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 45
+        },
+        {
+          "name": "test_price_rows_have_complete_provenance",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 36
+        },
+        {
+          "name": "test_holdout_metadata_explicitly_records_exclusion",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 33
+        },
+        {
+          "name": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 77
+        },
+        {
+          "name": "test_candidate_conflict_is_not_auto_approved",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 41
+        },
+        {
+          "name": "test_result_endpoint_shape_contains_items_and_metrics",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "test_parallel_bundle_scales_matching_multi_core_catalog_item",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "test_price_drift_warning_is_actionable_and_not_auto_approved",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 30
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "app",
+          "specifiers": [
+            "db"
+          ]
+        },
+        {
+          "source": "app.ingest",
+          "specifiers": [
+            "ingest_workbook"
+          ]
+        },
+        {
+          "source": "app.pricing",
+          "specifiers": [
+            "AUTO_THRESHOLD",
+            "Candidate",
+            "choose_labor_rate",
+            "choose_product_price",
+            "find_labor_candidates",
+            "find_product_candidates",
+            "get_project_result",
+            "_price_multiplier",
+            "_status_for",
+            "run_pricing"
+          ]
+        },
+        {
+          "source": ".conftest",
+          "specifiers": [
+            "find_input_file"
+          ]
+        }
+      ],
+      "exports": [
+        "_count",
+        "test_holdout_ingest_never_publishes_holdout_prices",
+        "test_ingest_is_idempotent_for_same_checksum",
+        "test_allow_duplicate_creates_distinct_source_and_project",
+        "test_price_rows_have_complete_provenance",
+        "test_holdout_metadata_explicitly_records_exclusion",
+        "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+        "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+        "test_candidate_conflict_is_not_auto_approved",
+        "test_result_endpoint_shape_contains_items_and_metrics",
+        "test_parallel_bundle_scales_matching_multi_core_catalog_item",
+        "test_price_drift_warning_is_actionable_and_not_auto_approved"
+      ],
+      "totalLines": 412,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_pricing_lifecycle_hardening.py": {
+      "filePath": "tests/test_pricing_lifecycle_hardening.py",
+      "contentHash": "95f1d520f351d2a2ab8a9c3f3f968087637abb4e722ce1a889e976c4f3aa1b6c",
+      "functions": [
+        {
+          "name": "_source",
+          "params": [
+            "conn",
+            "filename",
+            "status"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "test_product_selection_uses_ex_vat_observation_for_drift",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 52
+        },
+        {
+          "name": "test_selected_supplier_tier_wins_and_tax_labels_are_normalized",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 73
+        },
+        {
+          "name": "test_current_observation_wins_over_legacy_historical_operational_row",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 48
+        },
+        {
+          "name": "test_zero_drift_threshold_is_preserved_and_flags_any_difference",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 48
+        },
+        {
+          "name": "test_archived_source_is_not_selected_for_new_price",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "test_manual_review_is_persisted_and_survives_default_rerun",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 68
+        },
+        {
+          "name": "test_selected_candidate_with_explicit_price_creates_manual_observation",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 69
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "app",
+          "specifiers": [
+            "db"
+          ]
+        },
+        {
+          "source": "app.price_policy",
+          "specifiers": [
+            "normalize_price_basis",
+            "normalize_tax_mode"
+          ]
+        },
+        {
+          "source": "app.pricing",
+          "specifiers": [
+            "choose_product_price",
+            "clear_runtime_caches",
+            "review_item",
+            "run_pricing"
+          ]
+        }
+      ],
+      "exports": [
+        "_source",
+        "test_product_selection_uses_ex_vat_observation_for_drift",
+        "test_selected_supplier_tier_wins_and_tax_labels_are_normalized",
+        "test_current_observation_wins_over_legacy_historical_operational_row",
+        "test_zero_drift_threshold_is_preserved_and_flags_any_difference",
+        "test_archived_source_is_not_selected_for_new_price",
+        "test_manual_review_is_persisted_and_survives_default_rerun",
+        "test_selected_candidate_with_explicit_price_creates_manual_observation"
+      ],
+      "totalLines": 421,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_pricing_llm.py": {
+      "filePath": "tests/test_pricing_llm.py",
+      "contentHash": "489033d615ff4b8abe4f3bad9fd69b7335313c18649b51bb52052d7018b903f5",
+      "functions": [
+        {
+          "name": "_candidate",
+          "params": [
+            "entity_id",
+            "name",
+            "family",
+            "score"
+          ],
+          "returnType": "Candidate",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "test_run_pricing_uses_llm_only_for_ambiguous_candidates_and_persists_usage",
+          "params": [
+            "isolated_db",
+            "monkeypatch"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 124
+        }
+      ],
+      "classes": [
+        {
+          "name": "StubProvider",
+          "methods": [
+            "reset_budget"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 13
+        }
+      ],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Any"
+          ]
+        },
+        {
+          "source": "app",
+          "specifiers": [
+            "db",
+            "pricing"
+          ]
+        },
+        {
+          "source": "app.ai",
+          "specifiers": [
+            "AIResponse",
+            "RerankResult"
+          ]
+        },
+        {
+          "source": "app.pricing",
+          "specifiers": [
+            "Candidate",
+            "run_pricing"
+          ]
+        }
+      ],
+      "exports": [
+        "StubProvider",
+        "_candidate",
+        "test_run_pricing_uses_llm_only_for_ambiguous_candidates_and_persists_usage"
+      ],
+      "totalLines": 171,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_reports.py": {
+      "filePath": "tests/test_reports.py",
+      "contentHash": "dc31c5cba787c5d6d31500f08d35d2b9a42b3a8337e6ca87b37476685da61bb3",
+      "functions": [
+        {
+          "name": "_insert_product",
+          "params": [
+            "conn",
+            "name",
+            "category",
+            "price"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "test_normalize_category_is_stable_and_generic",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_data_gap_and_failure_reports_separate_source_gap_from_match_failure",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 82
+        },
+        {
+          "name": "test_data_requirement_writer_creates_required_artifacts",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 44
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "app",
+          "specifiers": [
+            "db"
+          ]
+        },
+        {
+          "source": "benchmarks.reports",
+          "specifiers": [
+            "build_data_gap_report",
+            "build_data_requirements",
+            "build_failure_analysis",
+            "normalize_category",
+            "render_failure_markdown",
+            "write_report_files"
+          ]
+        }
+      ],
+      "exports": [
+        "_insert_product",
+        "test_normalize_category_is_stable_and_generic",
+        "test_data_gap_and_failure_reports_separate_source_gap_from_match_failure",
+        "test_data_requirement_writer_creates_required_artifacts"
+      ],
+      "totalLines": 175,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_round2_report.py": {
+      "filePath": "tests/test_round2_report.py",
+      "contentHash": "78af55f95cdae5b3e1f9cf192757c974616504d4b4779d9ede71217f4c4eec15",
+      "functions": [
+        {
+          "name": "_snapshot",
+          "params": [
+            "material_priced",
+            "material_coverage",
+            "labor_priced",
+            "labor_coverage",
+            "source_supported_material"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 51
+        },
+        {
+          "name": "test_round2_report_preserves_unmeasured_round1_values_as_null",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 30
+        },
+        {
+          "name": "test_compact_primary_report_omits_heavy_row_arrays",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 29
+        },
+        {
+          "name": "test_round2_report_writer_creates_json_and_markdown",
+          "params": [
+            "tmp_path"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 26
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "benchmarks.holdout",
+          "specifiers": [
+            "_compact_report_for_disk"
+          ]
+        },
+        {
+          "source": "benchmarks.round2_report",
+          "specifiers": [
+            "build_round2_report",
+            "render_round2_markdown",
+            "write_round2_report"
+          ]
+        }
+      ],
+      "exports": [
+        "_snapshot",
+        "test_round2_report_preserves_unmeasured_round1_values_as_null",
+        "test_compact_primary_report_omits_heavy_row_arrays",
+        "test_round2_report_writer_creates_json_and_markdown"
+      ],
+      "totalLines": 156,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_row_audit.py": {
+      "filePath": "tests/test_row_audit.py",
+      "contentHash": "541962ca5d7bb911475e0b0777f353386c49a807e3cb55ac89744f402d2ec627",
+      "functions": [
+        {
+          "name": "_row",
+          "params": [
+            "description",
+            "unit",
+            "quantity",
+            "material_price",
+            "row_kind",
+            "raw_cells"
+          ],
+          "returnType": "dict[str, object]",
+          "exported": true,
+          "lineCount": 23
+        },
+        {
+          "name": "test_row_audit_distinguishes_priceable_item_from_heading",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "test_row_audit_reads_total_label_from_unmapped_raw_cell",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "test_row_audit_does_not_treat_single_cell_subsection_as_header",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "test_row_audit_keeps_missing_quantity_visible_as_priceable",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "test_pricing_ignores_explicit_structural_rows",
+          "params": [
+            "isolated_db"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 55
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "app",
+          "specifiers": [
+            "db"
+          ]
+        },
+        {
+          "source": "app.pricing",
+          "specifiers": [
+            "run_pricing"
+          ]
+        },
+        {
+          "source": "benchmarks.row_audit",
+          "specifiers": [
+            "classify_row"
+          ]
+        }
+      ],
+      "exports": [
+        "_row",
+        "test_row_audit_distinguishes_priceable_item_from_heading",
+        "test_row_audit_reads_total_label_from_unmapped_raw_cell",
+        "test_row_audit_does_not_treat_single_cell_subsection_as_header",
+        "test_row_audit_keeps_missing_quantity_visible_as_priceable",
+        "test_pricing_ignores_explicit_structural_rows"
+      ],
+      "totalLines": 153,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_security.py": {
+      "filePath": "tests/test_security.py",
+      "contentHash": "6bcdd5ac031a9ed7518ab5379696795c597be1cbf72db8c3004ee19fa9a93a95",
+      "functions": [
+        {
+          "name": "test_save_upload_rejects_oversized_payload_and_cleans_temp_dir",
+          "params": [
+            "tmp_path",
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 15
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "io",
+          "specifiers": [
+            "io"
+          ]
+        },
+        {
+          "source": "types",
+          "specifiers": [
+            "SimpleNamespace"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "fastapi",
+          "specifiers": [
+            "HTTPException"
+          ]
+        },
+        {
+          "source": "app.main",
+          "specifiers": [
+            "main_module"
+          ]
+        }
+      ],
+      "exports": [
+        "test_save_upload_rejects_oversized_payload_and_cleans_temp_dir"
+      ],
+      "totalLines": 27,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_source_lifecycle_api.py": {
+      "filePath": "tests/test_source_lifecycle_api.py",
+      "contentHash": "11ea57598c5f2b139c07515a9fe086d10084bb848e014f7fa0a53907b76e0026",
+      "functions": [
+        {
+          "name": "_seed_source_graph",
+          "params": [],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 71
+        },
+        {
+          "name": "test_source_detail_archive_and_safe_delete",
+          "params": [
+            "isolated_db"
+          ],
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "test_source_raw_row_limit_is_workbook_wide",
+          "params": [
+            "isolated_db"
+          ],
+          "exported": true,
+          "lineCount": 54
+        },
+        {
+          "name": "test_catalog_list_and_product_detail",
+          "params": [
+            "isolated_db"
+          ],
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "test_catalog_current_price_prefers_immutable_observation_over_legacy_price",
+          "params": [
+            "isolated_db"
+          ],
+          "exported": true,
+          "lineCount": 43
+        },
+        {
+          "name": "test_catalog_all_pagination_is_global_and_stable",
+          "params": [
+            "isolated_db"
+          ],
+          "exported": true,
+          "lineCount": 50
+        },
+        {
+          "name": "test_source_detail_uses_legacy_direct_provenance_when_bridge_is_missing",
+          "params": [
+            "isolated_db"
+          ],
+          "exported": true,
+          "lineCount": 23
+        },
+        {
+          "name": "test_force_reimport_versions_source_without_breaking_provenance",
+          "params": [
+            "isolated_db"
+          ],
+          "exported": true,
+          "lineCount": 87
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "fastapi.testclient",
+          "specifiers": [
+            "TestClient"
+          ]
+        },
+        {
+          "source": "app.db",
+          "specifiers": [
+            "db_session",
+            "dumps",
+            "utc_now"
+          ]
+        },
+        {
+          "source": "app.ingest",
+          "specifiers": [
+            "ingest_workbook"
+          ]
+        },
+        {
+          "source": "app.main",
+          "specifiers": [
+            "app"
+          ]
+        },
+        {
+          "source": "tests.conftest",
+          "specifiers": [
+            "find_input_file"
+          ]
+        }
+      ],
+      "exports": [
+        "_seed_source_graph",
+        "test_source_detail_archive_and_safe_delete",
+        "test_source_raw_row_limit_is_workbook_wide",
+        "test_catalog_list_and_product_detail",
+        "test_catalog_current_price_prefers_immutable_observation_over_legacy_price",
+        "test_catalog_all_pagination_is_global_and_stable",
+        "test_source_detail_uses_legacy_direct_provenance_when_bridge_is_missing",
+        "test_force_reimport_versions_source_without_breaking_provenance"
+      ],
+      "totalLines": 406,
+      "hasStructuralAnalysis": true
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "projectRoot": "E:/Desktop/DH-company",
+  "batchFiles": [
+    {"path": "deliverables/ARCH-DHBG1.md", "language": "markdown", "sizeLines": 53, "fileCategory": "docs"},
+    {"path": "deliverables/MODULEMAP-DHBG1.md", "language": "markdown", "sizeLines": 27, "fileCategory": "docs"},
+    {"path": "deliverables/SCOPE-DHBG1.md", "language": "markdown", "sizeLines": 48, "fileCategory": "docs"},
+    {"path": "deliverables/SPEC-DHBG1.md", "language": "markdown", "sizeLines": 63, "fileCategory": "docs"},
+    {"path": "deliverables/WBS-DHBG1.md", "language": "markdown", "sizeLines": 60, "fileCategory": "docs"}
+  ],
+  "batchImportData": {
+    "deliverables/ARCH-DHBG1.md": [],
+    "deliverables/MODULEMAP-DHBG1.md": [],
+    "deliverables/SCOPE-DHBG1.md": [],
+    "deliverables/SPEC-DHBG1.md": [],
+    "deliverables/WBS-DHBG1.md": []
+  }
+}

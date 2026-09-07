@@ -1,0 +1,179 @@
+[
+  {
+    "id": "layer:api",
+    "name": "Tầng API",
+    "description": "Application factory FastAPI và toàn bộ 27 endpoint (@app.get/post/delete) định nghĩa trực tiếp trong app/main.py, đóng vai trò router kiêm controller trong kiến trúc modular monolith phẳng (không tách thư mục routers/ riêng theo ADR-001).",
+    "nodeIds": [
+      "file:app/main.py",
+      "endpoint:app/main.py:GET-/",
+      "endpoint:app/main.py:GET-/api/health",
+      "endpoint:app/main.py:GET-/api/sources",
+      "endpoint:app/main.py:GET-/api/sources/{source_id}",
+      "endpoint:app/main.py:POST-/api/sources/{source_id}/archive",
+      "endpoint:app/main.py:POST-/api/sources/{source_id}/restore",
+      "endpoint:app/main.py:DELETE-/api/sources/{source_id}",
+      "endpoint:app/main.py:POST-/api/sources/{source_id}/reprocess",
+      "endpoint:app/main.py:POST-/api/import/preview",
+      "endpoint:app/main.py:POST-/api/import",
+      "endpoint:app/main.py:POST-/api/seed",
+      "endpoint:app/main.py:GET-/api/catalog/stats",
+      "endpoint:app/main.py:GET-/api/catalog/items",
+      "endpoint:app/main.py:GET-/api/catalog/products/{product_id}",
+      "endpoint:app/main.py:GET-/api/catalog/labor/{labor_id}",
+      "endpoint:app/main.py:POST-/api/catalog/items/{kind}/{item_id}/archive",
+      "endpoint:app/main.py:POST-/api/catalog/items/{kind}/{item_id}/restore",
+      "endpoint:app/main.py:DELETE-/api/catalog/items/{kind}/{item_id}",
+      "endpoint:app/main.py:GET-/api/quotations",
+      "endpoint:app/main.py:POST-/api/quotations",
+      "endpoint:app/main.py:GET-/api/quotations/{project_id}",
+      "endpoint:app/main.py:POST-/api/quotations/{project_id}/run",
+      "endpoint:app/main.py:GET-/api/quotations/{project_id}/review",
+      "endpoint:app/main.py:POST-/api/boq-items/{item_id}/review",
+      "endpoint:app/main.py:GET-/api/quotations/{project_id}/export",
+      "endpoint:app/main.py:GET-/api/benchmark",
+      "endpoint:app/main.py:GET-/benchmark-report"
+    ]
+  },
+  {
+    "id": "layer:service",
+    "name": "Tầng Service (Business Logic)",
+    "description": "Lõi nghiệp vụ định giá deterministic: candidate matching, áp dụng price/labor policy và review workflow trong app/pricing.py, hai policy sub-service price_policy.py và labor_policy.py, cùng service ingest điều phối luồng nạp workbook giữa API và các tầng excel/normalize/db.",
+    "nodeIds": [
+      "file:app/pricing.py",
+      "file:app/price_policy.py",
+      "file:app/labor_policy.py",
+      "file:app/ingest.py"
+    ]
+  },
+  {
+    "id": "layer:ai",
+    "name": "Tầng AI Semantic (Bounded)",
+    "description": "Lớp semantic reranking tùy chọn và một chiều (pricing.py gọi ai.py, không có chiều ngược lại) theo ADR-003 — chỉ hỗ trợ gợi ý candidate, tuyệt đối không được tạo giá, nên tách biệt kiến trúc khỏi tầng Service deterministic.",
+    "nodeIds": [
+      "file:app/ai.py"
+    ]
+  },
+  {
+    "id": "layer:data",
+    "name": "Tầng Data",
+    "description": "Lớp truy cập dữ liệu SQLite (app/db.py) cùng schema quan hệ định nghĩa trong migrations/001_initial.sql và 16 bảng liên quan (source_files, products, price_observations, pricing_runs, boq_items, match_candidates, corrections, audit_events, v.v.) lưu toàn bộ provenance của hệ thống theo ADR-002.",
+    "nodeIds": [
+      "file:app/db.py",
+      "table:migrations/001_initial.sql",
+      "table:migrations/001_initial.sql:source_files",
+      "table:migrations/001_initial.sql:source_sheets",
+      "table:migrations/001_initial.sql:source_rows",
+      "table:migrations/001_initial.sql:products",
+      "table:migrations/001_initial.sql:product_prices",
+      "table:migrations/001_initial.sql:price_observations",
+      "table:migrations/001_initial.sql:labor_items",
+      "table:migrations/001_initial.sql:catalog_source_links",
+      "table:migrations/001_initial.sql:projects",
+      "table:migrations/001_initial.sql:labor_rates",
+      "table:migrations/001_initial.sql:pricing_runs",
+      "table:migrations/001_initial.sql:boq_items",
+      "table:migrations/001_initial.sql:match_candidates",
+      "table:migrations/001_initial.sql:corrections",
+      "table:migrations/001_initial.sql:aliases",
+      "table:migrations/001_initial.sql:audit_events"
+    ]
+  },
+  {
+    "id": "layer:excel-io",
+    "name": "Tầng I/O Excel",
+    "description": "Adapter đọc/ghi workbook Excel M&E: app/excel.py dùng openpyxl/xlrd để nạp dữ liệu thô từ workbook người dùng, app/export.py xuất báo giá đã định giá trong khi bảo toàn công thức gốc (formula-preserving) theo ADR-004.",
+    "nodeIds": [
+      "file:app/excel.py",
+      "file:app/export.py"
+    ]
+  },
+  {
+    "id": "layer:config-utility",
+    "name": "Tầng Config & Utility Nền Tảng",
+    "description": "Cấu hình ứng dụng và vận hành (app/config.py, .env.example, requirements.txt, run.ps1), điểm khởi tạo package (__init__.py), CLI entry point (cli.py) và primitive chuẩn hóa văn bản/số liệu deterministic không phụ thuộc nội bộ (normalize.py) được hầu hết module khác import.",
+    "nodeIds": [
+      "file:app/config.py",
+      "file:app/__init__.py",
+      "file:app/cli.py",
+      "file:app/normalize.py",
+      "config:.env.example",
+      "config:requirements.txt",
+      "file:run.ps1"
+    ]
+  },
+  {
+    "id": "layer:presentation",
+    "name": "Tầng Presentation (Frontend SPA)",
+    "description": "Giao diện SPA vanilla JS/HTML/CSS (app/static/app.js, index.html, styles.css) được app/main.py phục vụ trực tiếp, không dùng framework frontend riêng biệt.",
+    "nodeIds": [
+      "file:app/static/app.js",
+      "file:app/static/index.html",
+      "file:app/static/styles.css"
+    ]
+  },
+  {
+    "id": "layer:benchmarks",
+    "name": "Tầng Benchmark & Evaluation",
+    "description": "Bộ công cụ đánh giá độc lập, không mutate pricing engine: holdout leakage-safe, tách bạch historical_reproduction/current_repricing (modes.py), báo cáo data-gap/failure-analysis (reports.py), audit dòng dữ liệu (row_audit.py) và so sánh round-over-round (round2_report.py).",
+    "nodeIds": [
+      "file:benchmarks/holdout.py",
+      "file:benchmarks/modes.py",
+      "file:benchmarks/reports.py",
+      "file:benchmarks/round2_report.py",
+      "file:benchmarks/row_audit.py",
+      "file:benchmarks/__init__.py"
+    ]
+  },
+  {
+    "id": "layer:test",
+    "name": "Tầng Test",
+    "description": "Toàn bộ 19 test suite pytest (kèm conftest.py fixtures) bao phủ từng module app/ và benchmarks/, đảm bảo pipeline định giá deterministic không bị regress qua các lần thay đổi.",
+    "nodeIds": [
+      "file:tests/test_benchmark.py",
+      "file:tests/test_benchmark_modes.py",
+      "file:tests/test_normalize.py",
+      "file:tests/test_reports.py",
+      "file:tests/test_round2_report.py",
+      "file:tests/test_row_audit.py",
+      "file:tests/test_ai.py",
+      "file:tests/test_labor_policy.py",
+      "file:tests/test_pricing_lifecycle_hardening.py",
+      "file:tests/test_pricing_llm.py",
+      "file:tests/test_security.py",
+      "file:tests/test_source_lifecycle_api.py",
+      "file:tests/conftest.py",
+      "file:tests/test_excel.py",
+      "file:tests/test_export.py",
+      "file:tests/test_price_policy.py",
+      "file:tests/test_pricing.py",
+      "file:tests/__init__.py",
+      "file:tests/test_config.py"
+    ]
+  },
+  {
+    "id": "layer:documentation",
+    "name": "Tầng Documentation",
+    "description": "Tài liệu dự án ở gốc repo (README, ARCHITECTURE, AGENTS, CLAUDE, KNOWN_LIMITATIONS, PLAN, ROUND2-FINAL-REPORT), các deliverable đặc tả chính thức cùng 5 Architecture Decision Record (deliverables/**), và ghi chú quyết định/yêu cầu dữ liệu bổ sung (docs/**).",
+    "nodeIds": [
+      "document:AGENTS.md",
+      "document:ARCHITECTURE.md",
+      "document:CLAUDE.md",
+      "document:KNOWN_LIMITATIONS.md",
+      "document:PLAN.md",
+      "document:README.md",
+      "document:ROUND2-FINAL-REPORT.md",
+      "document:deliverables/ARCH-DHBG1.md",
+      "document:deliverables/MODULEMAP-DHBG1.md",
+      "document:deliverables/SCOPE-DHBG1.md",
+      "document:deliverables/SPEC-DHBG1.md",
+      "document:deliverables/WBS-DHBG1.md",
+      "document:deliverables/adr/ADR-001-modular-monolith.md",
+      "document:deliverables/adr/ADR-002-sqlite-provenance.md",
+      "document:deliverables/adr/ADR-003-bounded-ai-rerank.md",
+      "document:deliverables/adr/ADR-004-formula-preserving-export.md",
+      "document:deliverables/adr/ADR-005-network-port-3000.md",
+      "document:docs/DATA-REQUIREMENTS-NEXT.md",
+      "document:docs/DECISIONS.md"
+    ]
+  }
+]

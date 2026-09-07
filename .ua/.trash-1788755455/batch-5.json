@@ -1,0 +1,194 @@
+{
+  "nodes": [
+    {
+      "id": "table:migrations/001_initial.sql",
+      "type": "table",
+      "name": "001_initial.sql",
+      "filePath": "migrations/001_initial.sql",
+      "summary": "Migration khởi tạo toàn bộ schema SQLite của DH M&E Pricing Hub gồm 16 bảng và 13 index, phản chiếu đúng DDL runtime trong app/db.py. Thiết kế xoay quanh chuỗi provenance source_files → source_sheets → source_rows để mọi giá vật tư/nhân công đều truy vết được về workbook, sheet và dòng gốc.",
+      "tags": ["database", "migration", "schema-definition", "sqlite", "provenance"],
+      "complexity": "complex",
+      "languageNotes": "DDL viết idempotent bằng CREATE TABLE/INDEX IF NOT EXISTS nên chạy lại an toàn; bật PRAGMA foreign_keys = ON. Dữ liệu bán cấu trúc lưu ở cột TEXT hậu tố _json và tiền tệ dùng REAL — khi chuyển sang PostgreSQL có thể ánh xạ sang JSONB và NUMERIC mà vẫn giữ nguyên đồ thị khóa ngoại."
+    },
+    {
+      "id": "table:migrations/001_initial.sql:source_files",
+      "type": "table",
+      "name": "source_files",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [17, 37],
+      "summary": "Bảng gốc của chuỗi provenance, lưu mỗi workbook Excel đã upload cùng storage_key, sha256 nội dung và trạng thái xử lý. Các cột lifecycle_status, archived_at, superseded_by_source_file_id và version_no cho phép archive/reprocess theo phiên bản thay vì xóa cứng, nhờ đó provenance luôn được bảo toàn.",
+      "tags": ["database", "provenance", "ingestion", "versioning", "lifecycle"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:source_sheets",
+      "type": "table",
+      "name": "source_sheets",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [39, 50],
+      "summary": "Lưu từng sheet của một source_file kèm sheet_index, detected_type, header_row và table_range đã dò được. Cột mapping_json giữ kết quả ánh xạ cột để bước parsing tái lập chính xác cách đọc bảng.",
+      "tags": ["database", "provenance", "ingestion", "sheet-mapping"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:source_rows",
+      "type": "table",
+      "name": "source_rows",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [52, 60],
+      "summary": "Mức chi tiết nhất của provenance: mỗi dòng thô trong sheet được lưu nguyên trạng ở raw_cells_json cùng row_kind phân loại và parse_warnings_json. Đây là đích tham chiếu của mọi bản ghi giá để chứng minh nguồn gốc tới từng ô.",
+      "tags": ["database", "provenance", "raw-data", "ingestion"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:products",
+      "type": "table",
+      "name": "products",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [62, 78],
+      "summary": "Catalog vật tư đã chuẩn hóa, định danh bằng canonical_key duy nhất kèm normalized_name, product_code, brand, origin và đơn vị. Các thuộc tính kỹ thuật và alias lưu dạng JSON để phục vụ matching BOQ; lifecycle_status hỗ trợ archive thay vì xóa.",
+      "tags": ["database", "data-model", "catalog", "normalization", "matching"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:product_prices",
+      "type": "table",
+      "name": "product_prices",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [86, 104],
+      "summary": "Giá vật tư đang được vận hành (selection layer) với list_price, discount, net_price, currency, tax_mode và khoảng hiệu lực. Ba khóa ngoại source_file_id/source_sheet_id/source_row_id gắn provenance, còn calc_json ghi lại cách tính giá net.",
+      "tags": ["database", "pricing", "provenance", "data-model"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:price_observations",
+      "type": "table",
+      "name": "price_observations",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [111, 133],
+      "summary": "Kho quan sát giá bất biến, giữ lại mọi bậc list/discount/VAT từ nhà cung cấp và từ báo giá lịch sử (source_project_id, observation_type, price_basis). Là nguồn dữ liệu cho policy historical_median trong khi product_prices chỉ là giá đã chọn để dùng.",
+      "tags": ["database", "pricing", "provenance", "historical-data", "immutable"],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:labor_items",
+      "type": "table",
+      "name": "labor_items",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [138, 150],
+      "summary": "Catalog hạng mục nhân công chuẩn hóa với canonical_key duy nhất, normalized_name, code, category và unit. Song song với products nhưng dành cho phần nhân công của BOQ, cũng có lifecycle_status để archive.",
+      "tags": ["database", "data-model", "catalog", "labor", "normalization"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:catalog_source_links",
+      "type": "table",
+      "name": "catalog_source_links",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [154, 164],
+      "summary": "Bảng liên kết đa hình nối một mục catalog (product hoặc labor_item, phân biệt bằng entity_type) tới file/sheet/row nguồn kèm relation_type. Cho phép một mục catalog tích lũy nhiều bằng chứng nguồn qua nhiều lần ingest.",
+      "tags": ["database", "provenance", "join-table", "polymorphic", "catalog"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:projects",
+      "type": "table",
+      "name": "projects",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [172, 180],
+      "summary": "Đại diện một dự án/báo giá với project_name, customer, quotation_date và source_file_id của workbook BOQ gốc. Là điểm neo cho pricing_runs, boq_items và các quan sát giá lịch sử.",
+      "tags": ["database", "data-model", "project", "quotation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:labor_rates",
+      "type": "table",
+      "name": "labor_rates",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [182, 194],
+      "summary": "Đơn giá nhân công theo labor_item và dự án nguồn, kèm effective_date, confidence và policy_json mô tả cách suy ra đơn giá. Giữ đầy đủ provenance file/sheet/row giống các bảng giá vật tư.",
+      "tags": ["database", "pricing", "labor", "provenance"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:pricing_runs",
+      "type": "table",
+      "name": "pricing_runs",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [199, 209],
+      "summary": "Ghi nhận mỗi lần chạy định giá cho một project: policy_json đã áp dụng, status, metrics_json và model_usage_json cùng mốc started_at/finished_at. Cho phép so sánh và tái lập kết quả giữa các lần chạy khác nhau.",
+      "tags": ["database", "pricing", "audit", "reproducibility", "run-tracking"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:boq_items",
+      "type": "table",
+      "name": "boq_items",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [211, 245],
+      "summary": "Bảng trung tâm và rộng nhất của schema (33 cột), lưu từng dòng BOQ đã parse cùng kết quả matching và định giá: matched_product_id, matched_labor_item_id, độ tin cậy, đơn giá và thành tiền cho vật tư lẫn nhân công. Các cột material_source_json, labor_source_json, explanation, risk và alternatives_json mang provenance cùng lý do cho từng con số xuất ra báo giá.",
+      "tags": ["database", "data-model", "boq", "matching", "pricing"],
+      "complexity": "complex"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:match_candidates",
+      "type": "table",
+      "name": "match_candidates",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [250, 260],
+      "summary": "Danh sách candidate xếp hạng cho mỗi boq_item trong một pricing_run, gồm candidate_type/candidate_id, rank_no, score và score_components_json chi tiết. Phục vụ màn hình rà soát để người dùng chọn lại phương án phù hợp.",
+      "tags": ["database", "matching", "candidate", "review", "scoring"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:corrections",
+      "type": "table",
+      "name": "corrections",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [262, 272],
+      "summary": "Lưu lại các lần người dùng sửa kết quả matching: old_candidate, selected_candidate, rule_type và context_json kèm created_by. Là dữ liệu phản hồi để cải thiện độ chính xác matching cho những lần chạy sau.",
+      "tags": ["database", "feedback", "matching", "human-in-the-loop", "audit"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:aliases",
+      "type": "table",
+      "name": "aliases",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [274, 282],
+      "summary": "Từ điển ánh xạ alias sang canonical dùng khi chuẩn hóa mô tả vật tư/nhân công, có rule_type và context_json để giới hạn phạm vi áp dụng. Giúp matching deterministic nhận diện được các cách viết khác nhau của cùng một mục.",
+      "tags": ["database", "normalization", "matching", "lookup-table"],
+      "complexity": "simple"
+    },
+    {
+      "id": "table:migrations/001_initial.sql:audit_events",
+      "type": "table",
+      "name": "audit_events",
+      "filePath": "migrations/001_initial.sql",
+      "lineRange": [284, 291],
+      "summary": "Nhật ký sự kiện chung theo dạng event_type kết hợp entity_type/entity_id và payload_json. Ghi lại các thao tác quan trọng như upload, archive, reprocess và pricing run để phục vụ truy vết vận hành.",
+      "tags": ["database", "audit", "logging", "traceability"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:source_files", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:source_sheets", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:source_rows", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:products", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:product_prices", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:price_observations", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:labor_items", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:catalog_source_links", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:projects", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:labor_rates", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:pricing_runs", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:boq_items", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:match_candidates", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:corrections", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:aliases", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "table:migrations/001_initial.sql:audit_events", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "table:migrations/001_initial.sql", "target": "file:app/db.py", "type": "defines_schema", "direction": "forward", "weight": 0.8},
+    {"source": "table:migrations/001_initial.sql", "target": "file:app/pricing.py", "type": "defines_schema", "direction": "forward", "weight": 0.8}
+  ]
+}

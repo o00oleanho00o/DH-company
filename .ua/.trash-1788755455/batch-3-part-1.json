@@ -1,0 +1,341 @@
+{
+ "nodes": [
+  {
+   "id": "file:app/cli.py",
+   "type": "file",
+   "name": "cli.py",
+   "filePath": "app/cli.py",
+   "summary": "CLI quản trị của Pricing Hub, cung cấp các lệnh init-db, ingest, seed, price, stats, reset và benchmark để chạy pipeline định giá bên ngoài giao diện web.",
+   "tags": [
+    "cli",
+    "entry-point",
+    "argparse",
+    "quản-trị",
+    "pipeline"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "Dùng argparse với sub-parser và bảng dispatch cmd_*; hàm _print ép UTF-8 để console Windows mặc định cp1252 vẫn in được tên file tiếng Việt."
+  },
+  {
+   "id": "file:app/config.py",
+   "type": "file",
+   "name": "config.py",
+   "filePath": "app/config.py",
+   "summary": "Trung tâm cấu hình: xác định các đường dẫn lưu trữ (storage/raw/exports/pricing.db), nạp file .env dạng loose và expose dataclass Settings chứa toàn bộ tham số runtime, kể cả ngân sách LLM và ngưỡng price drift.",
+   "tags": [
+    "configuration",
+    "settings",
+    "environment",
+    "đường-dẫn",
+    "llm-budget"
+   ],
+   "complexity": "simple",
+   "languageNotes": "Settings là frozen dataclass với giá trị mặc định đọc trực tiếp từ os.getenv, nên cấu hình được chốt một lần lúc import module."
+  },
+  {
+   "id": "function:app/cli.py:_print",
+   "type": "function",
+   "name": "_print",
+   "filePath": "app/cli.py",
+   "lineRange": [
+    18,
+    27
+   ],
+   "summary": "In dữ liệu ra stdout an toàn cho console Windows, tự encode/decode UTF-8 để không vỡ khi tên file hoặc payload chứa ký tự tiếng Việt.",
+   "tags": [
+    "utility",
+    "cli",
+    "encoding",
+    "windows"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/cli.py:cmd_ingest",
+   "type": "function",
+   "name": "cmd_ingest",
+   "filePath": "app/cli.py",
+   "lineRange": [
+    35,
+    47
+   ],
+   "summary": "Lệnh CLI nhập một workbook đơn lẻ, cho phép ép kiểu tài liệu, loại trừ giá holdout và cưỡng bức re-import.",
+   "tags": [
+    "cli",
+    "command",
+    "ingest",
+    "handler"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/cli.py:cmd_seed",
+   "type": "function",
+   "name": "cmd_seed",
+   "filePath": "app/cli.py",
+   "lineRange": [
+    50,
+    62
+   ],
+   "summary": "Lệnh CLI nạp hàng loạt workbook mẫu từ thư mục input, mặc định bỏ qua file holdout để giữ tập đánh giá sạch.",
+   "tags": [
+    "cli",
+    "command",
+    "seed",
+    "holdout"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/cli.py:cmd_benchmark",
+   "type": "function",
+   "name": "cmd_benchmark",
+   "filePath": "app/cli.py",
+   "lineRange": [
+    84,
+    93
+   ],
+   "summary": "Lệnh CLI chạy benchmark holdout và in báo cáo kết quả đánh giá độ chính xác của việc định giá.",
+   "tags": [
+    "cli",
+    "command",
+    "benchmark",
+    "evaluation"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/cli.py:build_parser",
+   "type": "function",
+   "name": "build_parser",
+   "filePath": "app/cli.py",
+   "lineRange": [
+    96,
+    138
+   ],
+   "summary": "Dựng ArgumentParser với đầy đủ sub-command (init-db, ingest, seed, price, stats, reset, benchmark) cùng các tuỳ chọn tương ứng.",
+   "tags": [
+    "cli",
+    "argparse",
+    "factory",
+    "parser"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/cli.py:main",
+   "type": "function",
+   "name": "main",
+   "filePath": "app/cli.py",
+   "lineRange": [
+    141,
+    151
+   ],
+   "summary": "Điểm vào CLI: parse tham số, dispatch tới hàm cmd_* tương ứng và trả về exit code cho shell.",
+   "tags": [
+    "entry-point",
+    "cli",
+    "dispatch"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/config.py:_load_loose_env",
+   "type": "function",
+   "name": "_load_loose_env",
+   "filePath": "app/config.py",
+   "lineRange": [
+    15,
+    58
+   ],
+   "summary": "Nạp file .env theo cú pháp lỏng (bỏ qua comment, dấu ngoặc, dòng lỗi) vào os.environ mà không cần thư viện ngoài, chỉ set những biến chưa tồn tại.",
+   "tags": [
+    "configuration",
+    "environment",
+    "parser",
+    "bootstrap"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/config.py:ensure_directories",
+   "type": "function",
+   "name": "ensure_directories",
+   "filePath": "app/config.py",
+   "lineRange": [
+    116,
+    119
+   ],
+   "summary": "Tạo sẵn các thư mục storage, raw và exports trước khi đọc/ghi dữ liệu để tránh lỗi đường dẫn khi chạy lần đầu.",
+   "tags": [
+    "configuration",
+    "filesystem",
+    "bootstrap",
+    "utility"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "class:app/config.py:Settings",
+   "type": "class",
+   "name": "Settings",
+   "filePath": "app/config.py",
+   "lineRange": [
+    85,
+    110
+   ],
+   "summary": "Frozen dataclass gom toàn bộ cấu hình runtime: host/port (mặc định 0.0.0.0:3000), database_url, thông tin Claude API đọc phía server, giới hạn ngân sách LLM và ngưỡng cảnh báo price drift.",
+   "tags": [
+    "configuration",
+    "dataclass",
+    "settings",
+    "llm-budget",
+    "security"
+   ],
+   "complexity": "moderate",
+   "languageNotes": "claude_api_key chỉ tồn tại phía server, không bao giờ được log hay trả về trình duyệt."
+  }
+ ],
+ "edges": [
+  {
+   "source": "file:app/cli.py",
+   "target": "function:app/cli.py:_print",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/cli.py",
+   "target": "function:app/cli.py:cmd_ingest",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/cli.py",
+   "target": "function:app/cli.py:cmd_seed",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/cli.py",
+   "target": "function:app/cli.py:cmd_benchmark",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/cli.py",
+   "target": "function:app/cli.py:build_parser",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/cli.py",
+   "target": "function:app/cli.py:main",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/config.py",
+   "target": "function:app/config.py:_load_loose_env",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/config.py",
+   "target": "function:app/config.py:ensure_directories",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/config.py",
+   "target": "class:app/config.py:Settings",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/cli.py",
+   "target": "file:app/config.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/cli.py",
+   "target": "file:app/db.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/cli.py",
+   "target": "file:app/ingest.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/cli.py",
+   "target": "file:app/pricing.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/config.py",
+   "target": "class:app/config.py:Settings",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:app/config.py",
+   "target": "function:app/config.py:ensure_directories",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:app/cli.py",
+   "target": "function:app/cli.py:main",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:app/cli.py",
+   "target": "function:app/cli.py:build_parser",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/cli.py:cmd_ingest",
+   "target": "function:app/ingest.py:ingest_workbook",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/cli.py:cmd_seed",
+   "target": "function:app/ingest.py:ingest_directory",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/cli.py:main",
+   "target": "function:app/cli.py:build_parser",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  }
+ ]
+}

@@ -1,0 +1,35 @@
+{
+  "issues": [],
+  "warnings": [
+    "Node 'file:benchmarks/__init__.py' has no edges (orphan)",
+    "Node 'file:tests/__init__.py' has no edges (orphan)"
+  ],
+  "stats": {
+    "totalNodes": 482,
+    "totalEdges": 883,
+    "totalLayers": 10,
+    "tourSteps": 12,
+    "nodeTypes": {
+      "file": 42,
+      "function": 362,
+      "class": 13,
+      "endpoint": 27,
+      "table": 17,
+      "config": 2,
+      "document": 19
+    },
+    "edgeTypes": {
+      "contains": 418,
+      "exports": 96,
+      "tested_by": 25,
+      "imports": 95,
+      "calls": 143,
+      "defines_schema": 2,
+      "configures": 4,
+      "deploys": 1,
+      "depends_on": 14,
+      "documents": 64,
+      "related": 21
+    }
+  }
+}

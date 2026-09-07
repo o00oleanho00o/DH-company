@@ -1,0 +1,69 @@
+{
+  "nodes": [
+    {
+      "id": "document:docs/DATA-REQUIREMENTS-NEXT.md",
+      "type": "document",
+      "name": "DATA-REQUIREMENTS-NEXT.md",
+      "filePath": "docs/DATA-REQUIREMENTS-NEXT.md",
+      "summary": "Tài liệu data-gap được sinh tự động từ kết quả benchmark: liệt kê 2388 dòng có thể định giá so với 2273 dòng đang được nguồn hỗ trợ, và bảng 17 nhóm category (cáp, dây, ống luồn, máng cáp, chiếu sáng, MCB/MCCB, tủ điện, máy biến áp, tiếp địa, chống sét...) kèm nguyên nhân thiếu giá và loại dữ liệu cần bổ sung.",
+      "tags": ["documentation", "data-gap", "benchmark", "generated", "roadmap"],
+      "complexity": "simple",
+      "languageNotes": "Là báo cáo sinh tự động (không sửa tay): con số ước lượng số dòng có thể mở thêm nếu bổ sung nguồn, và tài liệu tự ghi rõ nó không cam kết coverage chính xác."
+    },
+    {
+      "id": "document:docs/DECISIONS.md",
+      "type": "document",
+      "name": "DECISIONS.md",
+      "filePath": "docs/DECISIONS.md",
+      "summary": "Sổ quyết định nghiệp vụ/phạm vi của dự án, ghi sáu quyết định QĐ-01 đến QĐ-06: chọn modular monolith cho MVP, SQLite làm kho vận hành mặc định, giá deterministic với AI chỉ rerank có giới hạn, provenance và vòng đời nguồn là bắt buộc, export chỉ điền đơn giá và giữ công thức gốc, cùng bind mặc định `0.0.0.0:3000`. Mỗi quyết định kèm lý do và đánh đổi, và tài liệu tự khai báo mình là tầng gốc trong thứ tự tài liệu của dự án.",
+      "tags": ["documentation", "decision-log", "architecture", "governance", "entry-point"],
+      "complexity": "moderate",
+      "languageNotes": "Mỗi mục theo khuôn mẫu Người quyết / Ngày / Trạng thái / Quyết định / Lý do / Đánh đổi — dạng decision record nhẹ, sáu quyết định ở đây tương ứng gần như một-một với năm ADR trong `deliverables/adr/`."
+    },
+    {
+      "id": "file:tests/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "tests/__init__.py",
+      "summary": "Package marker cho bộ test regression và integration của nền tảng định giá DH, chỉ chứa một docstring.",
+      "tags": ["package-marker", "test", "entry-point"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_config.py",
+      "type": "file",
+      "name": "test_config.py",
+      "filePath": "tests/test_config.py",
+      "summary": "Test regression bảo vệ cấu hình mặc định của server: xác nhận `app.config.settings` cho ra bind `0.0.0.0:3000` khi không có biến môi trường `APP_HOST`/`APP_PORT`, đúng theo quyết định QĐ-06.",
+      "tags": ["test", "configuration", "regression", "pytest"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_config.py:test_default_server_bind_is_network_accessible_on_port_3000",
+      "type": "function",
+      "name": "test_default_server_bind_is_network_accessible_on_port_3000",
+      "filePath": "tests/test_config.py",
+      "lineRange": [12, 25],
+      "summary": "Chạy một subprocess Python sạch với `APP_HOST`/`APP_PORT` đã bị xoá khỏi môi trường, in ra `settings.host:settings.port` và assert kết quả đúng bằng `0.0.0.0:3000`.",
+      "tags": ["test", "configuration", "subprocess", "regression"],
+      "complexity": "simple",
+      "languageNotes": "Dùng subprocess thay vì import trực tiếp để tránh việc `app.config` đã được import (và cache settings) bởi các test khác trong cùng session pytest — cách duy nhất kiểm tra được giá trị mặc định thật."
+    }
+  ],
+  "edges": [
+    {"source": "file:tests/test_config.py", "target": "function:tests/test_config.py:test_default_server_bind_is_network_accessible_on_port_3000", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_config.py", "target": "function:tests/test_config.py:test_default_server_bind_is_network_accessible_on_port_3000", "type": "exports", "direction": "forward", "weight": 0.8},
+    {"source": "file:app/config.py", "target": "file:tests/test_config.py", "type": "tested_by", "direction": "forward", "weight": 0.5},
+    {"source": "document:docs/DATA-REQUIREMENTS-NEXT.md", "target": "file:benchmarks/reports.py", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:docs/DECISIONS.md", "target": "document:deliverables/SCOPE-DHBG1.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:docs/DECISIONS.md", "target": "document:deliverables/SPEC-DHBG1.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:docs/DECISIONS.md", "target": "document:deliverables/MODULEMAP-DHBG1.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:docs/DECISIONS.md", "target": "document:deliverables/ARCH-DHBG1.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:docs/DECISIONS.md", "target": "document:deliverables/WBS-DHBG1.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:docs/DECISIONS.md", "target": "document:deliverables/adr/ADR-001-modular-monolith.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:docs/DECISIONS.md", "target": "document:deliverables/adr/ADR-002-sqlite-provenance.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:docs/DECISIONS.md", "target": "document:deliverables/adr/ADR-003-bounded-ai-rerank.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:docs/DECISIONS.md", "target": "document:deliverables/adr/ADR-004-formula-preserving-export.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:docs/DECISIONS.md", "target": "document:deliverables/adr/ADR-005-network-port-3000.md", "type": "related", "direction": "forward", "weight": 0.5}
+  ]
+}

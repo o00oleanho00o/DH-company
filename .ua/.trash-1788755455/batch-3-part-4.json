@@ -1,0 +1,296 @@
+{
+ "nodes": [
+  {
+   "id": "file:tests/test_security.py",
+   "type": "file",
+   "name": "test_security.py",
+   "filePath": "tests/test_security.py",
+   "summary": "Test bảo mật kiểm tra _save_upload từ chối payload vượt MAX_UPLOAD_BYTES bằng HTTP 413 và dọn sạch thư mục tạm upload-*, không để lại file rác trong storage.",
+   "tags": [
+    "test",
+    "security",
+    "upload",
+    "pytest",
+    "cleanup"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "file:tests/test_source_lifecycle_api.py",
+   "type": "file",
+   "name": "test_source_lifecycle_api.py",
+   "filePath": "tests/test_source_lifecycle_api.py",
+   "summary": "Bộ test tích hợp cho vòng đời source và catalog qua API: archive/safe-delete, giới hạn raw row theo phạm vi workbook, phân trang catalog toàn cục, ưu tiên observation bất biến và force re-import không phá provenance.",
+   "tags": [
+    "test",
+    "integration",
+    "lifecycle",
+    "provenance",
+    "catalog"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "function:tests/test_security.py:test_save_upload_rejects_oversized_payload_and_cleans_temp_dir",
+   "type": "function",
+   "name": "test_save_upload_rejects_oversized_payload_and_cleans_temp_dir",
+   "filePath": "tests/test_security.py",
+   "lineRange": [
+    12,
+    26
+   ],
+   "summary": "Kiểm tra _save_upload ném HTTPException 413 khi payload vượt MAX_UPLOAD_BYTES và không để lại file hay thư mục upload-* nào trong storage.",
+   "tags": [
+    "test",
+    "security",
+    "upload",
+    "cleanup"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:tests/test_source_lifecycle_api.py:_seed_source_graph",
+   "type": "function",
+   "name": "_seed_source_graph",
+   "filePath": "tests/test_source_lifecycle_api.py",
+   "lineRange": [
+    11,
+    81
+   ],
+   "summary": "Helper dựng sẵn đồ thị dữ liệu gồm source file, sheet, row, catalog item và price observation để các test vòng đời chạy trên dữ liệu thật.",
+   "tags": [
+    "test",
+    "fixture",
+    "seed",
+    "provenance"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "function:tests/test_source_lifecycle_api.py:test_source_detail_archive_and_safe_delete",
+   "type": "function",
+   "name": "test_source_detail_archive_and_safe_delete",
+   "filePath": "tests/test_source_lifecycle_api.py",
+   "lineRange": [
+    84,
+    110
+   ],
+   "summary": "Xác nhận API chi tiết source trả đúng thống kê, archive giữ nguyên provenance và safe delete bị chặn khi còn tham chiếu.",
+   "tags": [
+    "test",
+    "lifecycle",
+    "safe-delete",
+    "api"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:tests/test_source_lifecycle_api.py:test_source_raw_row_limit_is_workbook_wide",
+   "type": "function",
+   "name": "test_source_raw_row_limit_is_workbook_wide",
+   "filePath": "tests/test_source_lifecycle_api.py",
+   "lineRange": [
+    113,
+    166
+   ],
+   "summary": "Xác nhận tham số limit của raw rows áp trên phạm vi toàn workbook chứ không phải từng sheet riêng lẻ.",
+   "tags": [
+    "test",
+    "pagination",
+    "sources",
+    "api"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:tests/test_source_lifecycle_api.py:test_catalog_list_and_product_detail",
+   "type": "function",
+   "name": "test_catalog_list_and_product_detail",
+   "filePath": "tests/test_source_lifecycle_api.py",
+   "lineRange": [
+    169,
+    194
+   ],
+   "summary": "Kiểm tra endpoint danh sách catalog và chi tiết sản phẩm trả đúng thông tin nhận dạng, giá và provenance.",
+   "tags": [
+    "test",
+    "catalog",
+    "api",
+    "provenance"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:tests/test_source_lifecycle_api.py:test_catalog_current_price_prefers_immutable_observation_over_legacy_price",
+   "type": "function",
+   "name": "test_catalog_current_price_prefers_immutable_observation_over_legacy_price",
+   "filePath": "tests/test_source_lifecycle_api.py",
+   "lineRange": [
+    197,
+    239
+   ],
+   "summary": "Xác nhận giá hiện hành của catalog được lấy từ price observation bất biến thay vì cột giá legacy cũ.",
+   "tags": [
+    "test",
+    "pricing",
+    "observation",
+    "catalog"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:tests/test_source_lifecycle_api.py:test_catalog_all_pagination_is_global_and_stable",
+   "type": "function",
+   "name": "test_catalog_all_pagination_is_global_and_stable",
+   "filePath": "tests/test_source_lifecycle_api.py",
+   "lineRange": [
+    242,
+    291
+   ],
+   "summary": "Xác nhận phân trang catalog với kind=all là toàn cục và ổn định giữa các trang, không trùng lặp hay bỏ sót mục nào.",
+   "tags": [
+    "test",
+    "pagination",
+    "catalog",
+    "stability"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:tests/test_source_lifecycle_api.py:test_source_detail_uses_legacy_direct_provenance_when_bridge_is_missing",
+   "type": "function",
+   "name": "test_source_detail_uses_legacy_direct_provenance_when_bridge_is_missing",
+   "filePath": "tests/test_source_lifecycle_api.py",
+   "lineRange": [
+    294,
+    316
+   ],
+   "summary": "Xác nhận API vẫn dựng được provenance từ liên kết trực tiếp kiểu cũ khi bảng bridge chưa có dữ liệu.",
+   "tags": [
+    "test",
+    "provenance",
+    "backward-compatibility",
+    "api"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:tests/test_source_lifecycle_api.py:test_force_reimport_versions_source_without_breaking_provenance",
+   "type": "function",
+   "name": "test_force_reimport_versions_source_without_breaking_provenance",
+   "filePath": "tests/test_source_lifecycle_api.py",
+   "lineRange": [
+    319,
+    405
+   ],
+   "summary": "Xác nhận force re-import tạo phiên bản source mới mà không phá vỡ provenance của dữ liệu đã nhập trước đó.",
+   "tags": [
+    "test",
+    "reimport",
+    "versioning",
+    "provenance"
+   ],
+   "complexity": "complex"
+  }
+ ],
+ "edges": [
+  {
+   "source": "file:tests/test_security.py",
+   "target": "function:tests/test_security.py:test_save_upload_rejects_oversized_payload_and_cleans_temp_dir",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:tests/test_source_lifecycle_api.py",
+   "target": "function:tests/test_source_lifecycle_api.py:_seed_source_graph",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:tests/test_source_lifecycle_api.py",
+   "target": "function:tests/test_source_lifecycle_api.py:test_source_detail_archive_and_safe_delete",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:tests/test_source_lifecycle_api.py",
+   "target": "function:tests/test_source_lifecycle_api.py:test_source_raw_row_limit_is_workbook_wide",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:tests/test_source_lifecycle_api.py",
+   "target": "function:tests/test_source_lifecycle_api.py:test_catalog_list_and_product_detail",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:tests/test_source_lifecycle_api.py",
+   "target": "function:tests/test_source_lifecycle_api.py:test_catalog_current_price_prefers_immutable_observation_over_legacy_price",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:tests/test_source_lifecycle_api.py",
+   "target": "function:tests/test_source_lifecycle_api.py:test_catalog_all_pagination_is_global_and_stable",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:tests/test_source_lifecycle_api.py",
+   "target": "function:tests/test_source_lifecycle_api.py:test_source_detail_uses_legacy_direct_provenance_when_bridge_is_missing",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:tests/test_source_lifecycle_api.py",
+   "target": "function:tests/test_source_lifecycle_api.py:test_force_reimport_versions_source_without_breaking_provenance",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:tests/test_security.py",
+   "target": "file:app/main.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:tests/test_source_lifecycle_api.py",
+   "target": "file:app/db.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:tests/test_source_lifecycle_api.py",
+   "target": "file:app/ingest.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:tests/test_source_lifecycle_api.py",
+   "target": "file:app/main.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:tests/test_source_lifecycle_api.py",
+   "target": "file:tests/conftest.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  }
+ ]
+}

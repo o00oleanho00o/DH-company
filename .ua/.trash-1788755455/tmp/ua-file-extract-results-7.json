@@ -1,0 +1,308 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 5,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 5,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 0,
+      "failed": 0,
+      "skipped": 5
+    }
+  },
+  "results": [
+    {
+      "path": "deliverables/ARCH-DHBG1.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 53,
+      "nonEmptyLines": 43,
+      "sections": [
+        {
+          "heading": "Kiến trúc DHBG1",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Tổng quan",
+          "level": 2,
+          "line": 3
+        },
+        {
+          "heading": "Thiết kế module",
+          "level": 2,
+          "line": 23
+        },
+        {
+          "heading": "Luồng request",
+          "level": 2,
+          "line": 34
+        },
+        {
+          "heading": "Triển khai mạng",
+          "level": 2,
+          "line": 42
+        },
+        {
+          "heading": "An toàn và độ tin cậy",
+          "level": 2,
+          "line": 48
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 6
+      }
+    },
+    {
+      "path": "deliverables/MODULEMAP-DHBG1.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 27,
+      "nonEmptyLines": 21,
+      "sections": [
+        {
+          "heading": "Module map DHBG1",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Bảng module",
+          "level": 2,
+          "line": 3
+        },
+        {
+          "heading": "Luồng chính",
+          "level": 2,
+          "line": 18
+        },
+        {
+          "heading": "Ranh giới dữ liệu",
+          "level": 2,
+          "line": 22
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 4
+      }
+    },
+    {
+      "path": "deliverables/SCOPE-DHBG1.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 48,
+      "nonEmptyLines": 38,
+      "sections": [
+        {
+          "heading": "Phạm vi dự án DH-Baogia (DHBG1)",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "1. Mục tiêu",
+          "level": 2,
+          "line": 3
+        },
+        {
+          "heading": "2. Trong phạm vi",
+          "level": 2,
+          "line": 10
+        },
+        {
+          "heading": "3. Ngoài phạm vi",
+          "level": 2,
+          "line": 25
+        },
+        {
+          "heading": "4. Người dùng và trách nhiệm",
+          "level": 2,
+          "line": 33
+        },
+        {
+          "heading": "5. Tiêu chí thành công",
+          "level": 2,
+          "line": 42
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 6
+      }
+    },
+    {
+      "path": "deliverables/SPEC-DHBG1.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 63,
+      "nonEmptyLines": 44,
+      "sections": [
+        {
+          "heading": "Đặc tả yêu cầu DHBG1",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Yêu cầu chức năng",
+          "level": 2,
+          "line": 3
+        },
+        {
+          "heading": "REQ-DHBG1-001",
+          "level": 3,
+          "line": 5
+        },
+        {
+          "heading": "REQ-DHBG1-002",
+          "level": 3,
+          "line": 9
+        },
+        {
+          "heading": "REQ-DHBG1-003",
+          "level": 3,
+          "line": 12
+        },
+        {
+          "heading": "REQ-DHBG1-004",
+          "level": 3,
+          "line": 15
+        },
+        {
+          "heading": "REQ-DHBG1-005",
+          "level": 3,
+          "line": 18
+        },
+        {
+          "heading": "REQ-DHBG1-006",
+          "level": 3,
+          "line": 21
+        },
+        {
+          "heading": "REQ-DHBG1-007",
+          "level": 3,
+          "line": 24
+        },
+        {
+          "heading": "REQ-DHBG1-008",
+          "level": 3,
+          "line": 27
+        },
+        {
+          "heading": "REQ-DHBG1-009",
+          "level": 3,
+          "line": 30
+        },
+        {
+          "heading": "REQ-DHBG1-010",
+          "level": 3,
+          "line": 33
+        },
+        {
+          "heading": "REQ-DHBG1-011",
+          "level": 3,
+          "line": 36
+        },
+        {
+          "heading": "REQ-DHBG1-012",
+          "level": 3,
+          "line": 39
+        },
+        {
+          "heading": "REQ-DHBG1-013",
+          "level": 3,
+          "line": 42
+        },
+        {
+          "heading": "REQ-DHBG1-014",
+          "level": 3,
+          "line": 45
+        },
+        {
+          "heading": "REQ-DHBG1-015",
+          "level": 3,
+          "line": 48
+        },
+        {
+          "heading": "REQ-DHBG1-016",
+          "level": 3,
+          "line": 51
+        },
+        {
+          "heading": "Yêu cầu phi chức năng",
+          "level": 2,
+          "line": 54
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 19
+      }
+    },
+    {
+      "path": "deliverables/WBS-DHBG1.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 60,
+      "nonEmptyLines": 47,
+      "sections": [
+        {
+          "heading": "WBS DHBG1",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Tiến độ",
+          "level": 2,
+          "line": 7
+        },
+        {
+          "heading": "Nền tảng và dữ liệu",
+          "level": 2,
+          "line": 16
+        },
+        {
+          "heading": "Pricing và AI",
+          "level": 2,
+          "line": 26
+        },
+        {
+          "heading": "Review, API và export",
+          "level": 2,
+          "line": 36
+        },
+        {
+          "heading": "Vận hành và bàn giao",
+          "level": 2,
+          "line": 46
+        },
+        {
+          "heading": "Quy tắc cập nhật",
+          "level": 2,
+          "line": 56
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 7
+      }
+    }
+  ]
+}

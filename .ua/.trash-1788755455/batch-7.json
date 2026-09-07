@@ -1,0 +1,88 @@
+{
+  "nodes": [
+    {
+      "id": "document:deliverables/ARCH-DHBG1.md",
+      "type": "document",
+      "name": "ARCH-DHBG1.md",
+      "filePath": "deliverables/ARCH-DHBG1.md",
+      "summary": "Tài liệu kiến trúc DHBG1: mô tả modular monolith FastAPI chạy trên port 3000 với sơ đồ tổng quan, trách nhiệm từng module trong app/, luồng request từ upload đến export, cách triển khai LAN/Cloudflare Tunnel và các ràng buộc an toàn (không áp giá thiếu provenance, không xóa cứng nguồn đã tham chiếu).",
+      "tags": ["documentation", "architecture", "deliverable", "module-design", "deployment"],
+      "complexity": "moderate",
+      "languageNotes": "Dùng khối text ASCII để vẽ sơ đồ phân lớp thay vì hình ảnh, giúp diff Git đọc được và giữ tài liệu ở dạng plain text."
+    },
+    {
+      "id": "document:deliverables/MODULEMAP-DHBG1.md",
+      "type": "document",
+      "name": "MODULEMAP-DHBG1.md",
+      "filePath": "deliverables/MODULEMAP-DHBG1.md",
+      "summary": "Bản đồ module DHBG1: bảng 10 module logic (runtime-config, intake, normalization, provenance-store, pricing-engine, ai-provider, review-workspace, quotation-api, excel-export, web-ui) kèm trách nhiệm và các REQ mà từng module sở hữu, cộng luồng chính và ranh giới dữ liệu giữa các module.",
+      "tags": ["documentation", "module-map", "deliverable", "requirements-traceability", "architecture"],
+      "complexity": "simple",
+      "languageNotes": "Mỗi module được gắn trực tiếp với danh sách REQ, tạo ma trận truy vết hai chiều giữa đặc tả và cấu trúc code."
+    },
+    {
+      "id": "document:deliverables/SCOPE-DHBG1.md",
+      "type": "document",
+      "name": "SCOPE-DHBG1.md",
+      "filePath": "deliverables/SCOPE-DHBG1.md",
+      "summary": "Tài liệu phạm vi dự án DH-Baogia (DHBG1): mục tiêu nền tảng web nội bộ nhập workbook Excel M&E, danh sách trong/ngoài phạm vi, vai trò người dùng và tiêu chí thành công (không có giá thiếu provenance, ngưỡng candidate 90%, export giữ nguyên công thức, pytest -q xanh).",
+      "tags": ["documentation", "scope", "deliverable", "requirements", "acceptance-criteria"],
+      "complexity": "moderate",
+      "languageNotes": "Phần Ngoài phạm vi được viết tường minh (ERP, OCR/CAD, PostgreSQL/pgvector, AI tự phát hành giá) nhằm chặn scope creep ngay ở tầng tài liệu."
+    },
+    {
+      "id": "document:deliverables/SPEC-DHBG1.md",
+      "type": "document",
+      "name": "SPEC-DHBG1.md",
+      "filePath": "deliverables/SPEC-DHBG1.md",
+      "summary": "Đặc tả yêu cầu DHBG1: 16 yêu cầu chức năng mã REQ-DHBG1-001..016 (intake .xls/.xlsx, provenance từng dòng, normalization, catalog lifecycle, matching material/labor độc lập, ngưỡng 90%, ba pricing policy, bounded AI rerank, export chỉ ghi unit price, REST API, UI, audit) cùng 6 yêu cầu phi chức năng kèm cách kiểm chứng.",
+      "tags": ["documentation", "specification", "deliverable", "requirements", "non-functional-requirements"],
+      "complexity": "moderate",
+      "languageNotes": "Mỗi NFR đi kèm cột Kiểm chứng chỉ rõ loại test tương ứng, biến yêu cầu phi chức năng thành hạng mục kiểm thử được."
+    },
+    {
+      "id": "document:deliverables/WBS-DHBG1.md",
+      "type": "document",
+      "name": "WBS-DHBG1.md",
+      "filePath": "deliverables/WBS-DHBG1.md",
+      "summary": "Work breakdown structure DHBG1: 20 task chia bốn nhóm (nền tảng và dữ liệu, pricing và AI, review-API-export, vận hành và bàn giao) với bảng tiến độ 10 hoàn thành / 2 chờ xác nhận / 8 chưa làm; mỗi task gắn module, REQ và trạng thái. Đây là trạng thái dẫn xuất từ DECISIONS, SCOPE, SPEC, MODULEMAP, ARCH và các ADR.",
+      "tags": ["documentation", "wbs", "deliverable", "project-tracking", "requirements-traceability"],
+      "complexity": "moderate",
+      "languageNotes": "Là tài liệu derived state: nội dung phản ánh trạng thái của các tài liệu tầng trên nên không được sửa trước khi tầng quyết định/spec/kiến trúc cập nhật."
+    }
+  ],
+  "edges": [
+    {"source": "document:deliverables/ARCH-DHBG1.md", "target": "file:app/main.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/ARCH-DHBG1.md", "target": "file:app/excel.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/ARCH-DHBG1.md", "target": "file:app/normalize.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/ARCH-DHBG1.md", "target": "file:app/ingest.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/ARCH-DHBG1.md", "target": "file:app/db.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/ARCH-DHBG1.md", "target": "file:app/pricing.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/ARCH-DHBG1.md", "target": "file:app/price_policy.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/ARCH-DHBG1.md", "target": "file:app/labor_policy.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/ARCH-DHBG1.md", "target": "file:app/ai.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/ARCH-DHBG1.md", "target": "file:app/export.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/ARCH-DHBG1.md", "target": "document:deliverables/SPEC-DHBG1.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/ARCH-DHBG1.md", "target": "document:deliverables/MODULEMAP-DHBG1.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/MODULEMAP-DHBG1.md", "target": "file:app/config.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/MODULEMAP-DHBG1.md", "target": "file:app/ingest.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/MODULEMAP-DHBG1.md", "target": "file:app/normalize.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/MODULEMAP-DHBG1.md", "target": "file:app/db.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/MODULEMAP-DHBG1.md", "target": "file:app/pricing.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/MODULEMAP-DHBG1.md", "target": "file:app/ai.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/MODULEMAP-DHBG1.md", "target": "file:app/main.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/MODULEMAP-DHBG1.md", "target": "file:app/export.py", "type": "documents", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/MODULEMAP-DHBG1.md", "target": "document:deliverables/SPEC-DHBG1.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/SPEC-DHBG1.md", "target": "document:deliverables/SCOPE-DHBG1.md", "type": "related", "direction": "forward", "weight": 0.5},
+    {"source": "document:deliverables/WBS-DHBG1.md", "target": "document:docs/DECISIONS.md", "type": "depends_on", "direction": "forward", "weight": 0.6},
+    {"source": "document:deliverables/WBS-DHBG1.md", "target": "document:deliverables/SCOPE-DHBG1.md", "type": "depends_on", "direction": "forward", "weight": 0.6},
+    {"source": "document:deliverables/WBS-DHBG1.md", "target": "document:deliverables/SPEC-DHBG1.md", "type": "depends_on", "direction": "forward", "weight": 0.6},
+    {"source": "document:deliverables/WBS-DHBG1.md", "target": "document:deliverables/MODULEMAP-DHBG1.md", "type": "depends_on", "direction": "forward", "weight": 0.6},
+    {"source": "document:deliverables/WBS-DHBG1.md", "target": "document:deliverables/ARCH-DHBG1.md", "type": "depends_on", "direction": "forward", "weight": 0.6},
+    {"source": "document:deliverables/WBS-DHBG1.md", "target": "document:deliverables/adr/ADR-001-modular-monolith.md", "type": "depends_on", "direction": "forward", "weight": 0.6},
+    {"source": "document:deliverables/WBS-DHBG1.md", "target": "document:deliverables/adr/ADR-002-sqlite-provenance.md", "type": "depends_on", "direction": "forward", "weight": 0.6},
+    {"source": "document:deliverables/WBS-DHBG1.md", "target": "document:deliverables/adr/ADR-003-bounded-ai-rerank.md", "type": "depends_on", "direction": "forward", "weight": 0.6},
+    {"source": "document:deliverables/WBS-DHBG1.md", "target": "document:deliverables/adr/ADR-004-formula-preserving-export.md", "type": "depends_on", "direction": "forward", "weight": 0.6},
+    {"source": "document:deliverables/WBS-DHBG1.md", "target": "document:deliverables/adr/ADR-005-network-port-3000.md", "type": "depends_on", "direction": "forward", "weight": 0.6}
+  ]
+}

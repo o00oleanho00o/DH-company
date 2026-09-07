@@ -1,0 +1,153 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_pricing_lifecycle_hardening.py",
+      "type": "file",
+      "name": "test_pricing_lifecycle_hardening.py",
+      "filePath": "tests/test_pricing_lifecycle_hardening.py",
+      "summary": "Bộ test làm cứng vòng đời nguồn giá và pricing: chọn observation ex-VAT để tính drift, ưu tiên tier supplier đã chọn, loại nguồn đã archive, giữ quyết định review qua các lần chạy lại và tạo observation manual khi engineer nhập giá.",
+      "tags": ["test", "lifecycle", "drift", "provenance", "review"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/test_pricing_lifecycle_hardening.py:_source",
+      "type": "function",
+      "name": "_source",
+      "filePath": "tests/test_pricing_lifecycle_hardening.py",
+      "lineRange": [10, 22],
+      "summary": "Helper chèn một row source_files với lifecycle status cấu hình được, dùng làm nguồn provenance cho các test.",
+      "tags": ["test", "fixture", "helper", "database"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_pricing_lifecycle_hardening.py:test_product_selection_uses_ex_vat_observation_for_drift",
+      "type": "function",
+      "name": "test_product_selection_uses_ex_vat_observation_for_drift",
+      "filePath": "tests/test_pricing_lifecycle_hardening.py",
+      "lineRange": [25, 76],
+      "summary": "Khi so sánh drift, choose_product_price dùng observation ex-VAT để hai nguồn cùng cơ sở thuế, tránh cảnh báo sai.",
+      "tags": ["test", "drift", "vat", "material"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_pricing_lifecycle_hardening.py:test_selected_supplier_tier_wins_and_tax_labels_are_normalized",
+      "type": "function",
+      "name": "test_selected_supplier_tier_wins_and_tax_labels_are_normalized",
+      "filePath": "tests/test_pricing_lifecycle_hardening.py",
+      "lineRange": [79, 151],
+      "summary": "Tier discount được chọn tường minh thắng các nguồn khác và nhãn thuế trong workbook được chuẩn hóa về ex_vat/inc_vat.",
+      "tags": ["test", "supplier-price", "normalization", "precedence"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/test_pricing_lifecycle_hardening.py:test_current_observation_wins_over_legacy_historical_operational_row",
+      "type": "function",
+      "name": "test_current_observation_wins_over_legacy_historical_operational_row",
+      "filePath": "tests/test_pricing_lifecycle_hardening.py",
+      "lineRange": [154, 201],
+      "summary": "Observation supplier hiện hành được ưu tiên hơn row giá vận hành lịch sử cũ theo thứ tự nguồn đã định.",
+      "tags": ["test", "precedence", "price-source", "material"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_pricing_lifecycle_hardening.py:test_zero_drift_threshold_is_preserved_and_flags_any_difference",
+      "type": "function",
+      "name": "test_zero_drift_threshold_is_preserved_and_flags_any_difference",
+      "filePath": "tests/test_pricing_lifecycle_hardening.py",
+      "lineRange": [204, 251],
+      "summary": "Ngưỡng drift bằng 0 không bị coi là chưa cấu hình và mọi chênh lệch giá đều bị gắn cảnh báo.",
+      "tags": ["test", "drift", "configuration", "edge-case"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_pricing_lifecycle_hardening.py:test_archived_source_is_not_selected_for_new_price",
+      "type": "function",
+      "name": "test_archived_source_is_not_selected_for_new_price",
+      "filePath": "tests/test_pricing_lifecycle_hardening.py",
+      "lineRange": [254, 279],
+      "summary": "Nguồn đã archive không được dùng để áp giá mới, bảo đảm lifecycle status của source file được tôn trọng.",
+      "tags": ["test", "lifecycle", "price-source", "governance"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_pricing_lifecycle_hardening.py:test_manual_review_is_persisted_and_survives_default_rerun",
+      "type": "function",
+      "name": "test_manual_review_is_persisted_and_survives_default_rerun",
+      "filePath": "tests/test_pricing_lifecycle_hardening.py",
+      "lineRange": [282, 349],
+      "summary": "Quyết định review thủ công được lưu lại và không bị ghi đè khi chạy lại pricing với tham số mặc định.",
+      "tags": ["test", "review", "idempotency", "persistence"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/test_pricing_lifecycle_hardening.py:test_selected_candidate_with_explicit_price_creates_manual_observation",
+      "type": "function",
+      "name": "test_selected_candidate_with_explicit_price_creates_manual_observation",
+      "filePath": "tests/test_pricing_lifecycle_hardening.py",
+      "lineRange": [352, 420],
+      "summary": "Khi engineer chọn candidate kèm giá tường minh, hệ thống tạo một price observation manual có provenance rõ ràng thay vì âm thầm sửa giá.",
+      "tags": ["test", "review", "observation", "provenance", "audit"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/test_pricing_llm.py",
+      "type": "file",
+      "name": "test_pricing_llm.py",
+      "filePath": "tests/test_pricing_llm.py",
+      "summary": "Test tích hợp xác nhận run_pricing chỉ gọi lớp LLM cho các dòng có candidate nhập nhằng và ghi lại model usage của lần chạy, dùng StubProvider không có network client.",
+      "tags": ["test", "ai", "integration", "gating", "telemetry"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_pricing_llm.py:StubProvider",
+      "type": "class",
+      "name": "StubProvider",
+      "filePath": "tests/test_pricing_llm.py",
+      "lineRange": [11, 23],
+      "summary": "Stub cung cấp metadata provider đã cấu hình (model, budget, margin) nhưng không có client mạng, để pipeline pricing coi như AI đã bật.",
+      "tags": ["test", "test-double", "fixture", "ai"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_pricing_llm.py:_candidate",
+      "type": "function",
+      "name": "_candidate",
+      "filePath": "tests/test_pricing_llm.py",
+      "lineRange": [26, 44],
+      "summary": "Helper dựng đối tượng Candidate với family và điểm cho trước để tạo tình huống nhập nhằng hoặc rõ ràng.",
+      "tags": ["test", "fixture", "helper", "candidate"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_pricing_llm.py:test_run_pricing_uses_llm_only_for_ambiguous_candidates_and_persists_usage",
+      "type": "function",
+      "name": "test_run_pricing_uses_llm_only_for_ambiguous_candidates_and_persists_usage",
+      "filePath": "tests/test_pricing_llm.py",
+      "lineRange": [47, 170],
+      "summary": "Kiểm chứng run_pricing chỉ gọi rerank cho dòng có candidate nhập nhằng, giữ nguyên thứ tự deterministic cho dòng rõ ràng, và lưu model usage vào bản ghi run.",
+      "tags": ["test", "ai", "gating", "telemetry", "pricing-run"],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {"source": "file:tests/test_pricing_lifecycle_hardening.py", "target": "file:app/__init__.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_pricing_lifecycle_hardening.py", "target": "file:app/db.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_pricing_lifecycle_hardening.py", "target": "file:app/price_policy.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_pricing_lifecycle_hardening.py", "target": "file:app/pricing.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_pricing_lifecycle_hardening.py", "target": "function:tests/test_pricing_lifecycle_hardening.py:_source", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_pricing_lifecycle_hardening.py", "target": "function:tests/test_pricing_lifecycle_hardening.py:test_product_selection_uses_ex_vat_observation_for_drift", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_pricing_lifecycle_hardening.py", "target": "function:tests/test_pricing_lifecycle_hardening.py:test_selected_supplier_tier_wins_and_tax_labels_are_normalized", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_pricing_lifecycle_hardening.py", "target": "function:tests/test_pricing_lifecycle_hardening.py:test_current_observation_wins_over_legacy_historical_operational_row", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_pricing_lifecycle_hardening.py", "target": "function:tests/test_pricing_lifecycle_hardening.py:test_zero_drift_threshold_is_preserved_and_flags_any_difference", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_pricing_lifecycle_hardening.py", "target": "function:tests/test_pricing_lifecycle_hardening.py:test_archived_source_is_not_selected_for_new_price", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_pricing_lifecycle_hardening.py", "target": "function:tests/test_pricing_lifecycle_hardening.py:test_manual_review_is_persisted_and_survives_default_rerun", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_pricing_lifecycle_hardening.py", "target": "function:tests/test_pricing_lifecycle_hardening.py:test_selected_candidate_with_explicit_price_creates_manual_observation", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_pricing_llm.py", "target": "file:app/__init__.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_pricing_llm.py", "target": "file:app/ai.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_pricing_llm.py", "target": "file:app/db.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_pricing_llm.py", "target": "file:app/pricing.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_pricing_llm.py", "target": "class:tests/test_pricing_llm.py:StubProvider", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_pricing_llm.py", "target": "function:tests/test_pricing_llm.py:_candidate", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_pricing_llm.py", "target": "function:tests/test_pricing_llm.py:test_run_pricing_uses_llm_only_for_ambiguous_candidates_and_persists_usage", "type": "contains", "direction": "forward", "weight": 1.0}
+  ]
+}

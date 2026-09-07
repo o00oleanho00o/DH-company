@@ -1,0 +1,1709 @@
+{
+ "nodes": [
+  {
+   "id": "file:app/ingest.py",
+   "type": "file",
+   "name": "ingest.py",
+   "filePath": "app/ingest.py",
+   "summary": "Pipeline nhập workbook: tính checksum, chống trùng, phân loại dòng BOQ, upsert catalog vật tư/nhân công, ghi price observation theo price policy và dựng bridge provenance tới từng file/sheet/row nguồn.",
+   "tags": [
+    "ingest",
+    "etl",
+    "catalog",
+    "provenance",
+    "deduplication"
+   ],
+   "complexity": "complex",
+   "languageNotes": "Toàn bộ quá trình ingest chạy trong một db_session duy nhất và luôn ghi liên kết catalog ↔ source, nhờ đó mọi giá đều truy vết ngược được về ô Excel gốc."
+  },
+  {
+   "id": "file:app/main.py",
+   "type": "file",
+   "name": "main.py",
+   "filePath": "app/main.py",
+   "summary": "Điểm vào FastAPI của toàn hệ thống: khởi tạo app, mount static và định nghĩa 27 route REST cho health, import, sources, catalog, quotations, review BOQ, export và benchmark.",
+   "tags": [
+    "entry-point",
+    "fastapi",
+    "api-handler",
+    "rest",
+    "web-server"
+   ],
+   "complexity": "complex",
+   "languageNotes": "Handler được viết dạng hàm đồng bộ và mỗi request tự mở db_session riêng; hệ thống chưa có lớp RBAC nên mọi endpoint hiện đều truy cập tự do."
+  },
+  {
+   "id": "function:app/ingest.py:_classify_boq_row",
+   "type": "function",
+   "name": "_classify_boq_row",
+   "filePath": "app/ingest.py",
+   "lineRange": [
+    22,
+    38
+   ],
+   "summary": "Phân loại một dòng BOQ (item, heading, dòng tổng, dòng cấu trúc) dựa trên nội dung và lớp của dòng liền trước, để pipeline biết dòng nào có thể định giá.",
+   "tags": [
+    "ingest",
+    "classification",
+    "boq",
+    "heuristic"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/ingest.py:_source_file_record",
+   "type": "function",
+   "name": "_source_file_record",
+   "filePath": "app/ingest.py",
+   "lineRange": [
+    41,
+    57
+   ],
+   "summary": "Tra cứu bản ghi source_files theo sha256 để phát hiện workbook đã nhập trước đó và hỗ trợ ingest idempotent.",
+   "tags": [
+    "ingest",
+    "deduplication",
+    "checksum",
+    "database"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/ingest.py:_link_catalog_source",
+   "type": "function",
+   "name": "_link_catalog_source",
+   "filePath": "app/ingest.py",
+   "lineRange": [
+    60,
+    126
+   ],
+   "summary": "Tạo bridge provenance nối một mục catalog (product hoặc labor) với file/sheet/row nguồn theo relation_type, đồng thời tránh trùng lặp liên kết.",
+   "tags": [
+    "ingest",
+    "provenance",
+    "linking",
+    "database"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "function:app/ingest.py:_upsert_product",
+   "type": "function",
+   "name": "_upsert_product",
+   "filePath": "app/ingest.py",
+   "lineRange": [
+    129,
+    174
+   ],
+   "summary": "Upsert sản phẩm vào catalog theo canonical key, hợp nhất mã, thương hiệu, xuất xứ, đơn vị và thuộc tính kỹ thuật khi bản ghi đã tồn tại.",
+   "tags": [
+    "ingest",
+    "catalog",
+    "upsert",
+    "normalization"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/ingest.py:_merge_product_context",
+   "type": "function",
+   "name": "_merge_product_context",
+   "filePath": "app/ingest.py",
+   "lineRange": [
+    177,
+    229
+   ],
+   "summary": "Bổ sung ngữ cảnh cho sản phẩm đã có (category, brand, origin, context attributes) mà không ghi đè dữ liệu đáng tin cậy đã lưu trước đó.",
+   "tags": [
+    "ingest",
+    "catalog",
+    "merge",
+    "enrichment"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/ingest.py:_upsert_labor_item",
+   "type": "function",
+   "name": "_upsert_labor_item",
+   "filePath": "app/ingest.py",
+   "lineRange": [
+    232,
+    256
+   ],
+   "summary": "Upsert hạng mục nhân công vào catalog theo canonical key, bổ sung mã, đơn vị và nhóm công việc khi còn thiếu.",
+   "tags": [
+    "ingest",
+    "catalog",
+    "labor",
+    "upsert"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/ingest.py:_supplier_name",
+   "type": "function",
+   "name": "_supplier_name",
+   "filePath": "app/ingest.py",
+   "lineRange": [
+    268,
+    294
+   ],
+   "summary": "Suy ra tên nhà cung cấp từ metadata sheet, gợi ý của người dùng hoặc tên file, làm cơ sở gắn nguồn cho price observation.",
+   "tags": [
+    "ingest",
+    "metadata",
+    "supplier",
+    "heuristic"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/ingest.py:_sheet_context_attributes",
+   "type": "function",
+   "name": "_sheet_context_attributes",
+   "filePath": "app/ingest.py",
+   "lineRange": [
+    297,
+    311
+   ],
+   "summary": "Trích các thuộc tính ngữ cảnh cấp sheet (dự án, tiêu chuẩn, ghi chú) để làm giàu cho mọi dòng thuộc sheet đó.",
+   "tags": [
+    "ingest",
+    "metadata",
+    "context",
+    "extraction"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/ingest.py:ingest_workbook",
+   "type": "function",
+   "name": "ingest_workbook",
+   "filePath": "app/ingest.py",
+   "lineRange": [
+    314,
+    1010
+   ],
+   "summary": "Hàm ingest chính: hash file, lưu bản raw, parse workbook, phân loại sheet, upsert catalog, ghi price observation theo price policy và tạo project/BOQ item cùng toàn bộ provenance.",
+   "tags": [
+    "ingest",
+    "orchestration",
+    "entry-point",
+    "provenance",
+    "price-policy"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "function:app/ingest.py:_source_ref_payload",
+   "type": "function",
+   "name": "_source_ref_payload",
+   "filePath": "app/ingest.py",
+   "lineRange": [
+    1013,
+    1058
+   ],
+   "summary": "Dựng payload tham chiếu nguồn (file, sheet, row, ô) cho API để giao diện hiển thị chính xác vị trí dữ liệu gốc.",
+   "tags": [
+    "ingest",
+    "serialization",
+    "provenance",
+    "api-payload"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/ingest.py:source_file_detail",
+   "type": "function",
+   "name": "source_file_detail",
+   "filePath": "app/ingest.py",
+   "lineRange": [
+    1061,
+    1502
+   ],
+   "summary": "Tổng hợp chi tiết một source file cho API: metadata, danh sách sheet, thống kê tham chiếu catalog và raw rows có phân trang trên phạm vi toàn workbook.",
+   "tags": [
+    "ingest",
+    "query",
+    "serialization",
+    "provenance",
+    "pagination"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "function:app/ingest.py:ingest_directory",
+   "type": "function",
+   "name": "ingest_directory",
+   "filePath": "app/ingest.py",
+   "lineRange": [
+    1505,
+    1534
+   ],
+   "summary": "Duyệt thư mục input và ingest lần lượt từng workbook, cho phép bỏ qua file holdout để không rò rỉ giá vào tập đánh giá.",
+   "tags": [
+    "ingest",
+    "batch",
+    "holdout",
+    "orchestration"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/main.py:_source_payload",
+   "type": "function",
+   "name": "_source_payload",
+   "filePath": "app/main.py",
+   "lineRange": [
+    68,
+    137
+   ],
+   "summary": "Chuẩn hoá một dòng source_files thành payload API đầy đủ: metadata, trạng thái vòng đời, phân loại tài liệu và thống kê sheet/row.",
+   "tags": [
+    "api-payload",
+    "serialization",
+    "sources",
+    "provenance"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "function:app/main.py:_source_reference_counts",
+   "type": "function",
+   "name": "_source_reference_counts",
+   "filePath": "app/main.py",
+   "lineRange": [
+    140,
+    204
+   ],
+   "summary": "Đếm số tham chiếu tới một source (catalog item, price observation, BOQ item) để quyết định source đó có được xoá an toàn hay chỉ được archive.",
+   "tags": [
+    "query",
+    "lifecycle",
+    "safe-delete",
+    "provenance"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "function:app/main.py:_source_lifecycle_payload",
+   "type": "function",
+   "name": "_source_lifecycle_payload",
+   "filePath": "app/main.py",
+   "lineRange": [
+    207,
+    217
+   ],
+   "summary": "Gom trạng thái vòng đời của source cùng số tham chiếu thành payload dùng chung cho các endpoint archive/restore/delete.",
+   "tags": [
+    "api-payload",
+    "lifecycle",
+    "serialization"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/main.py:_project_payload",
+   "type": "function",
+   "name": "_project_payload",
+   "filePath": "app/main.py",
+   "lineRange": [
+    220,
+    253
+   ],
+   "summary": "Serialize một project báo giá kèm thông tin khách hàng, ngày báo giá, pricing policy và run gần nhất cho API quotations.",
+   "tags": [
+    "api-payload",
+    "serialization",
+    "quotation"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/main.py:_save_upload",
+   "type": "function",
+   "name": "_save_upload",
+   "filePath": "app/main.py",
+   "lineRange": [
+    256,
+    294
+   ],
+   "summary": "Lưu file upload vào thư mục tạm trong storage, chặn payload vượt MAX_UPLOAD_BYTES bằng HTTP 413 và dọn sạch thư mục tạm khi thất bại.",
+   "tags": [
+    "upload",
+    "security",
+    "validation",
+    "filesystem"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/main.py:_catalog_source_pointer",
+   "type": "function",
+   "name": "_catalog_source_pointer",
+   "filePath": "app/main.py",
+   "lineRange": [
+    617,
+    664
+   ],
+   "summary": "Dựng con trỏ tới ô nguồn (file/sheet/row) cho một mục catalog, dùng để hiển thị provenance chi tiết trên giao diện.",
+   "tags": [
+    "provenance",
+    "serialization",
+    "catalog",
+    "query"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/main.py:_dedupe_pointers",
+   "type": "function",
+   "name": "_dedupe_pointers",
+   "filePath": "app/main.py",
+   "lineRange": [
+    667,
+    683
+   ],
+   "summary": "Loại bỏ các con trỏ provenance trùng nhau nhưng giữ thứ tự xuất hiện, để danh sách nguồn hiển thị gọn và ổn định.",
+   "tags": [
+    "utility",
+    "deduplication",
+    "provenance"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/main.py:_catalog_provenance",
+   "type": "function",
+   "name": "_catalog_provenance",
+   "filePath": "app/main.py",
+   "lineRange": [
+    686,
+    742
+   ],
+   "summary": "Thu thập toàn bộ nguồn gốc của một mục catalog qua bảng bridge, có fallback sang liên kết trực tiếp kiểu cũ khi bridge chưa có dữ liệu.",
+   "tags": [
+    "provenance",
+    "query",
+    "catalog",
+    "backward-compatibility"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "function:app/main.py:_serialize_product_catalog",
+   "type": "function",
+   "name": "_serialize_product_catalog",
+   "filePath": "app/main.py",
+   "lineRange": [
+    745,
+    824
+   ],
+   "summary": "Serialize một sản phẩm catalog kèm giá hiện hành, provenance, thuộc tính kỹ thuật và tuỳ chọn lịch sử giá cho API.",
+   "tags": [
+    "api-payload",
+    "serialization",
+    "catalog",
+    "pricing"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "function:app/main.py:_product_price_history",
+   "type": "function",
+   "name": "_product_price_history",
+   "filePath": "app/main.py",
+   "lineRange": [
+    827,
+    853
+   ],
+   "summary": "Truy vấn lịch sử giá legacy của một sản phẩm theo thời gian, giới hạn số bản ghi trả về.",
+   "tags": [
+    "query",
+    "history",
+    "pricing",
+    "catalog"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/main.py:_product_observation_history",
+   "type": "function",
+   "name": "_product_observation_history",
+   "filePath": "app/main.py",
+   "lineRange": [
+    856,
+    885
+   ],
+   "summary": "Truy vấn lịch sử price observation bất biến của một sản phẩm — nguồn dữ liệu được ưu tiên khi xác định giá hiện hành.",
+   "tags": [
+    "query",
+    "history",
+    "observation",
+    "provenance"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/main.py:_serialize_labor_catalog",
+   "type": "function",
+   "name": "_serialize_labor_catalog",
+   "filePath": "app/main.py",
+   "lineRange": [
+    888,
+    971
+   ],
+   "summary": "Serialize một hạng mục nhân công trong catalog kèm đơn giá hiện hành, provenance và tuỳ chọn lịch sử rate cho API.",
+   "tags": [
+    "api-payload",
+    "serialization",
+    "catalog",
+    "labor"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "function:app/main.py:_catalog_reference_counts",
+   "type": "function",
+   "name": "_catalog_reference_counts",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1306,
+    1335
+   ],
+   "summary": "Đếm số nơi đang tham chiếu tới một mục catalog để chặn hard-delete khi dữ liệu còn được BOQ item hoặc observation sử dụng.",
+   "tags": [
+    "query",
+    "lifecycle",
+    "safe-delete",
+    "catalog"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "function:app/main.py:_catalog_item_payload",
+   "type": "function",
+   "name": "_catalog_item_payload",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1338,
+    1347
+   ],
+   "summary": "Gom trạng thái vòng đời và số tham chiếu của một mục catalog thành payload dùng chung cho các endpoint archive/restore/delete.",
+   "tags": [
+    "api-payload",
+    "lifecycle",
+    "catalog"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "function:app/main.py:_result_payload",
+   "type": "function",
+   "name": "_result_payload",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1562,
+    1593
+   ],
+   "summary": "Dựng payload kết quả định giá của một project/run gồm danh sách BOQ item, tổng tiền và các chỉ số chất lượng matching.",
+   "tags": [
+    "api-payload",
+    "serialization",
+    "pricing",
+    "metrics"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "endpoint:app/main.py:GET-/",
+   "type": "endpoint",
+   "name": "GET /",
+   "filePath": "app/main.py",
+   "lineRange": [
+    306,
+    311
+   ],
+   "summary": "Trả về trang SPA tĩnh index.html của giao diện Pricing Hub.",
+   "tags": [
+    "endpoint",
+    "html",
+    "static",
+    "ui"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:GET-/api/health",
+   "type": "endpoint",
+   "name": "GET /api/health",
+   "filePath": "app/main.py",
+   "lineRange": [
+    314,
+    324
+   ],
+   "summary": "Health check trả về trạng thái app, thông tin phiên bản và cờ bật/tắt LLM mà không để lộ API key.",
+   "tags": [
+    "endpoint",
+    "health-check",
+    "monitoring",
+    "security"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:GET-/api/sources",
+   "type": "endpoint",
+   "name": "GET /api/sources",
+   "filePath": "app/main.py",
+   "lineRange": [
+    327,
+    347
+   ],
+   "summary": "Liệt kê các file nguồn đã nhập, hỗ trợ lọc theo trạng thái vòng đời và tìm kiếm theo từ khoá.",
+   "tags": [
+    "endpoint",
+    "sources",
+    "listing",
+    "filter"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:GET-/api/sources/{source_id}",
+   "type": "endpoint",
+   "name": "GET /api/sources/{source_id}",
+   "filePath": "app/main.py",
+   "lineRange": [
+    350,
+    365
+   ],
+   "summary": "Trả về chi tiết một source file gồm danh sách sheet, thống kê tham chiếu và tuỳ chọn raw rows có phân trang.",
+   "tags": [
+    "endpoint",
+    "sources",
+    "detail",
+    "provenance"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:POST-/api/sources/{source_id}/archive",
+   "type": "endpoint",
+   "name": "POST /api/sources/{source_id}/archive",
+   "filePath": "app/main.py",
+   "lineRange": [
+    368,
+    403
+   ],
+   "summary": "Archive một source kèm lý do thay vì xoá, giữ nguyên provenance cho các giá đã phát sinh từ nó.",
+   "tags": [
+    "endpoint",
+    "lifecycle",
+    "archive",
+    "provenance"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "endpoint:app/main.py:POST-/api/sources/{source_id}/restore",
+   "type": "endpoint",
+   "name": "POST /api/sources/{source_id}/restore",
+   "filePath": "app/main.py",
+   "lineRange": [
+    406,
+    439
+   ],
+   "summary": "Khôi phục một source đã archive về trạng thái hoạt động để tiếp tục dùng cho việc định giá.",
+   "tags": [
+    "endpoint",
+    "lifecycle",
+    "restore",
+    "sources"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "endpoint:app/main.py:DELETE-/api/sources/{source_id}",
+   "type": "endpoint",
+   "name": "DELETE /api/sources/{source_id}",
+   "filePath": "app/main.py",
+   "lineRange": [
+    442,
+    509
+   ],
+   "summary": "Xoá an toàn một source: chỉ cho phép khi không còn tham chiếu, trừ khi truyền force, nhằm bảo vệ chuỗi provenance.",
+   "tags": [
+    "endpoint",
+    "lifecycle",
+    "safe-delete",
+    "provenance"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "endpoint:app/main.py:POST-/api/sources/{source_id}/reprocess",
+   "type": "endpoint",
+   "name": "POST /api/sources/{source_id}/reprocess",
+   "filePath": "app/main.py",
+   "lineRange": [
+    512,
+    527
+   ],
+   "summary": "Nhập lại một source đã lưu từ bản raw để áp dụng logic parse và price policy mới nhất.",
+   "tags": [
+    "endpoint",
+    "reprocess",
+    "ingest",
+    "lifecycle"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:POST-/api/import/preview",
+   "type": "endpoint",
+   "name": "POST /api/import/preview",
+   "filePath": "app/main.py",
+   "lineRange": [
+    530,
+    557
+   ],
+   "summary": "Parse thử workbook được upload và trả về kết quả phân loại tài liệu/sheet để người dùng xác nhận trước khi nhập thật.",
+   "tags": [
+    "endpoint",
+    "import",
+    "preview",
+    "classification"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "endpoint:app/main.py:POST-/api/import",
+   "type": "endpoint",
+   "name": "POST /api/import",
+   "filePath": "app/main.py",
+   "lineRange": [
+    560,
+    591
+   ],
+   "summary": "Nhập chính thức một hoặc nhiều workbook đã upload, cho phép ép kiểu phân loại theo xác nhận của người dùng.",
+   "tags": [
+    "endpoint",
+    "import",
+    "ingest",
+    "upload"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "endpoint:app/main.py:POST-/api/seed",
+   "type": "endpoint",
+   "name": "POST /api/seed",
+   "filePath": "app/main.py",
+   "lineRange": [
+    594,
+    609
+   ],
+   "summary": "Nạp dữ liệu mẫu từ thư mục input cho môi trường dev, mặc định loại trừ file holdout.",
+   "tags": [
+    "endpoint",
+    "seed",
+    "development",
+    "holdout"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:GET-/api/catalog/stats",
+   "type": "endpoint",
+   "name": "GET /api/catalog/stats",
+   "filePath": "app/main.py",
+   "lineRange": [
+    612,
+    614
+   ],
+   "summary": "Trả về thống kê tổng quan catalog: số sản phẩm, số hạng mục nhân công và độ phủ giá.",
+   "tags": [
+    "endpoint",
+    "catalog",
+    "statistics",
+    "metrics"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:GET-/api/catalog/items",
+   "type": "endpoint",
+   "name": "GET /api/catalog/items",
+   "filePath": "app/main.py",
+   "lineRange": [
+    974,
+    1274
+   ],
+   "summary": "Endpoint tra cứu catalog hợp nhất vật tư và nhân công, hỗ trợ lọc theo kind/category/source/status, tìm kiếm và phân trang toàn cục ổn định.",
+   "tags": [
+    "endpoint",
+    "catalog",
+    "search",
+    "pagination",
+    "api-handler"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "endpoint:app/main.py:GET-/api/catalog/products/{product_id}",
+   "type": "endpoint",
+   "name": "GET /api/catalog/products/{product_id}",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1277,
+    1283
+   ],
+   "summary": "Trả về chi tiết một sản phẩm trong catalog kèm provenance và lịch sử giá.",
+   "tags": [
+    "endpoint",
+    "catalog",
+    "detail",
+    "pricing"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:GET-/api/catalog/labor/{labor_id}",
+   "type": "endpoint",
+   "name": "GET /api/catalog/labor/{labor_id}",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1286,
+    1294
+   ],
+   "summary": "Trả về chi tiết một hạng mục nhân công trong catalog kèm provenance và lịch sử đơn giá.",
+   "tags": [
+    "endpoint",
+    "catalog",
+    "detail",
+    "labor"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:POST-/api/catalog/items/{kind}/{item_id}/archive",
+   "type": "endpoint",
+   "name": "POST /api/catalog/items/{kind}/{item_id}/archive",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1350,
+    1390
+   ],
+   "summary": "Archive một mục catalog kèm lý do, loại nó khỏi kết quả matching nhưng giữ nguyên dữ liệu lịch sử.",
+   "tags": [
+    "endpoint",
+    "catalog",
+    "lifecycle",
+    "archive"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "endpoint:app/main.py:POST-/api/catalog/items/{kind}/{item_id}/restore",
+   "type": "endpoint",
+   "name": "POST /api/catalog/items/{kind}/{item_id}/restore",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1393,
+    1419
+   ],
+   "summary": "Khôi phục một mục catalog đã archive để tiếp tục tham gia matching và định giá.",
+   "tags": [
+    "endpoint",
+    "catalog",
+    "lifecycle",
+    "restore"
+   ],
+   "complexity": "moderate"
+  },
+  {
+   "id": "endpoint:app/main.py:DELETE-/api/catalog/items/{kind}/{item_id}",
+   "type": "endpoint",
+   "name": "DELETE /api/catalog/items/{kind}/{item_id}",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1422,
+    1490
+   ],
+   "summary": "Xoá an toàn một mục catalog, từ chối khi còn BOQ item hoặc observation tham chiếu, trừ khi truyền force.",
+   "tags": [
+    "endpoint",
+    "catalog",
+    "safe-delete",
+    "lifecycle"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "endpoint:app/main.py:GET-/api/quotations",
+   "type": "endpoint",
+   "name": "GET /api/quotations",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1493,
+    1497
+   ],
+   "summary": "Liệt kê các project báo giá đã tạo cùng thông tin run gần nhất.",
+   "tags": [
+    "endpoint",
+    "quotation",
+    "listing"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:POST-/api/quotations",
+   "type": "endpoint",
+   "name": "POST /api/quotations",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1500,
+    1559
+   ],
+   "summary": "Tạo project báo giá mới từ workbook BOQ được upload, kèm thông tin khách hàng, ngày báo giá, pricing policy và ghi chú.",
+   "tags": [
+    "endpoint",
+    "quotation",
+    "upload",
+    "ingest"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "endpoint:app/main.py:GET-/api/quotations/{project_id}",
+   "type": "endpoint",
+   "name": "GET /api/quotations/{project_id}",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1596,
+    1598
+   ],
+   "summary": "Trả về kết quả định giá của một project theo run được chỉ định hoặc run mới nhất.",
+   "tags": [
+    "endpoint",
+    "quotation",
+    "detail",
+    "pricing"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:POST-/api/quotations/{project_id}/run",
+   "type": "endpoint",
+   "name": "POST /api/quotations/{project_id}/run",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1601,
+    1610
+   ],
+   "summary": "Chạy pipeline định giá deterministic cho project, tạo run mới và tính lại toàn bộ candidate cùng tổng tiền.",
+   "tags": [
+    "endpoint",
+    "quotation",
+    "pricing",
+    "orchestration"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:GET-/api/quotations/{project_id}/review",
+   "type": "endpoint",
+   "name": "GET /api/quotations/{project_id}/review",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1613,
+    1625
+   ],
+   "summary": "Trả về danh sách BOQ item cần rà soát cùng candidate và cảnh báo để người duyệt ra quyết định.",
+   "tags": [
+    "endpoint",
+    "review",
+    "quotation",
+    "candidate"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:POST-/api/boq-items/{item_id}/review",
+   "type": "endpoint",
+   "name": "POST /api/boq-items/{item_id}/review",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1628,
+    1718
+   ],
+   "summary": "Ghi nhận quyết định rà soát cho một BOQ item: chọn candidate, nhập đơn giá thủ công hoặc từ chối, và lưu lại để không bị ghi đè khi chạy lại pipeline.",
+   "tags": [
+    "endpoint",
+    "review",
+    "boq",
+    "manual-override",
+    "provenance"
+   ],
+   "complexity": "complex"
+  },
+  {
+   "id": "endpoint:app/main.py:GET-/api/quotations/{project_id}/export",
+   "type": "endpoint",
+   "name": "GET /api/quotations/{project_id}/export",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1721,
+    1731
+   ],
+   "summary": "Xuất workbook báo giá đã điền đơn giá cho project và trả file về trình duyệt.",
+   "tags": [
+    "endpoint",
+    "export",
+    "excel",
+    "download"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:GET-/api/benchmark",
+   "type": "endpoint",
+   "name": "GET /api/benchmark",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1734,
+    1749
+   ],
+   "summary": "Trả về trạng thái và metric mới nhất của benchmark holdout, dùng để theo dõi chất lượng định giá.",
+   "tags": [
+    "endpoint",
+    "benchmark",
+    "metrics",
+    "monitoring"
+   ],
+   "complexity": "simple"
+  },
+  {
+   "id": "endpoint:app/main.py:GET-/benchmark-report",
+   "type": "endpoint",
+   "name": "GET /benchmark-report",
+   "filePath": "app/main.py",
+   "lineRange": [
+    1752,
+    1765
+   ],
+   "summary": "Trả về báo cáo benchmark dạng HTML để xem trực tiếp trên trình duyệt.",
+   "tags": [
+    "endpoint",
+    "benchmark",
+    "html",
+    "reporting"
+   ],
+   "complexity": "simple"
+  }
+ ],
+ "edges": [
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:_classify_boq_row",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:_source_file_record",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:_link_catalog_source",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:_upsert_product",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:_merge_product_context",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:_upsert_labor_item",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:_supplier_name",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:_sheet_context_attributes",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:ingest_workbook",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:_source_ref_payload",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:source_file_detail",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:ingest_directory",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_source_payload",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_source_reference_counts",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_source_lifecycle_payload",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_project_payload",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_save_upload",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_catalog_source_pointer",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_dedupe_pointers",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_catalog_provenance",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_serialize_product_catalog",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_product_price_history",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_product_observation_history",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_serialize_labor_catalog",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_catalog_reference_counts",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_catalog_item_payload",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "function:app/main.py:_result_payload",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:GET-/",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:GET-/api/health",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:GET-/api/sources",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:GET-/api/sources/{source_id}",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:POST-/api/sources/{source_id}/archive",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:POST-/api/sources/{source_id}/restore",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:DELETE-/api/sources/{source_id}",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:POST-/api/sources/{source_id}/reprocess",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:POST-/api/import/preview",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:POST-/api/import",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:POST-/api/seed",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:GET-/api/catalog/stats",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:GET-/api/catalog/items",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:GET-/api/catalog/products/{product_id}",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:GET-/api/catalog/labor/{labor_id}",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:POST-/api/catalog/items/{kind}/{item_id}/archive",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:POST-/api/catalog/items/{kind}/{item_id}/restore",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:DELETE-/api/catalog/items/{kind}/{item_id}",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:GET-/api/quotations",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:POST-/api/quotations",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:GET-/api/quotations/{project_id}",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:POST-/api/quotations/{project_id}/run",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:GET-/api/quotations/{project_id}/review",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:POST-/api/boq-items/{item_id}/review",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:GET-/api/quotations/{project_id}/export",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:GET-/api/benchmark",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "endpoint:app/main.py:GET-/benchmark-report",
+   "type": "contains",
+   "direction": "forward",
+   "weight": 1.0
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "file:app/config.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "file:app/db.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "file:app/excel.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "file:app/normalize.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "file:app/price_policy.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "file:app/ai.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "file:app/config.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "file:app/db.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "file:app/excel.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "file:app/export.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "file:app/ingest.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "file:app/normalize.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "file:app/pricing.py",
+   "type": "imports",
+   "direction": "forward",
+   "weight": 0.7
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:ingest_workbook",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:source_file_detail",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "function:app/ingest.py:ingest_directory",
+   "type": "exports",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/ingest.py:ingest_workbook",
+   "target": "function:app/excel.py:parse_workbook",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/ingest.py:ingest_workbook",
+   "target": "function:app/price_policy.py:select_price_observation",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/ingest.py:ingest_workbook",
+   "target": "function:app/price_policy.py:select_manual_pricing_rule",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/ingest.py:ingest_workbook",
+   "target": "function:app/normalize.py:canonical_key",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/ingest.py:ingest_workbook",
+   "target": "function:app/ingest.py:_upsert_product",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/ingest.py:ingest_workbook",
+   "target": "function:app/ingest.py:_link_catalog_source",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/ingest.py:ingest_directory",
+   "target": "function:app/ingest.py:ingest_workbook",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/ingest.py:_upsert_product",
+   "target": "function:app/normalize.py:canonical_key",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:POST-/api/import",
+   "target": "function:app/ingest.py:ingest_workbook",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:POST-/api/import/preview",
+   "target": "function:app/excel.py:parse_workbook",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:POST-/api/seed",
+   "target": "function:app/ingest.py:ingest_directory",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:GET-/api/sources/{source_id}",
+   "target": "function:app/ingest.py:source_file_detail",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:POST-/api/quotations",
+   "target": "function:app/ingest.py:ingest_workbook",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:POST-/api/quotations/{project_id}/run",
+   "target": "function:app/pricing.py:run_pricing",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:GET-/api/quotations/{project_id}/review",
+   "target": "function:app/pricing.py:serialize_boq_item",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:POST-/api/boq-items/{item_id}/review",
+   "target": "function:app/pricing.py:review_item",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:GET-/api/quotations/{project_id}/export",
+   "target": "function:app/export.py:export_project",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:GET-/api/catalog/stats",
+   "target": "function:app/pricing.py:catalog_stats",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/main.py:_result_payload",
+   "target": "function:app/pricing.py:get_project_result",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:POST-/api/import",
+   "target": "function:app/main.py:_save_upload",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:POST-/api/quotations",
+   "target": "function:app/main.py:_save_upload",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:GET-/api/sources",
+   "target": "function:app/main.py:_source_payload",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:DELETE-/api/sources/{source_id}",
+   "target": "function:app/main.py:_source_reference_counts",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:GET-/api/catalog/items",
+   "target": "function:app/main.py:_serialize_product_catalog",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "endpoint:app/main.py:GET-/api/catalog/items",
+   "target": "function:app/main.py:_serialize_labor_catalog",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "function:app/main.py:_serialize_product_catalog",
+   "target": "function:app/main.py:_catalog_provenance",
+   "type": "calls",
+   "direction": "forward",
+   "weight": 0.8
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "file:tests/test_security.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:app/main.py",
+   "target": "file:tests/test_source_lifecycle_api.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "file:tests/test_source_lifecycle_api.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  },
+  {
+   "source": "file:app/ingest.py",
+   "target": "file:tests/test_pricing.py",
+   "type": "tested_by",
+   "direction": "forward",
+   "weight": 0.5
+  }
+ ]
+}

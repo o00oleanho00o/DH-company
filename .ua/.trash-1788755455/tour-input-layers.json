@@ -1,0 +1,52 @@
+[
+  {
+    "id": "layer:api",
+    "name": "Tầng API",
+    "description": "Application factory FastAPI và toàn bộ 27 endpoint (@app.get/post/delete) định nghĩa trực tiếp trong app/main.py, đóng vai trò router kiêm controller trong kiến trúc modular monolith phẳng (không tách thư mục routers/ riêng theo ADR-001)."
+  },
+  {
+    "id": "layer:service",
+    "name": "Tầng Service (Business Logic)",
+    "description": "Lõi nghiệp vụ định giá deterministic: candidate matching, áp dụng price/labor policy và review workflow trong app/pricing.py, hai policy sub-service price_policy.py và labor_policy.py, cùng service ingest điều phối luồng nạp workbook giữa API và các tầng excel/normalize/db."
+  },
+  {
+    "id": "layer:ai",
+    "name": "Tầng AI Semantic (Bounded)",
+    "description": "Lớp semantic reranking tùy chọn và một chiều (pricing.py gọi ai.py, không có chiều ngược lại) theo ADR-003 — chỉ hỗ trợ gợi ý candidate, tuyệt đối không được tạo giá, nên tách biệt kiến trúc khỏi tầng Service deterministic."
+  },
+  {
+    "id": "layer:data",
+    "name": "Tầng Data",
+    "description": "Lớp truy cập dữ liệu SQLite (app/db.py) cùng schema quan hệ định nghĩa trong migrations/001_initial.sql và 16 bảng liên quan (source_files, products, price_observations, pricing_runs, boq_items, match_candidates, corrections, audit_events, v.v.) lưu toàn bộ provenance của hệ thống theo ADR-002."
+  },
+  {
+    "id": "layer:excel-io",
+    "name": "Tầng I/O Excel",
+    "description": "Adapter đọc/ghi workbook Excel M&E: app/excel.py dùng openpyxl/xlrd để nạp dữ liệu thô từ workbook người dùng, app/export.py xuất báo giá đã định giá trong khi bảo toàn công thức gốc (formula-preserving) theo ADR-004."
+  },
+  {
+    "id": "layer:config-utility",
+    "name": "Tầng Config & Utility Nền Tảng",
+    "description": "Cấu hình ứng dụng và vận hành (app/config.py, .env.example, requirements.txt, run.ps1), điểm khởi tạo package (__init__.py), CLI entry point (cli.py) và primitive chuẩn hóa văn bản/số liệu deterministic không phụ thuộc nội bộ (normalize.py) được hầu hết module khác import."
+  },
+  {
+    "id": "layer:presentation",
+    "name": "Tầng Presentation (Frontend SPA)",
+    "description": "Giao diện SPA vanilla JS/HTML/CSS (app/static/app.js, index.html, styles.css) được app/main.py phục vụ trực tiếp, không dùng framework frontend riêng biệt."
+  },
+  {
+    "id": "layer:benchmarks",
+    "name": "Tầng Benchmark & Evaluation",
+    "description": "Bộ công cụ đánh giá độc lập, không mutate pricing engine: holdout leakage-safe, tách bạch historical_reproduction/current_repricing (modes.py), báo cáo data-gap/failure-analysis (reports.py), audit dòng dữ liệu (row_audit.py) và so sánh round-over-round (round2_report.py)."
+  },
+  {
+    "id": "layer:test",
+    "name": "Tầng Test",
+    "description": "Toàn bộ 19 test suite pytest (kèm conftest.py fixtures) bao phủ từng module app/ và benchmarks/, đảm bảo pipeline định giá deterministic không bị regress qua các lần thay đổi."
+  },
+  {
+    "id": "layer:documentation",
+    "name": "Tầng Documentation",
+    "description": "Tài liệu dự án ở gốc repo (README, ARCHITECTURE, AGENTS, CLAUDE, KNOWN_LIMITATIONS, PLAN, ROUND2-FINAL-REPORT), các deliverable đặc tả chính thức cùng 5 Architecture Decision Record (deliverables/**), và ghi chú quyết định/yêu cầu dữ liệu bổ sung (docs/**)."
+  }
+]

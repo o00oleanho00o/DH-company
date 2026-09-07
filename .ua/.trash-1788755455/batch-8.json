@@ -1,0 +1,189 @@
+{
+  "nodes": [
+    {
+      "id": "document:deliverables/adr/ADR-001-modular-monolith.md",
+      "type": "document",
+      "name": "ADR-001-modular-monolith.md",
+      "filePath": "deliverables/adr/ADR-001-modular-monolith.md",
+      "summary": "ADR ghi nhận quyết định dùng một FastAPI application dạng modular monolith, chia module theo ranh giới nghiệp vụ và gọi nội bộ qua function contracts. Nêu bối cảnh MVP một máy, trade-off về single point of failure và điều kiện để tách service sau này.",
+      "tags": ["documentation", "adr", "architecture", "modular-monolith", "decision-record"],
+      "complexity": "simple",
+      "languageNotes": "Theo template ADR chuẩn 5 mục: Status / Context / Decision / Trade-offs / Revisit trigger."
+    },
+    {
+      "id": "document:deliverables/adr/ADR-002-sqlite-provenance.md",
+      "type": "document",
+      "name": "ADR-002-sqlite-provenance.md",
+      "filePath": "deliverables/adr/ADR-002-sqlite-provenance.md",
+      "summary": "ADR chọn SQLite làm operational store theo hướng provenance-first: raw workbook giữ riêng, mọi canonical record đều lưu tham chiếu source file/sheet/row. Ghi nhận giới hạn concurrent write và trigger chuyển sang PostgreSQL khi cần HA.",
+      "tags": ["documentation", "adr", "database", "provenance", "decision-record"],
+      "complexity": "simple",
+      "languageNotes": "Quyết định lưu trữ ưu tiên reproducibility hơn throughput ghi đồng thời."
+    },
+    {
+      "id": "document:deliverables/adr/ADR-003-bounded-ai-rerank.md",
+      "type": "document",
+      "name": "ADR-003-bounded-ai-rerank.md",
+      "filePath": "deliverables/adr/ADR-003-bounded-ai-rerank.md",
+      "summary": "ADR giới hạn vai trò AI ở mức rerank: deterministic engine truy xuất candidate, provider tùy chọn chỉ trả về thứ tự ID trong top-N với timeout/retry/budget và audit. Model không được quyết định giá thương mại.",
+      "tags": ["documentation", "adr", "ai-policy", "security", "decision-record"],
+      "complexity": "simple",
+      "languageNotes": "Ràng buộc kiến trúc nhằm loại bỏ rủi ro hallucination trong luồng định giá."
+    },
+    {
+      "id": "document:deliverables/adr/ADR-004-formula-preserving-export.md",
+      "type": "document",
+      "name": "ADR-004-formula-preserving-export.md",
+      "filePath": "deliverables/adr/ADR-004-formula-preserving-export.md",
+      "summary": "ADR quy định export bằng cách sao chép workbook nguồn và chỉ ghi unit price material/labor, giữ nguyên các ô còn lại cùng công thức và bật native recalculation khi cần. Chấp nhận giá trị cached có thể chậm cập nhật đến khi mở bằng Excel.",
+      "tags": ["documentation", "adr", "excel-export", "formula-preservation", "decision-record"],
+      "complexity": "simple",
+      "languageNotes": "Xử lý các mẫu BOQ nhiều sheet có công thức và cached value khác nhau."
+    },
+    {
+      "id": "document:deliverables/adr/ADR-005-network-port-3000.md",
+      "type": "document",
+      "name": "ADR-005-network-port-3000.md",
+      "filePath": "deliverables/adr/ADR-005-network-port-3000.md",
+      "summary": "ADR đặt mặc định bind APP_HOST=0.0.0.0 và APP_PORT=3000 để review từ máy khác và publish qua Cloudflare tunnel, cho phép override bằng environment. Ghi nhận yêu cầu firewall/authentication và điều kiện bắt buộc trước khi internet-facing.",
+      "tags": ["documentation", "adr", "networking", "configuration", "decision-record"],
+      "complexity": "simple",
+      "languageNotes": "Quyết định vận hành gắn trực tiếp với biến môi trường APP_HOST/APP_PORT."
+    }
+  ],
+  "edges": [
+    {
+      "source": "document:deliverables/adr/ADR-001-modular-monolith.md",
+      "target": "file:app/main.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-001-modular-monolith.md",
+      "target": "file:app/__init__.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-001-modular-monolith.md",
+      "target": "document:deliverables/ARCH-DHBG1.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-001-modular-monolith.md",
+      "target": "document:deliverables/MODULEMAP-DHBG1.md",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-002-sqlite-provenance.md",
+      "target": "file:app/db.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-002-sqlite-provenance.md",
+      "target": "table:migrations/001_initial.sql",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-002-sqlite-provenance.md",
+      "target": "table:migrations/001_initial.sql:source_files",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-002-sqlite-provenance.md",
+      "target": "table:migrations/001_initial.sql:source_sheets",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-002-sqlite-provenance.md",
+      "target": "table:migrations/001_initial.sql:source_rows",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-002-sqlite-provenance.md",
+      "target": "table:migrations/001_initial.sql:price_observations",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-003-bounded-ai-rerank.md",
+      "target": "file:app/ai.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-003-bounded-ai-rerank.md",
+      "target": "file:app/pricing.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-003-bounded-ai-rerank.md",
+      "target": "config:.env.example",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-004-formula-preserving-export.md",
+      "target": "file:app/export.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-004-formula-preserving-export.md",
+      "target": "file:app/excel.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-005-network-port-3000.md",
+      "target": "file:run.ps1",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-005-network-port-3000.md",
+      "target": "file:app/config.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-005-network-port-3000.md",
+      "target": "file:app/main.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:deliverables/adr/ADR-005-network-port-3000.md",
+      "target": "config:.env.example",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

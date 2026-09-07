@@ -1,0 +1,3042 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 7,
+  "filesSkipped": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 7,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 7,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "app/__init__.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 2,
+      "nonEmptyLines": 1,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "app/excel.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 694,
+      "nonEmptyLines": 640,
+      "functions": [
+        {
+          "name": "sha256_file",
+          "startLine": 67,
+          "endLine": 72,
+          "params": [
+            "path"
+          ]
+        },
+        {
+          "name": "infer_effective_date",
+          "startLine": 75,
+          "endLine": 88,
+          "params": [
+            "filename"
+          ]
+        },
+        {
+          "name": "_safe_cell",
+          "startLine": 91,
+          "endLine": 99,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "load_workbook_snapshots",
+          "startLine": 102,
+          "endLine": 144,
+          "params": [
+            "path"
+          ]
+        },
+        {
+          "name": "_row_text",
+          "startLine": 147,
+          "endLine": 148,
+          "params": [
+            "row"
+          ]
+        },
+        {
+          "name": "detect_document_type",
+          "startLine": 151,
+          "endLine": 173,
+          "params": [
+            "filename",
+            "snapshots"
+          ]
+        },
+        {
+          "name": "detect_sheet_type",
+          "startLine": 176,
+          "endLine": 197,
+          "params": [
+            "snapshot",
+            "workbook_type"
+          ]
+        },
+        {
+          "name": "find_header_row",
+          "startLine": 200,
+          "endLine": 225,
+          "params": [
+            "snapshot",
+            "sheet_type"
+          ]
+        },
+        {
+          "name": "map_columns",
+          "startLine": 228,
+          "endLine": 303,
+          "params": [
+            "snapshot",
+            "header_row",
+            "sheet_type"
+          ]
+        },
+        {
+          "name": "_header_number",
+          "startLine": 306,
+          "endLine": 322,
+          "params": [
+            "value"
+          ]
+        },
+        {
+          "name": "detect_price_columns",
+          "startLine": 325,
+          "endLine": 424,
+          "params": [
+            "snapshot",
+            "header_row",
+            "sheet_type"
+          ]
+        },
+        {
+          "name": "_context_value",
+          "startLine": 427,
+          "endLine": 444,
+          "params": [
+            "rows",
+            "labels"
+          ]
+        },
+        {
+          "name": "detect_sheet_metadata",
+          "startLine": 447,
+          "endLine": 494,
+          "params": [
+            "snapshot",
+            "header_row",
+            "sheet_type"
+          ]
+        },
+        {
+          "name": "_cell_at",
+          "startLine": 497,
+          "endLine": 500,
+          "params": [
+            "row",
+            "col"
+          ]
+        },
+        {
+          "name": "classify_row",
+          "startLine": 503,
+          "endLine": 526,
+          "params": [
+            "row",
+            "fields",
+            "sheet_type"
+          ]
+        },
+        {
+          "name": "extract_rows",
+          "startLine": 529,
+          "endLine": 653,
+          "params": [
+            "snapshot",
+            "sheet_type",
+            "header_row",
+            "mapping",
+            "metadata"
+          ]
+        },
+        {
+          "name": "parse_workbook",
+          "startLine": 656,
+          "endLine": 694,
+          "params": [
+            "path"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "SheetSnapshot",
+          "startLine": 21,
+          "endLine": 28,
+          "methods": [],
+          "properties": [
+            "name",
+            "index",
+            "rows",
+            "formulas",
+            "max_row",
+            "max_col",
+            "merged_ranges"
+          ]
+        },
+        {
+          "name": "ParsedSheet",
+          "startLine": 32,
+          "endLine": 43,
+          "methods": [],
+          "properties": [
+            "snapshot",
+            "detected_type",
+            "header_row",
+            "mapping",
+            "rows",
+            "warnings",
+            "metadata"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "SheetSnapshot",
+          "line": 20,
+          "isDefault": false
+        },
+        {
+          "name": "ParsedSheet",
+          "line": 31,
+          "isDefault": false
+        },
+        {
+          "name": "sha256_file",
+          "line": 67,
+          "isDefault": false
+        },
+        {
+          "name": "infer_effective_date",
+          "line": 75,
+          "isDefault": false
+        },
+        {
+          "name": "_safe_cell",
+          "line": 91,
+          "isDefault": false
+        },
+        {
+          "name": "load_workbook_snapshots",
+          "line": 102,
+          "isDefault": false
+        },
+        {
+          "name": "_row_text",
+          "line": 147,
+          "isDefault": false
+        },
+        {
+          "name": "detect_document_type",
+          "line": 151,
+          "isDefault": false
+        },
+        {
+          "name": "detect_sheet_type",
+          "line": 176,
+          "isDefault": false
+        },
+        {
+          "name": "find_header_row",
+          "line": 200,
+          "isDefault": false
+        },
+        {
+          "name": "map_columns",
+          "line": 228,
+          "isDefault": false
+        },
+        {
+          "name": "_header_number",
+          "line": 306,
+          "isDefault": false
+        },
+        {
+          "name": "detect_price_columns",
+          "line": 325,
+          "isDefault": false
+        },
+        {
+          "name": "_context_value",
+          "line": 427,
+          "isDefault": false
+        },
+        {
+          "name": "detect_sheet_metadata",
+          "line": 447,
+          "isDefault": false
+        },
+        {
+          "name": "_cell_at",
+          "line": 497,
+          "isDefault": false
+        },
+        {
+          "name": "classify_row",
+          "line": 503,
+          "isDefault": false
+        },
+        {
+          "name": "extract_rows",
+          "line": 529,
+          "isDefault": false
+        },
+        {
+          "name": "parse_workbook",
+          "line": 656,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "sha256_file",
+          "callee": "hashlib.sha256",
+          "lineNumber": 68
+        },
+        {
+          "caller": "sha256_file",
+          "callee": "path.open",
+          "lineNumber": 69
+        },
+        {
+          "caller": "sha256_file",
+          "callee": "iter",
+          "lineNumber": 70
+        },
+        {
+          "caller": "sha256_file",
+          "callee": "handle.read",
+          "lineNumber": 70
+        },
+        {
+          "caller": "sha256_file",
+          "callee": "digest.update",
+          "lineNumber": 71
+        },
+        {
+          "caller": "sha256_file",
+          "callee": "digest.hexdigest",
+          "lineNumber": 72
+        },
+        {
+          "caller": "infer_effective_date",
+          "callee": "re.search",
+          "lineNumber": 81
+        },
+        {
+          "caller": "infer_effective_date",
+          "callee": "\"-\".join",
+          "lineNumber": 83
+        },
+        {
+          "caller": "infer_effective_date",
+          "callee": "match.groups",
+          "lineNumber": 83
+        },
+        {
+          "caller": "infer_effective_date",
+          "callee": "datetime.strptime(raw, fmt).date().isoformat",
+          "lineNumber": 85
+        },
+        {
+          "caller": "infer_effective_date",
+          "callee": "datetime.strptime(raw, fmt).date",
+          "lineNumber": 85
+        },
+        {
+          "caller": "infer_effective_date",
+          "callee": "datetime.strptime",
+          "lineNumber": 85
+        },
+        {
+          "caller": "_safe_cell",
+          "callee": "isinstance",
+          "lineNumber": 94
+        },
+        {
+          "caller": "_safe_cell",
+          "callee": "value.isoformat",
+          "lineNumber": 97
+        },
+        {
+          "caller": "_safe_cell",
+          "callee": "str",
+          "lineNumber": 99
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "path.suffix.lower",
+          "lineNumber": 103
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "load_workbook",
+          "lineNumber": 105
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "load_workbook",
+          "lineNumber": 106
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "enumerate",
+          "lineNumber": 108
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "range",
+          "lineNumber": 112
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "rows.append",
+          "lineNumber": 113
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "_safe_cell",
+          "lineNumber": 113
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "ws.cell",
+          "lineNumber": 113
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "range",
+          "lineNumber": 113
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "formulas.append",
+          "lineNumber": 114
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "_safe_cell",
+          "lineNumber": 114
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "formula_ws.cell",
+          "lineNumber": 114
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "range",
+          "lineNumber": 114
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "snapshots.append",
+          "lineNumber": 115
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "SheetSnapshot",
+          "lineNumber": 116
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "str",
+          "lineNumber": 123
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "xlrd.open_workbook",
+          "lineNumber": 128
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "str",
+          "lineNumber": 128
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "enumerate",
+          "lineNumber": 130
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "book_values.sheets",
+          "lineNumber": 130
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "_safe_cell",
+          "lineNumber": 131
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "sh.cell_value",
+          "lineNumber": 131
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "range",
+          "lineNumber": 131
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "range",
+          "lineNumber": 131
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "snapshots.append",
+          "lineNumber": 132
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "SheetSnapshot",
+          "lineNumber": 133
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "list",
+          "lineNumber": 137
+        },
+        {
+          "caller": "load_workbook_snapshots",
+          "callee": "ValueError",
+          "lineNumber": 144
+        },
+        {
+          "caller": "_row_text",
+          "callee": "\" \".join",
+          "lineNumber": 148
+        },
+        {
+          "caller": "_row_text",
+          "callee": "normalize_text",
+          "lineNumber": 148
+        },
+        {
+          "caller": "detect_document_type",
+          "callee": "normalize_text",
+          "lineNumber": 152
+        },
+        {
+          "caller": "detect_document_type",
+          "callee": "\" \".join",
+          "lineNumber": 153
+        },
+        {
+          "caller": "detect_document_type",
+          "callee": "normalize_text",
+          "lineNumber": 154
+        },
+        {
+          "caller": "detect_document_type",
+          "callee": "_row_text",
+          "lineNumber": 154
+        },
+        {
+          "caller": "detect_document_type",
+          "callee": "any",
+          "lineNumber": 158
+        },
+        {
+          "caller": "detect_document_type",
+          "callee": "any",
+          "lineNumber": 162
+        },
+        {
+          "caller": "detect_sheet_type",
+          "callee": "normalize_text",
+          "lineNumber": 180
+        },
+        {
+          "caller": "detect_sheet_type",
+          "callee": "\" \".join",
+          "lineNumber": 180
+        },
+        {
+          "caller": "detect_sheet_type",
+          "callee": "_row_text",
+          "lineNumber": 180
+        },
+        {
+          "caller": "detect_sheet_type",
+          "callee": "any",
+          "lineNumber": 187
+        },
+        {
+          "caller": "detect_sheet_type",
+          "callee": "any",
+          "lineNumber": 188
+        },
+        {
+          "caller": "find_header_row",
+          "callee": "min",
+          "lineNumber": 203
+        },
+        {
+          "caller": "find_header_row",
+          "callee": "len",
+          "lineNumber": 203
+        },
+        {
+          "caller": "find_header_row",
+          "callee": "range",
+          "lineNumber": 204
+        },
+        {
+          "caller": "find_header_row",
+          "callee": "_row_text",
+          "lineNumber": 206
+        },
+        {
+          "caller": "find_header_row",
+          "callee": "HEADER_SYNONYMS.values",
+          "lineNumber": 210
+        },
+        {
+          "caller": "find_header_row",
+          "callee": "any",
+          "lineNumber": 211
+        },
+        {
+          "caller": "find_header_row",
+          "callee": "normalize_text",
+          "lineNumber": 211
+        },
+        {
+          "caller": "find_header_row",
+          "callee": "re.search",
+          "lineNumber": 214
+        },
+        {
+          "caller": "map_columns",
+          "callee": "min",
+          "lineNumber": 235
+        },
+        {
+          "caller": "map_columns",
+          "callee": "range",
+          "lineNumber": 236
+        },
+        {
+          "caller": "map_columns",
+          "callee": "range",
+          "lineNumber": 238
+        },
+        {
+          "caller": "map_columns",
+          "callee": "min",
+          "lineNumber": 238
+        },
+        {
+          "caller": "map_columns",
+          "callee": "len",
+          "lineNumber": 238
+        },
+        {
+          "caller": "map_columns",
+          "callee": "len",
+          "lineNumber": 239
+        },
+        {
+          "caller": "map_columns",
+          "callee": "parts.append",
+          "lineNumber": 241
+        },
+        {
+          "caller": "map_columns",
+          "callee": "str",
+          "lineNumber": 241
+        },
+        {
+          "caller": "map_columns",
+          "callee": "combined.append",
+          "lineNumber": 242
+        },
+        {
+          "caller": "map_columns",
+          "callee": "normalize_text",
+          "lineNumber": 242
+        },
+        {
+          "caller": "map_columns",
+          "callee": "\" \".join",
+          "lineNumber": 242
+        },
+        {
+          "caller": "map_columns",
+          "callee": "HEADER_SYNONYMS.items",
+          "lineNumber": 244
+        },
+        {
+          "caller": "map_columns",
+          "callee": "enumerate",
+          "lineNumber": 246
+        },
+        {
+          "caller": "map_columns",
+          "callee": "normalize_text",
+          "lineNumber": 251
+        },
+        {
+          "caller": "map_columns",
+          "callee": "max",
+          "lineNumber": 253
+        },
+        {
+          "caller": "map_columns",
+          "callee": "max",
+          "lineNumber": 255
+        },
+        {
+          "caller": "map_columns",
+          "callee": "mapping.setdefault",
+          "lineNumber": 263
+        },
+        {
+          "caller": "map_columns",
+          "callee": "mapping.setdefault",
+          "lineNumber": 264
+        },
+        {
+          "caller": "map_columns",
+          "callee": "snapshot.name.strip().upper",
+          "lineNumber": 269
+        },
+        {
+          "caller": "map_columns",
+          "callee": "snapshot.name.strip",
+          "lineNumber": 269
+        },
+        {
+          "caller": "map_columns",
+          "callee": "mapping.setdefault",
+          "lineNumber": 272
+        },
+        {
+          "caller": "map_columns",
+          "callee": "min",
+          "lineNumber": 275
+        },
+        {
+          "caller": "map_columns",
+          "callee": "len",
+          "lineNumber": 275
+        },
+        {
+          "caller": "map_columns",
+          "callee": "enumerate",
+          "lineNumber": 277
+        },
+        {
+          "caller": "map_columns",
+          "callee": "normalize_text",
+          "lineNumber": 278
+        },
+        {
+          "caller": "map_columns",
+          "callee": "any",
+          "lineNumber": 279
+        },
+        {
+          "caller": "map_columns",
+          "callee": "mapping.setdefault",
+          "lineNumber": 280
+        },
+        {
+          "caller": "map_columns",
+          "callee": "any",
+          "lineNumber": 281
+        },
+        {
+          "caller": "map_columns",
+          "callee": "mapping.setdefault",
+          "lineNumber": 282
+        },
+        {
+          "caller": "map_columns",
+          "callee": "mapping.setdefault",
+          "lineNumber": 291
+        },
+        {
+          "caller": "map_columns",
+          "callee": "mapping.setdefault",
+          "lineNumber": 292
+        },
+        {
+          "caller": "map_columns",
+          "callee": "mapping.pop",
+          "lineNumber": 301
+        },
+        {
+          "caller": "_header_number",
+          "callee": "parse_number",
+          "lineNumber": 315
+        },
+        {
+          "caller": "_header_number",
+          "callee": "round",
+          "lineNumber": 321
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "len",
+          "lineNumber": 343
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "min",
+          "lineNumber": 345
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "range",
+          "lineNumber": 352
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "min",
+          "lineNumber": 352
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "len",
+          "lineNumber": 352
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "range",
+          "lineNumber": 353
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "\" \".join",
+          "lineNumber": 354
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "normalize_text",
+          "lineNumber": 355
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "len",
+          "lineNumber": 357
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "range",
+          "lineNumber": 379
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "min",
+          "lineNumber": 379
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "len",
+          "lineNumber": 379
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "range",
+          "lineNumber": 380
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "len",
+          "lineNumber": 381
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "_header_number",
+          "lineNumber": 382
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "\" \".join",
+          "lineNumber": 391
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "normalize_text",
+          "lineNumber": 392
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "range",
+          "lineNumber": 393
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "min",
+          "lineNumber": 393
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "len",
+          "lineNumber": 393
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "len",
+          "lineNumber": 394
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "pair.get",
+          "lineNumber": 405
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "pair.get",
+          "lineNumber": 406
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "any",
+          "lineNumber": 408
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "tier.get",
+          "lineNumber": 411
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "tier.get",
+          "lineNumber": 412
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "discount_tiers.append",
+          "lineNumber": 417
+        },
+        {
+          "caller": "detect_price_columns",
+          "callee": "discount_tiers.sort",
+          "lineNumber": 418
+        },
+        {
+          "caller": "_context_value",
+          "callee": "tuple",
+          "lineNumber": 430
+        },
+        {
+          "caller": "_context_value",
+          "callee": "normalize_text",
+          "lineNumber": 430
+        },
+        {
+          "caller": "_context_value",
+          "callee": "str(value).strip",
+          "lineNumber": 432
+        },
+        {
+          "caller": "_context_value",
+          "callee": "str",
+          "lineNumber": 432
+        },
+        {
+          "caller": "_context_value",
+          "callee": "enumerate",
+          "lineNumber": 433
+        },
+        {
+          "caller": "_context_value",
+          "callee": "normalize_text",
+          "lineNumber": 434
+        },
+        {
+          "caller": "_context_value",
+          "callee": "any",
+          "lineNumber": 435
+        },
+        {
+          "caller": "_context_value",
+          "callee": "cell.split(\":\", 1)[1].strip",
+          "lineNumber": 439
+        },
+        {
+          "caller": "_context_value",
+          "callee": "cell.split",
+          "lineNumber": 439
+        },
+        {
+          "caller": "_context_value",
+          "callee": "len",
+          "lineNumber": 442
+        },
+        {
+          "caller": "detect_sheet_metadata",
+          "callee": "max",
+          "lineNumber": 455
+        },
+        {
+          "caller": "detect_sheet_metadata",
+          "callee": "detect_price_columns",
+          "lineNumber": 460
+        },
+        {
+          "caller": "detect_sheet_metadata",
+          "callee": "_context_value",
+          "lineNumber": 462
+        },
+        {
+          "caller": "detect_sheet_metadata",
+          "callee": "_context_value",
+          "lineNumber": 466
+        },
+        {
+          "caller": "detect_sheet_metadata",
+          "callee": "_context_value",
+          "lineNumber": 470
+        },
+        {
+          "caller": "detect_sheet_metadata",
+          "callee": "str(value).strip",
+          "lineNumber": 483
+        },
+        {
+          "caller": "detect_sheet_metadata",
+          "callee": "str",
+          "lineNumber": 483
+        },
+        {
+          "caller": "detect_sheet_metadata",
+          "callee": "\" \".join",
+          "lineNumber": 486
+        },
+        {
+          "caller": "detect_sheet_metadata",
+          "callee": "normalize_text",
+          "lineNumber": 487
+        },
+        {
+          "caller": "detect_sheet_metadata",
+          "callee": "any",
+          "lineNumber": 488
+        },
+        {
+          "caller": "detect_sheet_metadata",
+          "callee": "metadata.setdefault",
+          "lineNumber": 492
+        },
+        {
+          "caller": "_cell_at",
+          "callee": "len",
+          "lineNumber": 498
+        },
+        {
+          "caller": "classify_row",
+          "callee": "normalize_text",
+          "lineNumber": 507
+        },
+        {
+          "caller": "classify_row",
+          "callee": "fields.get",
+          "lineNumber": 507
+        },
+        {
+          "caller": "classify_row",
+          "callee": "any",
+          "lineNumber": 509
+        },
+        {
+          "caller": "classify_row",
+          "callee": "any",
+          "lineNumber": 510
+        },
+        {
+          "caller": "classify_row",
+          "callee": "parse_number",
+          "lineNumber": 512
+        },
+        {
+          "caller": "classify_row",
+          "callee": "fields.get",
+          "lineNumber": 512
+        },
+        {
+          "caller": "classify_row",
+          "callee": "fields.get",
+          "lineNumber": 514
+        },
+        {
+          "caller": "classify_row",
+          "callee": "parse_number",
+          "lineNumber": 514
+        },
+        {
+          "caller": "classify_row",
+          "callee": "fields.get",
+          "lineNumber": 514
+        },
+        {
+          "caller": "classify_row",
+          "callee": "parse_number",
+          "lineNumber": 520
+        },
+        {
+          "caller": "classify_row",
+          "callee": "fields.get",
+          "lineNumber": 520
+        },
+        {
+          "caller": "classify_row",
+          "callee": "parse_number",
+          "lineNumber": 521
+        },
+        {
+          "caller": "classify_row",
+          "callee": "fields.get",
+          "lineNumber": 521
+        },
+        {
+          "caller": "classify_row",
+          "callee": "parse_number",
+          "lineNumber": 522
+        },
+        {
+          "caller": "classify_row",
+          "callee": "fields.get",
+          "lineNumber": 522
+        },
+        {
+          "caller": "classify_row",
+          "callee": "fields.get",
+          "lineNumber": 523
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "metadata.get",
+          "lineNumber": 539
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "price_columns.get",
+          "lineNumber": 540
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "price_columns.get",
+          "lineNumber": 541
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "range",
+          "lineNumber": 543
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "len",
+          "lineNumber": 543
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "len",
+          "lineNumber": 545
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "str",
+          "lineNumber": 546
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "enumerate",
+          "lineNumber": 546
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 548
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 548
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 549
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 549
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "normalize_unit",
+          "lineNumber": 550
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 550
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 550
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "parse_number",
+          "lineNumber": 551
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 551
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 551
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "parse_number",
+          "lineNumber": 552
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 552
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 552
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "parse_number",
+          "lineNumber": 553
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 553
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 553
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "parse_number",
+          "lineNumber": 554
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 554
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 554
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "parse_number",
+          "lineNumber": 555
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 555
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 555
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "parse_number",
+          "lineNumber": 556
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 556
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 556
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 557
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 557
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 558
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 558
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "parse_number",
+          "lineNumber": 559
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 559
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 559
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 560
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 560
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "base_price_columns.get",
+          "lineNumber": 568
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 568
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "base_price_columns.get",
+          "lineNumber": 569
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "mapping.get",
+          "lineNumber": 569
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "parse_number",
+          "lineNumber": 570
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 570
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "parse_number",
+          "lineNumber": 571
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 571
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "price_observations.append",
+          "lineNumber": 573
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "price_observations.append",
+          "lineNumber": 583
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "tier.get",
+          "lineNumber": 593
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "tier.get",
+          "lineNumber": 594
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "tier.get",
+          "lineNumber": 595
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "parse_number",
+          "lineNumber": 596
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 596
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "parse_number",
+          "lineNumber": 597
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "_cell_at",
+          "lineNumber": 597
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "price_observations.append",
+          "lineNumber": 599
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "price_observations.append",
+          "lineNumber": 609
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "classify_row",
+          "lineNumber": 634
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "warnings.append",
+          "lineNumber": 638
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "warnings.append",
+          "lineNumber": 640
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "warnings.append",
+          "lineNumber": 642
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "result.append",
+          "lineNumber": 643
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "str",
+          "lineNumber": 647
+        },
+        {
+          "caller": "extract_rows",
+          "callee": "enumerate",
+          "lineNumber": 647
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "load_workbook_snapshots",
+          "lineNumber": 657
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "detect_document_type",
+          "lineNumber": 658
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "detect_sheet_type",
+          "lineNumber": 663
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "find_header_row",
+          "lineNumber": 664
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "map_columns",
+          "lineNumber": 665
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "detect_sheet_metadata",
+          "lineNumber": 666
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "extract_rows",
+          "lineNumber": 667
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "sum",
+          "lineNumber": 668
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "any",
+          "lineNumber": 669
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "_row_text",
+          "lineNumber": 669
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "warnings.append",
+          "lineNumber": 670
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "parsed_sheets.append",
+          "lineNumber": 671
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "ParsedSheet",
+          "lineNumber": 672
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "infer_effective_date",
+          "lineNumber": 682
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "sha256_file",
+          "lineNumber": 685
+        },
+        {
+          "caller": "parse_workbook",
+          "callee": "path.suffix.lower",
+          "lineNumber": 686
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 19,
+        "functionCount": 17,
+        "classCount": 2
+      }
+    },
+    {
+      "path": "tests/conftest.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 64,
+      "nonEmptyLines": 48,
+      "functions": [
+        {
+          "name": "find_input_file",
+          "startLine": 20,
+          "endLine": 37,
+          "params": [
+            "prefix"
+          ]
+        },
+        {
+          "name": "isolated_db",
+          "startLine": 41,
+          "endLine": 64,
+          "params": [
+            "tmp_path",
+            "monkeypatch"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "find_input_file",
+          "line": 20,
+          "isDefault": false
+        },
+        {
+          "name": "isolated_db",
+          "line": 40,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "find_input_file",
+          "callee": "sorted",
+          "lineNumber": 28
+        },
+        {
+          "caller": "find_input_file",
+          "callee": "INPUT_DIR.iterdir",
+          "lineNumber": 30
+        },
+        {
+          "caller": "find_input_file",
+          "callee": "path.is_file",
+          "lineNumber": 31
+        },
+        {
+          "caller": "find_input_file",
+          "callee": "path.suffix.lower",
+          "lineNumber": 32
+        },
+        {
+          "caller": "find_input_file",
+          "callee": "path.name.startswith",
+          "lineNumber": 33
+        },
+        {
+          "caller": "find_input_file",
+          "callee": "FileNotFoundError",
+          "lineNumber": 36
+        },
+        {
+          "caller": "isolated_db",
+          "callee": "monkeypatch.setattr",
+          "lineNumber": 55
+        },
+        {
+          "caller": "isolated_db",
+          "callee": "monkeypatch.setattr",
+          "lineNumber": 56
+        },
+        {
+          "caller": "isolated_db",
+          "callee": "monkeypatch.setattr",
+          "lineNumber": 57
+        },
+        {
+          "caller": "isolated_db",
+          "callee": "monkeypatch.setattr",
+          "lineNumber": 58
+        },
+        {
+          "caller": "isolated_db",
+          "callee": "monkeypatch.setattr",
+          "lineNumber": 59
+        },
+        {
+          "caller": "isolated_db",
+          "callee": "monkeypatch.setattr",
+          "lineNumber": 60
+        },
+        {
+          "caller": "isolated_db",
+          "callee": "config.ensure_directories",
+          "lineNumber": 62
+        },
+        {
+          "caller": "isolated_db",
+          "callee": "db.init_db",
+          "lineNumber": 63
+        }
+      ],
+      "metrics": {
+        "importCount": 4,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/test_excel.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 160,
+      "nonEmptyLines": 134,
+      "functions": [
+        {
+          "name": "test_real_sample_workbooks_parse",
+          "startLine": 30,
+          "endLine": 50,
+          "params": [
+            "prefix"
+          ]
+        },
+        {
+          "name": "test_real_directory_covers_both_excel_extensions",
+          "startLine": 53,
+          "endLine": 59,
+          "params": []
+        },
+        {
+          "name": "test_expected_document_classification_signals",
+          "startLine": 62,
+          "endLine": 76,
+          "params": []
+        },
+        {
+          "name": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "startLine": 79,
+          "endLine": 131,
+          "params": [
+            "tmp_path"
+          ]
+        },
+        {
+          "name": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "startLine": 134,
+          "endLine": 160,
+          "params": [
+            "tmp_path"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "test_real_sample_workbooks_parse",
+          "line": 29,
+          "isDefault": false
+        },
+        {
+          "name": "test_real_directory_covers_both_excel_extensions",
+          "line": 53,
+          "isDefault": false
+        },
+        {
+          "name": "test_expected_document_classification_signals",
+          "line": 62,
+          "isDefault": false
+        },
+        {
+          "name": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "line": 79,
+          "isDefault": false
+        },
+        {
+          "name": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "line": 134,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "test_real_sample_workbooks_parse",
+          "callee": "find_input_file",
+          "lineNumber": 31
+        },
+        {
+          "caller": "test_real_sample_workbooks_parse",
+          "callee": "parse_workbook",
+          "lineNumber": 32
+        },
+        {
+          "caller": "test_real_sample_workbooks_parse",
+          "callee": "len",
+          "lineNumber": 35
+        },
+        {
+          "caller": "test_real_sample_workbooks_parse",
+          "callee": "all",
+          "lineNumber": 49
+        },
+        {
+          "caller": "test_real_sample_workbooks_parse",
+          "callee": "any",
+          "lineNumber": 50
+        },
+        {
+          "caller": "test_real_sample_workbooks_parse",
+          "callee": "row[\"fields\"].get",
+          "lineNumber": 50
+        },
+        {
+          "caller": "test_real_directory_covers_both_excel_extensions",
+          "callee": "path.suffix.lower",
+          "lineNumber": 55
+        },
+        {
+          "caller": "test_real_directory_covers_both_excel_extensions",
+          "callee": "INPUT_DIR.iterdir",
+          "lineNumber": 56
+        },
+        {
+          "caller": "test_real_directory_covers_both_excel_extensions",
+          "callee": "path.is_file",
+          "lineNumber": 57
+        },
+        {
+          "caller": "test_real_directory_covers_both_excel_extensions",
+          "callee": "path.suffix.lower",
+          "lineNumber": 57
+        },
+        {
+          "caller": "test_expected_document_classification_signals",
+          "callee": "parse_workbook",
+          "lineNumber": 63
+        },
+        {
+          "caller": "test_expected_document_classification_signals",
+          "callee": "find_input_file",
+          "lineNumber": 63
+        },
+        {
+          "caller": "test_expected_document_classification_signals",
+          "callee": "parse_workbook",
+          "lineNumber": 64
+        },
+        {
+          "caller": "test_expected_document_classification_signals",
+          "callee": "find_input_file",
+          "lineNumber": 64
+        },
+        {
+          "caller": "test_expected_document_classification_signals",
+          "callee": "parse_workbook",
+          "lineNumber": 65
+        },
+        {
+          "caller": "test_expected_document_classification_signals",
+          "callee": "find_input_file",
+          "lineNumber": 65
+        },
+        {
+          "caller": "test_expected_document_classification_signals",
+          "callee": "any",
+          "lineNumber": 71
+        },
+        {
+          "caller": "test_expected_document_classification_signals",
+          "callee": "any",
+          "lineNumber": 72
+        },
+        {
+          "caller": "test_expected_document_classification_signals",
+          "callee": "any",
+          "lineNumber": 73
+        },
+        {
+          "caller": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "callee": "Workbook",
+          "lineNumber": 87
+        },
+        {
+          "caller": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "callee": "sheet.merge_cells",
+          "lineNumber": 92
+        },
+        {
+          "caller": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "callee": "sheet.append",
+          "lineNumber": 99
+        },
+        {
+          "caller": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "callee": "sheet.append",
+          "lineNumber": 109
+        },
+        {
+          "caller": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "callee": "workbook.save",
+          "lineNumber": 111
+        },
+        {
+          "caller": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "callee": "load_workbook_snapshots",
+          "lineNumber": 113
+        },
+        {
+          "caller": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "callee": "len",
+          "lineNumber": 114
+        },
+        {
+          "caller": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "callee": "parse_workbook",
+          "lineNumber": 117
+        },
+        {
+          "caller": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "callee": "len",
+          "lineNumber": 127
+        },
+        {
+          "caller": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "callee": "pytest.approx",
+          "lineNumber": 129
+        },
+        {
+          "caller": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "callee": "pytest.approx",
+          "lineNumber": 130
+        },
+        {
+          "caller": "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+          "callee": "pytest.approx",
+          "lineNumber": 131
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "Workbook",
+          "lineNumber": 136
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "range",
+          "lineNumber": 139
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "sheet.cell",
+          "lineNumber": 140
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "sheet.cell",
+          "lineNumber": 141
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "sheet.cell",
+          "lineNumber": 142
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "sheet.cell",
+          "lineNumber": 143
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "sheet.cell",
+          "lineNumber": 144
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "sheet.cell",
+          "lineNumber": 145
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "sheet.cell",
+          "lineNumber": 146
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "sheet.cell",
+          "lineNumber": 147
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "sheet.cell",
+          "lineNumber": 148
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "sheet.cell",
+          "lineNumber": 149
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "sheet.cell",
+          "lineNumber": 150
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "workbook.save",
+          "lineNumber": 151
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "load_workbook_snapshots",
+          "lineNumber": 153
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "find_header_row",
+          "lineNumber": 154
+        },
+        {
+          "caller": "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows",
+          "callee": "map_columns",
+          "lineNumber": 156
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 5,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/test_export.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 102,
+      "nonEmptyLines": 89,
+      "functions": [
+        {
+          "name": "_template",
+          "startLine": 11,
+          "endLine": 27,
+          "params": [
+            "path"
+          ]
+        },
+        {
+          "name": "test_export_only_updates_unit_price_columns",
+          "startLine": 30,
+          "endLine": 102,
+          "params": [
+            "monkeypatch",
+            "tmp_path"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "_template",
+          "line": 11,
+          "isDefault": false
+        },
+        {
+          "name": "test_export_only_updates_unit_price_columns",
+          "line": 30,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "_template",
+          "callee": "Workbook",
+          "lineNumber": 12
+        },
+        {
+          "caller": "_template",
+          "callee": "workbook.save",
+          "lineNumber": 27
+        },
+        {
+          "caller": "test_export_only_updates_unit_price_columns",
+          "callee": "_template",
+          "lineNumber": 32
+        },
+        {
+          "caller": "test_export_only_updates_unit_price_columns",
+          "callee": "output_dir.mkdir",
+          "lineNumber": 34
+        },
+        {
+          "caller": "test_export_only_updates_unit_price_columns",
+          "callee": "sqlite3.connect",
+          "lineNumber": 36
+        },
+        {
+          "caller": "test_export_only_updates_unit_price_columns",
+          "callee": "conn.executescript",
+          "lineNumber": 38
+        },
+        {
+          "caller": "test_export_only_updates_unit_price_columns",
+          "callee": "conn.execute",
+          "lineNumber": 50
+        },
+        {
+          "caller": "test_export_only_updates_unit_price_columns",
+          "callee": "str",
+          "lineNumber": 52
+        },
+        {
+          "caller": "test_export_only_updates_unit_price_columns",
+          "callee": "conn.execute",
+          "lineNumber": 54
+        },
+        {
+          "caller": "test_export_only_updates_unit_price_columns",
+          "callee": "monkeypatch.setattr",
+          "lineNumber": 69
+        },
+        {
+          "caller": "test_export_only_updates_unit_price_columns",
+          "callee": "monkeypatch.setattr",
+          "lineNumber": 70
+        },
+        {
+          "caller": "test_export_only_updates_unit_price_columns",
+          "callee": "monkeypatch.setattr",
+          "lineNumber": 71
+        },
+        {
+          "caller": "test_export_only_updates_unit_price_columns",
+          "callee": "Session",
+          "lineNumber": 71
+        },
+        {
+          "caller": "test_export_only_updates_unit_price_columns",
+          "callee": "monkeypatch.setattr",
+          "lineNumber": 72
+        },
+        {
+          "caller": "test_export_only_updates_unit_price_columns",
+          "callee": "export.export_project",
+          "lineNumber": 94
+        },
+        {
+          "caller": "test_export_only_updates_unit_price_columns",
+          "callee": "load_workbook",
+          "lineNumber": 95
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/test_price_policy.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 171,
+      "nonEmptyLines": 156,
+      "functions": [
+        {
+          "name": "test_real_cable_tong_preserves_base_vat_and_discount_tiers",
+          "startLine": 17,
+          "endLine": 56,
+          "params": []
+        },
+        {
+          "name": "test_manual_rule_selects_published_tier_without_inventing_price",
+          "startLine": 59,
+          "endLine": 94,
+          "params": []
+        },
+        {
+          "name": "test_ingest_keeps_observations_and_uses_configured_tier",
+          "startLine": 97,
+          "endLine": 134,
+          "params": [
+            "isolated_db",
+            "monkeypatch"
+          ]
+        },
+        {
+          "name": "test_supplier_detail_sheet_enriches_tong_product_identity",
+          "startLine": 137,
+          "endLine": 157,
+          "params": [
+            "isolated_db"
+          ]
+        },
+        {
+          "name": "test_holdout_exclusion_does_not_publish_price_observations",
+          "startLine": 160,
+          "endLine": 171,
+          "params": [
+            "isolated_db"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "test_real_cable_tong_preserves_base_vat_and_discount_tiers",
+          "line": 17,
+          "isDefault": false
+        },
+        {
+          "name": "test_manual_rule_selects_published_tier_without_inventing_price",
+          "line": 59,
+          "isDefault": false
+        },
+        {
+          "name": "test_ingest_keeps_observations_and_uses_configured_tier",
+          "line": 97,
+          "isDefault": false
+        },
+        {
+          "name": "test_supplier_detail_sheet_enriches_tong_product_identity",
+          "line": 137,
+          "isDefault": false
+        },
+        {
+          "name": "test_holdout_exclusion_does_not_publish_price_observations",
+          "line": 160,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "test_real_cable_tong_preserves_base_vat_and_discount_tiers",
+          "callee": "parse_workbook",
+          "lineNumber": 18
+        },
+        {
+          "caller": "test_real_cable_tong_preserves_base_vat_and_discount_tiers",
+          "callee": "find_input_file",
+          "lineNumber": 18
+        },
+        {
+          "caller": "test_real_cable_tong_preserves_base_vat_and_discount_tiers",
+          "callee": "next",
+          "lineNumber": 19
+        },
+        {
+          "caller": "test_real_cable_tong_preserves_base_vat_and_discount_tiers",
+          "callee": "next",
+          "lineNumber": 45
+        },
+        {
+          "caller": "test_real_cable_tong_preserves_base_vat_and_discount_tiers",
+          "callee": "len",
+          "lineNumber": 47
+        },
+        {
+          "caller": "test_manual_rule_selects_published_tier_without_inventing_price",
+          "callee": "load_manual_pricing_rules",
+          "lineNumber": 60
+        },
+        {
+          "caller": "test_manual_rule_selects_published_tier_without_inventing_price",
+          "callee": "json.dumps",
+          "lineNumber": 61
+        },
+        {
+          "caller": "test_manual_rule_selects_published_tier_without_inventing_price",
+          "callee": "select_price_observation",
+          "lineNumber": 74
+        },
+        {
+          "caller": "test_manual_rule_selects_published_tier_without_inventing_price",
+          "callee": "selected.get",
+          "lineNumber": 93
+        },
+        {
+          "caller": "test_ingest_keeps_observations_and_uses_configured_tier",
+          "callee": "monkeypatch.setenv",
+          "lineNumber": 100
+        },
+        {
+          "caller": "test_ingest_keeps_observations_and_uses_configured_tier",
+          "callee": "json.dumps",
+          "lineNumber": 102
+        },
+        {
+          "caller": "test_ingest_keeps_observations_and_uses_configured_tier",
+          "callee": "ingest_workbook",
+          "lineNumber": 114
+        },
+        {
+          "caller": "test_ingest_keeps_observations_and_uses_configured_tier",
+          "callee": "find_input_file",
+          "lineNumber": 114
+        },
+        {
+          "caller": "test_ingest_keeps_observations_and_uses_configured_tier",
+          "callee": "db.db_session",
+          "lineNumber": 117
+        },
+        {
+          "caller": "test_ingest_keeps_observations_and_uses_configured_tier",
+          "callee": "conn.execute(\r\n            \"\"\"\r\n            SELECT pp.net_price, pp.discount, pp.tax_mode, pp.calc_json\r\n            FROM product_prices pp\r\n            ORDER BY pp.id\r\n            LIMIT 1\r\n            \"\"\"\r\n        ).fetchone",
+          "lineNumber": 118
+        },
+        {
+          "caller": "test_ingest_keeps_observations_and_uses_configured_tier",
+          "callee": "conn.execute",
+          "lineNumber": 118
+        },
+        {
+          "caller": "test_ingest_keeps_observations_and_uses_configured_tier",
+          "callee": "json.loads",
+          "lineNumber": 129
+        },
+        {
+          "caller": "test_ingest_keeps_observations_and_uses_configured_tier",
+          "callee": "conn.execute(\r\n            \"SELECT COUNT(*) FROM price_observations WHERE product_id = 1\"\r\n        ).fetchone",
+          "lineNumber": 132
+        },
+        {
+          "caller": "test_ingest_keeps_observations_and_uses_configured_tier",
+          "callee": "conn.execute",
+          "lineNumber": 132
+        },
+        {
+          "caller": "test_supplier_detail_sheet_enriches_tong_product_identity",
+          "callee": "ingest_workbook",
+          "lineNumber": 142
+        },
+        {
+          "caller": "test_supplier_detail_sheet_enriches_tong_product_identity",
+          "callee": "find_input_file",
+          "lineNumber": 142
+        },
+        {
+          "caller": "test_supplier_detail_sheet_enriches_tong_product_identity",
+          "callee": "db.db_session",
+          "lineNumber": 143
+        },
+        {
+          "caller": "test_supplier_detail_sheet_enriches_tong_product_identity",
+          "callee": "conn.execute(\r\n            \"\"\"\r\n            SELECT normalized_name, technical_attributes_json\r\n            FROM products\r\n            WHERE normalized_name LIKE 'cxv 1x1.5%'\r\n            \"\"\"\r\n        ).fetchall",
+          "lineNumber": 144
+        },
+        {
+          "caller": "test_supplier_detail_sheet_enriches_tong_product_identity",
+          "callee": "conn.execute",
+          "lineNumber": 144
+        },
+        {
+          "caller": "test_supplier_detail_sheet_enriches_tong_product_identity",
+          "callee": "json.loads",
+          "lineNumber": 153
+        },
+        {
+          "caller": "test_supplier_detail_sheet_enriches_tong_product_identity",
+          "callee": "any",
+          "lineNumber": 154
+        },
+        {
+          "caller": "test_supplier_detail_sheet_enriches_tong_product_identity",
+          "callee": "attrs.get",
+          "lineNumber": 155
+        },
+        {
+          "caller": "test_supplier_detail_sheet_enriches_tong_product_identity",
+          "callee": "attrs.get",
+          "lineNumber": 155
+        },
+        {
+          "caller": "test_supplier_detail_sheet_enriches_tong_product_identity",
+          "callee": "attrs.get",
+          "lineNumber": 155
+        },
+        {
+          "caller": "test_holdout_exclusion_does_not_publish_price_observations",
+          "callee": "ingest_workbook",
+          "lineNumber": 163
+        },
+        {
+          "caller": "test_holdout_exclusion_does_not_publish_price_observations",
+          "callee": "find_input_file",
+          "lineNumber": 164
+        },
+        {
+          "caller": "test_holdout_exclusion_does_not_publish_price_observations",
+          "callee": "db.db_session",
+          "lineNumber": 168
+        },
+        {
+          "caller": "test_holdout_exclusion_does_not_publish_price_observations",
+          "callee": "conn.execute(\r\n            \"SELECT COUNT(*) FROM price_observations\"\r\n        ).fetchone",
+          "lineNumber": 169
+        },
+        {
+          "caller": "test_holdout_exclusion_does_not_publish_price_observations",
+          "callee": "conn.execute",
+          "lineNumber": 169
+        }
+      ],
+      "metrics": {
+        "importCount": 6,
+        "exportCount": 5,
+        "functionCount": 5,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/test_pricing.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 411,
+      "nonEmptyLines": 350,
+      "functions": [
+        {
+          "name": "_count",
+          "startLine": 27,
+          "endLine": 31,
+          "params": [
+            "conn",
+            "table",
+            "where",
+            "params"
+          ]
+        },
+        {
+          "name": "test_holdout_ingest_never_publishes_holdout_prices",
+          "startLine": 34,
+          "endLine": 69,
+          "params": [
+            "isolated_db"
+          ]
+        },
+        {
+          "name": "test_ingest_is_idempotent_for_same_checksum",
+          "startLine": 72,
+          "endLine": 87,
+          "params": [
+            "isolated_db"
+          ]
+        },
+        {
+          "name": "test_allow_duplicate_creates_distinct_source_and_project",
+          "startLine": 90,
+          "endLine": 134,
+          "params": [
+            "isolated_db"
+          ]
+        },
+        {
+          "name": "test_price_rows_have_complete_provenance",
+          "startLine": 137,
+          "endLine": 172,
+          "params": [
+            "isolated_db"
+          ]
+        },
+        {
+          "name": "test_holdout_metadata_explicitly_records_exclusion",
+          "startLine": 175,
+          "endLine": 186,
+          "params": [
+            "isolated_db"
+          ]
+        },
+        {
+          "name": "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+          "startLine": 189,
+          "endLine": 221,
+          "params": [
+            "isolated_db"
+          ]
+        },
+        {
+          "name": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "startLine": 224,
+          "endLine": 300,
+          "params": [
+            "isolated_db"
+          ]
+        },
+        {
+          "name": "test_candidate_conflict_is_not_auto_approved",
+          "startLine": 303,
+          "endLine": 343,
+          "params": [
+            "isolated_db"
+          ]
+        },
+        {
+          "name": "test_result_endpoint_shape_contains_items_and_metrics",
+          "startLine": 346,
+          "endLine": 357,
+          "params": [
+            "isolated_db"
+          ]
+        },
+        {
+          "name": "test_parallel_bundle_scales_matching_multi_core_catalog_item",
+          "startLine": 360,
+          "endLine": 379,
+          "params": []
+        },
+        {
+          "name": "test_price_drift_warning_is_actionable_and_not_auto_approved",
+          "startLine": 382,
+          "endLine": 411,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "_count",
+          "line": 27,
+          "isDefault": false
+        },
+        {
+          "name": "test_holdout_ingest_never_publishes_holdout_prices",
+          "line": 34,
+          "isDefault": false
+        },
+        {
+          "name": "test_ingest_is_idempotent_for_same_checksum",
+          "line": 72,
+          "isDefault": false
+        },
+        {
+          "name": "test_allow_duplicate_creates_distinct_source_and_project",
+          "line": 90,
+          "isDefault": false
+        },
+        {
+          "name": "test_price_rows_have_complete_provenance",
+          "line": 137,
+          "isDefault": false
+        },
+        {
+          "name": "test_holdout_metadata_explicitly_records_exclusion",
+          "line": 175,
+          "isDefault": false
+        },
+        {
+          "name": "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+          "line": 189,
+          "isDefault": false
+        },
+        {
+          "name": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "line": 224,
+          "isDefault": false
+        },
+        {
+          "name": "test_candidate_conflict_is_not_auto_approved",
+          "line": 303,
+          "isDefault": false
+        },
+        {
+          "name": "test_result_endpoint_shape_contains_items_and_metrics",
+          "line": 346,
+          "isDefault": false
+        },
+        {
+          "name": "test_parallel_bundle_scales_matching_multi_core_catalog_item",
+          "line": 360,
+          "isDefault": false
+        },
+        {
+          "name": "test_price_drift_warning_is_actionable_and_not_auto_approved",
+          "line": 382,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "_count",
+          "callee": "int",
+          "lineNumber": 31
+        },
+        {
+          "caller": "_count",
+          "callee": "conn.execute(query, params).fetchone",
+          "lineNumber": 31
+        },
+        {
+          "caller": "_count",
+          "callee": "conn.execute",
+          "lineNumber": 31
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "find_input_file",
+          "lineNumber": 37
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "find_input_file",
+          "lineNumber": 40
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "find_input_file",
+          "lineNumber": 41
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "ingest_workbook",
+          "lineNumber": 43
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "ingest_workbook",
+          "lineNumber": 44
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "ingest_workbook",
+          "lineNumber": 45
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "db.db_session",
+          "lineNumber": 52
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "int",
+          "lineNumber": 53
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "conn.execute(\r\n                \"SELECT id FROM source_files WHERE filename = ?\", (holdout.name,)\r\n            ).fetchone",
+          "lineNumber": 54
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "conn.execute",
+          "lineNumber": 54
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "_count",
+          "lineNumber": 59
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "_count",
+          "lineNumber": 60
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "_count",
+          "lineNumber": 64
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "_count",
+          "lineNumber": 65
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "_count",
+          "lineNumber": 68
+        },
+        {
+          "caller": "test_holdout_ingest_never_publishes_holdout_prices",
+          "callee": "_count",
+          "lineNumber": 69
+        },
+        {
+          "caller": "test_ingest_is_idempotent_for_same_checksum",
+          "callee": "find_input_file",
+          "lineNumber": 73
+        },
+        {
+          "caller": "test_ingest_is_idempotent_for_same_checksum",
+          "callee": "ingest_workbook",
+          "lineNumber": 75
+        },
+        {
+          "caller": "test_ingest_is_idempotent_for_same_checksum",
+          "callee": "ingest_workbook",
+          "lineNumber": 76
+        },
+        {
+          "caller": "test_ingest_is_idempotent_for_same_checksum",
+          "callee": "first.get",
+          "lineNumber": 78
+        },
+        {
+          "caller": "test_ingest_is_idempotent_for_same_checksum",
+          "callee": "first.get",
+          "lineNumber": 78
+        },
+        {
+          "caller": "test_ingest_is_idempotent_for_same_checksum",
+          "callee": "second.get",
+          "lineNumber": 79
+        },
+        {
+          "caller": "test_ingest_is_idempotent_for_same_checksum",
+          "callee": "second.get",
+          "lineNumber": 79
+        },
+        {
+          "caller": "test_ingest_is_idempotent_for_same_checksum",
+          "callee": "db.db_session",
+          "lineNumber": 83
+        },
+        {
+          "caller": "test_ingest_is_idempotent_for_same_checksum",
+          "callee": "conn.execute(\r\n            \"SELECT sha256 FROM source_files WHERE id = ?\", (first_id,)\r\n        ).fetchone",
+          "lineNumber": 84
+        },
+        {
+          "caller": "test_ingest_is_idempotent_for_same_checksum",
+          "callee": "conn.execute",
+          "lineNumber": 84
+        },
+        {
+          "caller": "test_ingest_is_idempotent_for_same_checksum",
+          "callee": "_count",
+          "lineNumber": 87
+        },
+        {
+          "caller": "test_allow_duplicate_creates_distinct_source_and_project",
+          "callee": "find_input_file",
+          "lineNumber": 95
+        },
+        {
+          "caller": "test_allow_duplicate_creates_distinct_source_and_project",
+          "callee": "ingest_workbook",
+          "lineNumber": 96
+        },
+        {
+          "caller": "test_allow_duplicate_creates_distinct_source_and_project",
+          "callee": "ingest_workbook",
+          "lineNumber": 97
+        },
+        {
+          "caller": "test_allow_duplicate_creates_distinct_source_and_project",
+          "callee": "db.db_session",
+          "lineNumber": 107
+        },
+        {
+          "caller": "test_allow_duplicate_creates_distinct_source_and_project",
+          "callee": "conn.execute(\r\n            \"\"\"\r\n            SELECT id, sha256, metadata_json\r\n            FROM source_files\r\n            WHERE filename=?\r\n            ORDER BY id\r\n            \"\"\",\r\n            (path.name,),\r\n        ).fetchall",
+          "lineNumber": 108
+        },
+        {
+          "caller": "test_allow_duplicate_creates_distinct_source_and_project",
+          "callee": "conn.execute",
+          "lineNumber": 108
+        },
+        {
+          "caller": "test_allow_duplicate_creates_distinct_source_and_project",
+          "callee": "len",
+          "lineNumber": 117
+        },
+        {
+          "caller": "test_allow_duplicate_creates_distinct_source_and_project",
+          "callee": "json.loads",
+          "lineNumber": 119
+        },
+        {
+          "caller": "test_allow_duplicate_creates_distinct_source_and_project",
+          "callee": "_count",
+          "lineNumber": 123
+        },
+        {
+          "caller": "test_allow_duplicate_creates_distinct_source_and_project",
+          "callee": "_count",
+          "lineNumber": 129
+        },
+        {
+          "caller": "test_price_rows_have_complete_provenance",
+          "callee": "find_input_file",
+          "lineNumber": 138
+        },
+        {
+          "caller": "test_price_rows_have_complete_provenance",
+          "callee": "find_input_file",
+          "lineNumber": 139
+        },
+        {
+          "caller": "test_price_rows_have_complete_provenance",
+          "callee": "ingest_workbook",
+          "lineNumber": 140
+        },
+        {
+          "caller": "test_price_rows_have_complete_provenance",
+          "callee": "ingest_workbook",
+          "lineNumber": 141
+        },
+        {
+          "caller": "test_price_rows_have_complete_provenance",
+          "callee": "db.db_session",
+          "lineNumber": 143
+        },
+        {
+          "caller": "test_price_rows_have_complete_provenance",
+          "callee": "conn.execute(\r\n            \"\"\"\r\n            SELECT COUNT(*)\r\n            FROM product_prices pp\r\n            LEFT JOIN source_files sf ON sf.id = pp.source_file_id\r\n            LEFT JOIN source_sheets ss ON ss.id = pp.source_sheet_id\r\n            LEFT JOIN source_rows sr ON sr.id = pp.source_row_id\r\n            WHERE pp.source_file_id IS NULL\r\n               OR sf.id IS NULL\r\n               OR ss.id IS NULL\r\n               OR sr.id IS NULL\r\n            \"\"\"\r\n        ).fetchone",
+          "lineNumber": 144
+        },
+        {
+          "caller": "test_price_rows_have_complete_provenance",
+          "callee": "conn.execute",
+          "lineNumber": 144
+        },
+        {
+          "caller": "test_price_rows_have_complete_provenance",
+          "callee": "conn.execute(\r\n            \"\"\"\r\n            SELECT COUNT(*)\r\n            FROM labor_rates lr\r\n            LEFT JOIN source_files sf ON sf.id = lr.source_file_id\r\n            LEFT JOIN source_sheets ss ON ss.id = lr.source_sheet_id\r\n            LEFT JOIN source_rows sr ON sr.id = lr.source_row_id\r\n            WHERE lr.source_file_id IS NULL\r\n               OR sf.id IS NULL\r\n               OR ss.id IS NULL\r\n               OR sr.id IS NULL\r\n            \"\"\"\r\n        ).fetchone",
+          "lineNumber": 157
+        },
+        {
+          "caller": "test_price_rows_have_complete_provenance",
+          "callee": "conn.execute",
+          "lineNumber": 157
+        },
+        {
+          "caller": "test_holdout_metadata_explicitly_records_exclusion",
+          "callee": "find_input_file",
+          "lineNumber": 176
+        },
+        {
+          "caller": "test_holdout_metadata_explicitly_records_exclusion",
+          "callee": "ingest_workbook",
+          "lineNumber": 177
+        },
+        {
+          "caller": "test_holdout_metadata_explicitly_records_exclusion",
+          "callee": "db.db_session",
+          "lineNumber": 179
+        },
+        {
+          "caller": "test_holdout_metadata_explicitly_records_exclusion",
+          "callee": "conn.execute(\r\n            \"SELECT metadata_json FROM source_files WHERE id = ?\", (stats[\"source_file_id\"],)\r\n        ).fetchone",
+          "lineNumber": 180
+        },
+        {
+          "caller": "test_holdout_metadata_explicitly_records_exclusion",
+          "callee": "conn.execute",
+          "lineNumber": 180
+        },
+        {
+          "caller": "test_holdout_metadata_explicitly_records_exclusion",
+          "callee": "json.loads",
+          "lineNumber": 183
+        },
+        {
+          "caller": "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+          "callee": "find_input_file",
+          "lineNumber": 194
+        },
+        {
+          "caller": "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+          "callee": "ingest_workbook",
+          "lineNumber": 195
+        },
+        {
+          "caller": "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+          "callee": "db.db_session",
+          "lineNumber": 197
+        },
+        {
+          "caller": "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+          "callee": "conn.execute(\r\n            \"\"\"\r\n            SELECT p.*\r\n            FROM products p\r\n            JOIN product_prices pp ON pp.product_id = p.id\r\n            WHERE p.normalized_name <> '' AND pp.net_price > 0\r\n            ORDER BY pp.id\r\n            LIMIT 1\r\n            \"\"\"\r\n        ).fetchone",
+          "lineNumber": 198
+        },
+        {
+          "caller": "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+          "callee": "conn.execute",
+          "lineNumber": 198
+        },
+        {
+          "caller": "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+          "callee": "find_product_candidates",
+          "lineNumber": 210
+        },
+        {
+          "caller": "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+          "callee": "candidates[0].components.get",
+          "lineNumber": 220
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "find_input_file",
+          "lineNumber": 229
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "ingest_workbook",
+          "lineNumber": 230
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "db.db_session",
+          "lineNumber": 233
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "conn.execute(\r\n            \"\"\"\r\n            SELECT p.id, p.normalized_name, p.unit, pp.net_price\r\n            FROM products p\r\n            JOIN product_prices pp ON pp.product_id = p.id\r\n            WHERE p.normalized_name <> '' AND pp.net_price > 0\r\n            ORDER BY pp.id\r\n            LIMIT 1\r\n            \"\"\"\r\n        ).fetchone",
+          "lineNumber": 234
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "conn.execute",
+          "lineNumber": 234
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "conn.execute(\r\n            \"\"\"\r\n            SELECT li.id, li.normalized_name, li.unit, lr.rate\r\n            FROM labor_items li\r\n            JOIN labor_rates lr ON lr.labor_item_id = li.id\r\n            WHERE li.normalized_name <> '' AND lr.rate > 0\r\n            ORDER BY lr.id\r\n            LIMIT 1\r\n            \"\"\"\r\n        ).fetchone",
+          "lineNumber": 244
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "conn.execute",
+          "lineNumber": 244
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "conn.execute",
+          "lineNumber": 260
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "int",
+          "lineNumber": 267
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "conn.execute",
+          "lineNumber": 268
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "run_pricing",
+          "lineNumber": 284
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "db.db_session",
+          "lineNumber": 289
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "conn.execute(\r\n            \"SELECT * FROM boq_items WHERE project_id = ?\", (project_id,)\r\n        ).fetchone",
+          "lineNumber": 290
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "conn.execute",
+          "lineNumber": 290
+        },
+        {
+          "caller": "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+          "callee": "pytest.approx",
+          "lineNumber": 295
+        },
+        {
+          "caller": "test_candidate_conflict_is_not_auto_approved",
+          "callee": "find_input_file",
+          "lineNumber": 308
+        },
+        {
+          "caller": "test_candidate_conflict_is_not_auto_approved",
+          "callee": "ingest_workbook",
+          "lineNumber": 309
+        },
+        {
+          "caller": "test_candidate_conflict_is_not_auto_approved",
+          "callee": "db.db_session",
+          "lineNumber": 311
+        },
+        {
+          "caller": "test_candidate_conflict_is_not_auto_approved",
+          "callee": "conn.execute(\r\n            \"\"\"\r\n            SELECT p.*\r\n            FROM products p\r\n            WHERE p.category = 'cable'\r\n              AND p.technical_attributes_json LIKE '%voltage%'\r\n            ORDER BY p.id\r\n            \"\"\"\r\n        ).fetchall",
+          "lineNumber": 316
+        },
+        {
+          "caller": "test_candidate_conflict_is_not_auto_approved",
+          "callee": "conn.execute",
+          "lineNumber": 316
+        },
+        {
+          "caller": "test_candidate_conflict_is_not_auto_approved",
+          "callee": "re.sub",
+          "lineNumber": 330
+        },
+        {
+          "caller": "test_candidate_conflict_is_not_auto_approved",
+          "callee": "find_product_candidates",
+          "lineNumber": 337
+        },
+        {
+          "caller": "test_candidate_conflict_is_not_auto_approved",
+          "callee": "candidates[0].components.get",
+          "lineNumber": 341
+        },
+        {
+          "caller": "test_result_endpoint_shape_contains_items_and_metrics",
+          "callee": "find_input_file",
+          "lineNumber": 347
+        },
+        {
+          "caller": "test_result_endpoint_shape_contains_items_and_metrics",
+          "callee": "ingest_workbook",
+          "lineNumber": 348
+        },
+        {
+          "caller": "test_result_endpoint_shape_contains_items_and_metrics",
+          "callee": "run_pricing",
+          "lineNumber": 351
+        },
+        {
+          "caller": "test_result_endpoint_shape_contains_items_and_metrics",
+          "callee": "int",
+          "lineNumber": 351
+        },
+        {
+          "caller": "test_result_endpoint_shape_contains_items_and_metrics",
+          "callee": "get_project_result",
+          "lineNumber": 352
+        },
+        {
+          "caller": "test_result_endpoint_shape_contains_items_and_metrics",
+          "callee": "int",
+          "lineNumber": 352
+        },
+        {
+          "caller": "test_result_endpoint_shape_contains_items_and_metrics",
+          "callee": "len",
+          "lineNumber": 356
+        },
+        {
+          "caller": "test_result_endpoint_shape_contains_items_and_metrics",
+          "callee": "all",
+          "lineNumber": 357
+        },
+        {
+          "caller": "test_parallel_bundle_scales_matching_multi_core_catalog_item",
+          "callee": "Candidate",
+          "lineNumber": 361
+        },
+        {
+          "caller": "test_parallel_bundle_scales_matching_multi_core_catalog_item",
+          "callee": "_price_multiplier",
+          "lineNumber": 379
+        },
+        {
+          "caller": "test_price_drift_warning_is_actionable_and_not_auto_approved",
+          "callee": "Candidate",
+          "lineNumber": 383
+        },
+        {
+          "caller": "test_price_drift_warning_is_actionable_and_not_auto_approved",
+          "callee": "_status_for",
+          "lineNumber": 396
+        }
+      ],
+      "metrics": {
+        "importCount": 5,
+        "exportCount": 12,
+        "functionCount": 12,
+        "classCount": 0
+      }
+    }
+  ]
+}

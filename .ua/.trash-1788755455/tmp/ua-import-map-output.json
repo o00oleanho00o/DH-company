@@ -1,0 +1,201 @@
+{
+  "scriptCompleted": true,
+  "stats": {
+    "filesScanned": 65,
+    "filesWithImports": 30,
+    "totalEdges": 95
+  },
+  "failures": [],
+  "importMap": {
+    ".env.example": [],
+    ".ua/config.json": [],
+    "AGENTS.md": [],
+    "ARCHITECTURE.md": [],
+    "CLAUDE.md": [],
+    "KNOWN_LIMITATIONS.md": [],
+    "PLAN.md": [],
+    "README.md": [],
+    "ROUND2-FINAL-REPORT.md": [],
+    "app/__init__.py": [],
+    "app/ai.py": [
+      "app/config.py"
+    ],
+    "app/cli.py": [
+      "app/config.py",
+      "app/db.py",
+      "app/ingest.py",
+      "app/pricing.py"
+    ],
+    "app/config.py": [],
+    "app/db.py": [
+      "app/config.py"
+    ],
+    "app/excel.py": [
+      "app/normalize.py"
+    ],
+    "app/export.py": [
+      "app/config.py",
+      "app/db.py",
+      "app/pricing.py"
+    ],
+    "app/ingest.py": [
+      "app/config.py",
+      "app/db.py",
+      "app/excel.py",
+      "app/normalize.py",
+      "app/price_policy.py"
+    ],
+    "app/labor_policy.py": [],
+    "app/main.py": [
+      "app/ai.py",
+      "app/config.py",
+      "app/db.py",
+      "app/excel.py",
+      "app/export.py",
+      "app/ingest.py",
+      "app/normalize.py",
+      "app/pricing.py"
+    ],
+    "app/normalize.py": [],
+    "app/price_policy.py": [
+      "app/normalize.py"
+    ],
+    "app/pricing.py": [
+      "app/ai.py",
+      "app/config.py",
+      "app/db.py",
+      "app/labor_policy.py",
+      "app/normalize.py",
+      "app/price_policy.py"
+    ],
+    "app/static/app.js": [],
+    "app/static/index.html": [],
+    "app/static/styles.css": [],
+    "benchmarks/__init__.py": [],
+    "benchmarks/holdout.py": [
+      "app/__init__.py",
+      "app/config.py",
+      "app/db.py",
+      "app/excel.py",
+      "app/ingest.py",
+      "app/normalize.py",
+      "app/pricing.py",
+      "benchmarks/modes.py",
+      "benchmarks/reports.py",
+      "benchmarks/row_audit.py"
+    ],
+    "benchmarks/modes.py": [
+      "app/normalize.py",
+      "app/price_policy.py"
+    ],
+    "benchmarks/reports.py": [
+      "app/normalize.py"
+    ],
+    "benchmarks/round2_report.py": [],
+    "benchmarks/row_audit.py": [
+      "app/normalize.py"
+    ],
+    "deliverables/ARCH-DHBG1.md": [],
+    "deliverables/MODULEMAP-DHBG1.md": [],
+    "deliverables/SCOPE-DHBG1.md": [],
+    "deliverables/SPEC-DHBG1.md": [],
+    "deliverables/WBS-DHBG1.md": [],
+    "deliverables/adr/ADR-001-modular-monolith.md": [],
+    "deliverables/adr/ADR-002-sqlite-provenance.md": [],
+    "deliverables/adr/ADR-003-bounded-ai-rerank.md": [],
+    "deliverables/adr/ADR-004-formula-preserving-export.md": [],
+    "deliverables/adr/ADR-005-network-port-3000.md": [],
+    "docs/DATA-REQUIREMENTS-NEXT.md": [],
+    "docs/DECISIONS.md": [],
+    "migrations/001_initial.sql": [],
+    "requirements.txt": [],
+    "run.ps1": [],
+    "tests/__init__.py": [],
+    "tests/conftest.py": [
+      "app/__init__.py",
+      "app/config.py",
+      "app/db.py",
+      "app/ingest.py"
+    ],
+    "tests/test_ai.py": [
+      "app/ai.py"
+    ],
+    "tests/test_benchmark.py": [
+      "benchmarks/holdout.py"
+    ],
+    "tests/test_benchmark_modes.py": [
+      "app/__init__.py",
+      "app/db.py",
+      "benchmarks/modes.py"
+    ],
+    "tests/test_config.py": [],
+    "tests/test_excel.py": [
+      "app/excel.py",
+      "tests/conftest.py"
+    ],
+    "tests/test_export.py": [
+      "app/__init__.py",
+      "app/export.py"
+    ],
+    "tests/test_labor_policy.py": [
+      "app/__init__.py",
+      "app/db.py",
+      "app/labor_policy.py",
+      "app/pricing.py"
+    ],
+    "tests/test_normalize.py": [
+      "app/normalize.py"
+    ],
+    "tests/test_price_policy.py": [
+      "app/__init__.py",
+      "app/db.py",
+      "app/excel.py",
+      "app/ingest.py",
+      "app/price_policy.py",
+      "tests/conftest.py"
+    ],
+    "tests/test_pricing.py": [
+      "app/__init__.py",
+      "app/db.py",
+      "app/ingest.py",
+      "app/pricing.py",
+      "tests/conftest.py"
+    ],
+    "tests/test_pricing_lifecycle_hardening.py": [
+      "app/__init__.py",
+      "app/db.py",
+      "app/price_policy.py",
+      "app/pricing.py"
+    ],
+    "tests/test_pricing_llm.py": [
+      "app/__init__.py",
+      "app/ai.py",
+      "app/db.py",
+      "app/pricing.py"
+    ],
+    "tests/test_reports.py": [
+      "app/__init__.py",
+      "app/db.py",
+      "benchmarks/reports.py"
+    ],
+    "tests/test_round2_report.py": [
+      "benchmarks/holdout.py",
+      "benchmarks/round2_report.py"
+    ],
+    "tests/test_row_audit.py": [
+      "app/__init__.py",
+      "app/db.py",
+      "app/pricing.py",
+      "benchmarks/row_audit.py"
+    ],
+    "tests/test_security.py": [
+      "app/main.py"
+    ],
+    "tests/test_source_lifecycle_api.py": [
+      "app/db.py",
+      "app/ingest.py",
+      "app/main.py",
+      "tests/conftest.py"
+    ]
+  }
+}

@@ -1,0 +1,3282 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "louvain",
+  "totalFiles": 65,
+  "totalBatches": 9,
+  "exportsByPath": {
+    "app/__init__.py": [],
+    "app/ai.py": [
+      "AIProviderError",
+      "AIDisabledError",
+      "AIBudgetExceeded",
+      "AIProtocolError",
+      "AIResponse",
+      "RerankResult",
+      "ClassificationResult",
+      "_sensitive_key",
+      "_clip_text",
+      "_safe_json_value",
+      "_id_key",
+      "_candidate_value",
+      "_safe_candidate",
+      "_candidate_dict",
+      "_strip_code_fence",
+      "_parse_json_content",
+      "_message_content",
+      "_as_bool",
+      "_as_confidence",
+      "AIProvider",
+      "_is_ambiguous",
+      "safe_rerank",
+      "safe_classify",
+      "_run_coro_sync",
+      "safe_rerank_sync",
+      "safe_classify_sync"
+    ],
+    "app/cli.py": [
+      "_print",
+      "cmd_init_db",
+      "cmd_ingest",
+      "cmd_seed",
+      "cmd_price",
+      "cmd_stats",
+      "cmd_reset",
+      "cmd_benchmark",
+      "build_parser",
+      "main"
+    ],
+    "app/config.py": [
+      "_load_loose_env",
+      "_env_int",
+      "_env_float",
+      "Settings",
+      "ensure_directories"
+    ],
+    "app/db.py": [
+      "utc_now",
+      "get_db_path",
+      "connect",
+      "init_db",
+      "db_session",
+      "dumps",
+      "loads",
+      "row_dict"
+    ],
+    "app/excel.py": [
+      "SheetSnapshot",
+      "ParsedSheet",
+      "sha256_file",
+      "infer_effective_date",
+      "_safe_cell",
+      "load_workbook_snapshots",
+      "_row_text",
+      "detect_document_type",
+      "detect_sheet_type",
+      "find_header_row",
+      "map_columns",
+      "_header_number",
+      "detect_price_columns",
+      "_context_value",
+      "detect_sheet_metadata",
+      "_cell_at",
+      "classify_row",
+      "extract_rows",
+      "parse_workbook"
+    ],
+    "app/export.py": [
+      "_column",
+      "_write_cell",
+      "_audit_rows",
+      "_source_label",
+      "_style_audit",
+      "_formula_cache_map",
+      "_restore_formula_caches",
+      "_recalculate_formula_caches",
+      "export_project"
+    ],
+    "app/ingest.py": [
+      "_classify_boq_row",
+      "_source_file_record",
+      "_link_catalog_source",
+      "_upsert_product",
+      "_merge_product_context",
+      "_upsert_labor_item",
+      "_project_name_from_filename",
+      "_supplier_name",
+      "_sheet_context_attributes",
+      "ingest_workbook",
+      "_decode_json_field",
+      "_source_ref_payload",
+      "source_file_detail",
+      "ingest_directory"
+    ],
+    "app/labor_policy.py": [
+      "_safe_float",
+      "_safe_int",
+      "_parse_json",
+      "_parse_date",
+      "_date_text",
+      "_normalise_adjustment",
+      "normalise_labor_policy",
+      "_observation",
+      "normalise_observations",
+      "_public_provenance",
+      "labor_rate_statistics",
+      "_explanation",
+      "select_labor_rate"
+    ],
+    "app/main.py": [
+      "startup",
+      "_classification",
+      "_source_payload",
+      "_source_reference_counts",
+      "_source_lifecycle_payload",
+      "_project_payload",
+      "_save_upload",
+      "_cleanup_upload",
+      "index",
+      "health",
+      "list_sources",
+      "get_source",
+      "archive_source",
+      "restore_source",
+      "delete_source",
+      "reprocess_source",
+      "preview_import",
+      "import_files",
+      "seed_samples",
+      "get_catalog_stats",
+      "_catalog_source_pointer",
+      "_dedupe_pointers",
+      "_catalog_provenance",
+      "_serialize_product_catalog",
+      "_product_price_history",
+      "_product_observation_history",
+      "_serialize_labor_catalog",
+      "list_catalog_items",
+      "get_catalog_product",
+      "get_catalog_labor",
+      "_normalise_catalog_kind",
+      "_catalog_reference_counts",
+      "_catalog_item_payload",
+      "archive_catalog_item",
+      "restore_catalog_item",
+      "delete_catalog_item",
+      "list_quotations",
+      "create_quotation",
+      "_result_payload",
+      "get_quotation",
+      "price_quotation",
+      "quotation_review",
+      "review_boq_item",
+      "export_quotation",
+      "benchmark_status",
+      "benchmark_report"
+    ],
+    "app/normalize.py": [
+      "strip_accents",
+      "normalize_text",
+      "canonical_key",
+      "normalize_unit",
+      "parse_number",
+      "_has_token",
+      "technical_attributes"
+    ],
+    "app/price_policy.py": [
+      "_normalized_label",
+      "normalize_tax_mode",
+      "normalize_price_basis",
+      "normalize_discount_rate",
+      "_date_value",
+      "ManualPricingRule",
+      "_rule_id",
+      "_coerce_rule",
+      "load_manual_pricing_rules",
+      "_matches",
+      "rule_matches",
+      "select_manual_pricing_rule",
+      "find_observation",
+      "select_price_observation"
+    ],
+    "app/pricing.py": [
+      "Candidate",
+      "clear_runtime_caches",
+      "_line_class_value",
+      "_is_non_priceable_line",
+      "_source_warnings",
+      "_pricing_status_reason",
+      "_normalise_drift_threshold",
+      "_price_source_type",
+      "_price_source_tier",
+      "_price_source_rank",
+      "_price_source_was_explicitly_selected",
+      "_compact_price_source",
+      "_price_source_explanation",
+      "_decorate_price_source",
+      "_db_identity",
+      "_tokens",
+      "_technical_tokens",
+      "_family_tokens",
+      "_jaccard",
+      "_family_compatible",
+      "_normalized_category",
+      "_is_meaningful_unit",
+      "_critical_missing",
+      "_shape_tokens",
+      "_safe_float",
+      "_attribute_score",
+      "_candidate_from_product",
+      "_candidate_from_labor",
+      "_score_candidate",
+      "_alias_matches",
+      "_product_catalog",
+      "_labor_catalog",
+      "_prepared_catalog",
+      "_prefilter_rows",
+      "find_product_candidates",
+      "find_labor_candidates",
+      "_provenance",
+      "_observation_provenance",
+      "choose_product_price",
+      "_choose_product_price_with_policy",
+      "_labor_policy_cache_key",
+      "choose_labor_rate",
+      "_price_multiplier",
+      "_candidate_signature",
+      "_round_money",
+      "_pricing_scope_for_item",
+      "_historical_exact_reference",
+      "_status_for",
+      "_candidate_json",
+      "_policy_bool",
+      "_llm_ambiguous",
+      "_reorder_candidates_from_llm",
+      "_new_model_usage",
+      "_record_model_usage",
+      "_labor_run_policy",
+      "_preserve_reviewed_item",
+      "run_pricing",
+      "serialize_boq_item",
+      "get_project_result",
+      "review_item",
+      "catalog_stats"
+    ],
+    "app/static/app.js": [],
+    "benchmarks/__init__.py": [],
+    "benchmarks/holdout.py": [
+      "_portable_report_path",
+      "_json_default",
+      "_compact_data_gap",
+      "_compact_failure_analysis",
+      "_compact_temporal_modes",
+      "_compact_report_for_disk",
+      "_utc_now",
+      "_find_workbooks",
+      "_resolve_holdout",
+      "_isolated_application_storage",
+      "_safe_float",
+      "_relative_error",
+      "_price_equal",
+      "_token_set",
+      "_technical_match_quality",
+      "_count",
+      "_snapshot_ground_truth",
+      "_evaluate",
+      "_markdown_report",
+      "run_benchmark",
+      "_build_parser",
+      "main"
+    ],
+    "benchmarks/modes.py": [
+      "_safe_float",
+      "_row_get",
+      "_loads",
+      "parse_date",
+      "date_text",
+      "normalize_mode",
+      "BenchmarkModeSpec",
+      "infer_benchmark_date",
+      "make_mode_spec",
+      "observation_date",
+      "observation_source_type",
+      "observation_selection_explicit",
+      "temporal_observation_status",
+      "eligible_observations",
+      "_lookup_observations",
+      "_source_json",
+      "_truth_value",
+      "_is_priceable",
+      "_relative_error",
+      "_price_equal",
+      "_source_date_for_row",
+      "_source_temporal_status",
+      "observation_amount",
+      "_source_priority",
+      "select_mode_observation",
+      "classify_price_error",
+      "_side_source_key",
+      "_evaluate_side",
+      "evaluate_mode_rows",
+      "compare_mode_metrics",
+      "evaluate_temporal_modes",
+      "_db_rows",
+      "_db_source_observations",
+      "evaluate_db_modes",
+      "render_temporal_markdown",
+      "write_temporal_report"
+    ],
+    "benchmarks/reports.py": [
+      "_safe_float",
+      "_loads",
+      "_row_get",
+      "normalize_category",
+      "_line_class",
+      "is_priceable_row",
+      "_status_reason",
+      "_catalog_source_index",
+      "_row_record",
+      "build_data_gap_report",
+      "_relative_error",
+      "_failure_code",
+      "_side_failure_code",
+      "_candidate_summary",
+      "build_failure_analysis",
+      "build_data_requirements",
+      "render_data_gap_markdown",
+      "render_failure_markdown",
+      "render_data_requirements_markdown",
+      "write_report_files"
+    ],
+    "benchmarks/round2_report.py": [
+      "load_report",
+      "_get",
+      "_number",
+      "_delta",
+      "_round",
+      "_round1_snapshot",
+      "_round2_snapshot",
+      "build_round2_report",
+      "_format_value",
+      "render_round2_markdown",
+      "write_round2_report"
+    ],
+    "benchmarks/row_audit.py": [
+      "_contains_phrase",
+      "_has_number",
+      "_contains_marker",
+      "_is_upper_title",
+      "_looks_like_header",
+      "_description_signal",
+      "classify_row",
+      "classify_parsed_workbook",
+      "markdown_report"
+    ],
+    "tests/__init__.py": [],
+    "tests/conftest.py": [
+      "find_input_file",
+      "isolated_db"
+    ],
+    "tests/test_ai.py": [
+      "FakeResponse",
+      "FakeClient",
+      "_provider",
+      "_candidates",
+      "test_safe_rerank_disabled_is_deterministic_and_does_not_call",
+      "test_rerank_sends_only_safe_fields_and_validates_supplied_ids",
+      "test_invalid_model_id_falls_back_and_marks_review",
+      "test_call_budget_is_enforced_without_network_or_retry_fanout",
+      "test_safe_rerank_skips_non_ambiguous_candidates",
+      "test_classification_is_limited_to_allowed_labels_and_confidence",
+      "test_classification_rejects_unknown_label_and_safe_fallback",
+      "test_provider_accepts_fenced_json_from_compatible_gateway",
+      "test_sync_wrappers_work_for_callers_in_sync_pricing_pipeline"
+    ],
+    "tests/test_benchmark.py": [
+      "test_benchmark_price_tolerance_is_small_and_deterministic",
+      "test_benchmark_match_quality_distinguishes_name_and_hard_conflict",
+      "test_holdout_selector_accepts_unique_prefix"
+    ],
+    "tests/test_benchmark_modes.py": [
+      "_row",
+      "test_mode_date_inference_requires_unambiguous_date",
+      "test_future_observations_are_excluded_only_by_temporal_cutoff",
+      "test_evaluate_temporal_modes_separates_historical_and_current_metrics",
+      "test_price_error_root_causes_are_evidence_backed",
+      "test_compare_mode_metrics_reports_current_minus_historical",
+      "test_db_source_observations_prefers_active_ex_vat_observations",
+      "test_mode_selector_prefers_explicit_tier_and_normalizes_tax_basis",
+      "test_db_legacy_price_fallback_prefers_ex_vat_rows"
+    ],
+    "tests/test_config.py": [
+      "test_default_server_bind_is_network_accessible_on_port_3000"
+    ],
+    "tests/test_excel.py": [
+      "test_real_sample_workbooks_parse",
+      "test_real_directory_covers_both_excel_extensions",
+      "test_expected_document_classification_signals",
+      "test_parser_handles_title_rows_reordered_columns_and_formula_cells",
+      "test_header_detector_and_column_mapper_are_not_fixed_to_first_rows"
+    ],
+    "tests/test_export.py": [
+      "_template",
+      "test_export_only_updates_unit_price_columns"
+    ],
+    "tests/test_labor_policy.py": [
+      "_row",
+      "test_normalise_policy_accepts_percent_adjustment_and_aliases",
+      "test_statistics_include_spread_variance_and_recency",
+      "test_median_last_3_with_adjustment_preserves_all_provenance",
+      "test_master_rate_wins_by_default_but_can_be_bypassed",
+      "test_high_spread_and_variance_become_review_warnings",
+      "test_invalid_or_empty_rates_are_not_selected",
+      "test_choose_labor_rate_wires_policy_and_sql_provenance",
+      "test_labor_warning_prevents_auto_approval",
+      "test_labor_only_exact_match_does_not_require_material_candidate"
+    ],
+    "tests/test_normalize.py": [
+      "test_normalize_text_is_unicode_and_engineering_safe",
+      "test_canonical_key_removes_cosmetic_separator_whitespace",
+      "test_parse_number_handles_vietnamese_and_excel_values",
+      "test_parse_number_rejects_non_numeric_cells",
+      "test_normalize_unit_aliases",
+      "test_technical_attributes_extracts_cable_specification",
+      "test_technical_attributes_prefers_outer_core_count_for_parenthesized_spec",
+      "test_technical_attributes_extracts_pipe_diameter",
+      "test_technical_attributes_does_not_treat_cable_section_hyphen_as_voltage_pair",
+      "test_technical_attributes_handles_underscore_and_nested_core_notation",
+      "test_technical_attributes_preserves_aluminium_family_tokens",
+      "test_technical_attributes_uses_token_boundaries_for_short_abbreviations"
+    ],
+    "tests/test_price_policy.py": [
+      "test_real_cable_tong_preserves_base_vat_and_discount_tiers",
+      "test_manual_rule_selects_published_tier_without_inventing_price",
+      "test_ingest_keeps_observations_and_uses_configured_tier",
+      "test_supplier_detail_sheet_enriches_tong_product_identity",
+      "test_holdout_exclusion_does_not_publish_price_observations"
+    ],
+    "tests/test_pricing.py": [
+      "_count",
+      "test_holdout_ingest_never_publishes_holdout_prices",
+      "test_ingest_is_idempotent_for_same_checksum",
+      "test_allow_duplicate_creates_distinct_source_and_project",
+      "test_price_rows_have_complete_provenance",
+      "test_holdout_metadata_explicitly_records_exclusion",
+      "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+      "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+      "test_candidate_conflict_is_not_auto_approved",
+      "test_result_endpoint_shape_contains_items_and_metrics",
+      "test_parallel_bundle_scales_matching_multi_core_catalog_item",
+      "test_price_drift_warning_is_actionable_and_not_auto_approved"
+    ],
+    "tests/test_pricing_lifecycle_hardening.py": [
+      "_source",
+      "test_product_selection_uses_ex_vat_observation_for_drift",
+      "test_selected_supplier_tier_wins_and_tax_labels_are_normalized",
+      "test_current_observation_wins_over_legacy_historical_operational_row",
+      "test_zero_drift_threshold_is_preserved_and_flags_any_difference",
+      "test_archived_source_is_not_selected_for_new_price",
+      "test_manual_review_is_persisted_and_survives_default_rerun",
+      "test_selected_candidate_with_explicit_price_creates_manual_observation"
+    ],
+    "tests/test_pricing_llm.py": [
+      "StubProvider",
+      "_candidate",
+      "test_run_pricing_uses_llm_only_for_ambiguous_candidates_and_persists_usage"
+    ],
+    "tests/test_reports.py": [
+      "_insert_product",
+      "test_normalize_category_is_stable_and_generic",
+      "test_data_gap_and_failure_reports_separate_source_gap_from_match_failure",
+      "test_data_requirement_writer_creates_required_artifacts"
+    ],
+    "tests/test_round2_report.py": [
+      "_snapshot",
+      "test_round2_report_preserves_unmeasured_round1_values_as_null",
+      "test_compact_primary_report_omits_heavy_row_arrays",
+      "test_round2_report_writer_creates_json_and_markdown"
+    ],
+    "tests/test_row_audit.py": [
+      "_row",
+      "test_row_audit_distinguishes_priceable_item_from_heading",
+      "test_row_audit_reads_total_label_from_unmapped_raw_cell",
+      "test_row_audit_does_not_treat_single_cell_subsection_as_header",
+      "test_row_audit_keeps_missing_quantity_visible_as_priceable",
+      "test_pricing_ignores_explicit_structural_rows"
+    ],
+    "tests/test_security.py": [
+      "test_save_upload_rejects_oversized_payload_and_cleans_temp_dir"
+    ],
+    "tests/test_source_lifecycle_api.py": [
+      "_seed_source_graph",
+      "test_source_detail_archive_and_safe_delete",
+      "test_source_raw_row_limit_is_workbook_wide",
+      "test_catalog_list_and_product_detail",
+      "test_catalog_current_price_prefers_immutable_observation_over_legacy_price",
+      "test_catalog_all_pagination_is_global_and_stable",
+      "test_source_detail_uses_legacy_direct_provenance_when_bridge_is_missing",
+      "test_force_reimport_versions_source_without_breaking_provenance"
+    ]
+  },
+  "batches": [
+    {
+      "batchIndex": 1,
+      "files": [
+        {
+          "path": "app/normalize.py",
+          "language": "python",
+          "sizeLines": 322,
+          "fileCategory": "code"
+        },
+        {
+          "path": "benchmarks/holdout.py",
+          "language": "python",
+          "sizeLines": 1215,
+          "fileCategory": "code"
+        },
+        {
+          "path": "benchmarks/modes.py",
+          "language": "python",
+          "sizeLines": 1418,
+          "fileCategory": "code"
+        },
+        {
+          "path": "benchmarks/reports.py",
+          "language": "python",
+          "sizeLines": 992,
+          "fileCategory": "code"
+        },
+        {
+          "path": "benchmarks/round2_report.py",
+          "language": "python",
+          "sizeLines": 342,
+          "fileCategory": "code"
+        },
+        {
+          "path": "benchmarks/row_audit.py",
+          "language": "python",
+          "sizeLines": 639,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_benchmark.py",
+          "language": "python",
+          "sizeLines": 52,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_benchmark_modes.py",
+          "language": "python",
+          "sizeLines": 409,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_normalize.py",
+          "language": "python",
+          "sizeLines": 141,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_reports.py",
+          "language": "python",
+          "sizeLines": 174,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_round2_report.py",
+          "language": "python",
+          "sizeLines": 155,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_row_audit.py",
+          "language": "python",
+          "sizeLines": 152,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "app/normalize.py": [],
+        "benchmarks/holdout.py": [
+          "app/__init__.py",
+          "app/config.py",
+          "app/db.py",
+          "app/excel.py",
+          "app/ingest.py",
+          "app/normalize.py",
+          "app/pricing.py",
+          "benchmarks/modes.py",
+          "benchmarks/reports.py",
+          "benchmarks/row_audit.py"
+        ],
+        "benchmarks/modes.py": [
+          "app/normalize.py",
+          "app/price_policy.py"
+        ],
+        "benchmarks/reports.py": [
+          "app/normalize.py"
+        ],
+        "benchmarks/round2_report.py": [],
+        "benchmarks/row_audit.py": [
+          "app/normalize.py"
+        ],
+        "tests/test_benchmark.py": [
+          "benchmarks/holdout.py"
+        ],
+        "tests/test_benchmark_modes.py": [
+          "app/__init__.py",
+          "app/db.py",
+          "benchmarks/modes.py"
+        ],
+        "tests/test_normalize.py": [
+          "app/normalize.py"
+        ],
+        "tests/test_reports.py": [
+          "app/__init__.py",
+          "app/db.py",
+          "benchmarks/reports.py"
+        ],
+        "tests/test_round2_report.py": [
+          "benchmarks/holdout.py",
+          "benchmarks/round2_report.py"
+        ],
+        "tests/test_row_audit.py": [
+          "app/__init__.py",
+          "app/db.py",
+          "app/pricing.py",
+          "benchmarks/row_audit.py"
+        ]
+      },
+      "neighborMap": {
+        "app/normalize.py": [
+          {
+            "path": "app/excel.py",
+            "batchIndex": 4,
+            "symbols": [
+              "SheetSnapshot",
+              "ParsedSheet",
+              "sha256_file",
+              "infer_effective_date",
+              "_safe_cell",
+              "load_workbook_snapshots",
+              "_row_text",
+              "detect_document_type",
+              "detect_sheet_type",
+              "find_header_row",
+              "map_columns",
+              "_header_number",
+              "detect_price_columns",
+              "_context_value",
+              "detect_sheet_metadata",
+              "_cell_at",
+              "classify_row",
+              "extract_rows",
+              "parse_workbook"
+            ]
+          },
+          {
+            "path": "app/ingest.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_classify_boq_row",
+              "_source_file_record",
+              "_link_catalog_source",
+              "_upsert_product",
+              "_merge_product_context",
+              "_upsert_labor_item",
+              "_project_name_from_filename",
+              "_supplier_name",
+              "_sheet_context_attributes",
+              "ingest_workbook",
+              "_decode_json_field",
+              "_source_ref_payload",
+              "source_file_detail",
+              "ingest_directory"
+            ]
+          },
+          {
+            "path": "app/main.py",
+            "batchIndex": 3,
+            "symbols": [
+              "startup",
+              "_classification",
+              "_source_payload",
+              "_source_reference_counts",
+              "_source_lifecycle_payload",
+              "_project_payload",
+              "_save_upload",
+              "_cleanup_upload",
+              "index",
+              "health",
+              "list_sources",
+              "get_source",
+              "archive_source",
+              "restore_source",
+              "delete_source",
+              "reprocess_source",
+              "preview_import",
+              "import_files",
+              "seed_samples",
+              "get_catalog_stats",
+              "_catalog_source_pointer",
+              "_dedupe_pointers",
+              "_catalog_provenance",
+              "_serialize_product_catalog",
+              "_product_price_history",
+              "_product_observation_history",
+              "_serialize_labor_catalog",
+              "list_catalog_items",
+              "get_catalog_product",
+              "get_catalog_labor",
+              "_normalise_catalog_kind",
+              "_catalog_reference_counts",
+              "_catalog_item_payload",
+              "archive_catalog_item",
+              "restore_catalog_item",
+              "delete_catalog_item",
+              "list_quotations",
+              "create_quotation",
+              "_result_payload",
+              "get_quotation",
+              "price_quotation",
+              "quotation_review",
+              "review_boq_item",
+              "export_quotation",
+              "benchmark_status",
+              "benchmark_report"
+            ]
+          },
+          {
+            "path": "app/price_policy.py",
+            "batchIndex": 2,
+            "symbols": [
+              "_normalized_label",
+              "normalize_tax_mode",
+              "normalize_price_basis",
+              "normalize_discount_rate",
+              "_date_value",
+              "ManualPricingRule",
+              "_rule_id",
+              "_coerce_rule",
+              "load_manual_pricing_rules",
+              "_matches",
+              "rule_matches",
+              "select_manual_pricing_rule",
+              "find_observation",
+              "select_price_observation"
+            ]
+          },
+          {
+            "path": "app/pricing.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Candidate",
+              "clear_runtime_caches",
+              "_line_class_value",
+              "_is_non_priceable_line",
+              "_source_warnings",
+              "_pricing_status_reason",
+              "_normalise_drift_threshold",
+              "_price_source_type",
+              "_price_source_tier",
+              "_price_source_rank",
+              "_price_source_was_explicitly_selected",
+              "_compact_price_source",
+              "_price_source_explanation",
+              "_decorate_price_source",
+              "_db_identity",
+              "_tokens",
+              "_technical_tokens",
+              "_family_tokens",
+              "_jaccard",
+              "_family_compatible",
+              "_normalized_category",
+              "_is_meaningful_unit",
+              "_critical_missing",
+              "_shape_tokens",
+              "_safe_float",
+              "_attribute_score",
+              "_candidate_from_product",
+              "_candidate_from_labor",
+              "_score_candidate",
+              "_alias_matches",
+              "_product_catalog",
+              "_labor_catalog",
+              "_prepared_catalog",
+              "_prefilter_rows",
+              "find_product_candidates",
+              "find_labor_candidates",
+              "_provenance",
+              "_observation_provenance",
+              "choose_product_price",
+              "_choose_product_price_with_policy",
+              "_labor_policy_cache_key",
+              "choose_labor_rate",
+              "_price_multiplier",
+              "_candidate_signature",
+              "_round_money",
+              "_pricing_scope_for_item",
+              "_historical_exact_reference",
+              "_status_for",
+              "_candidate_json",
+              "_policy_bool",
+              "_llm_ambiguous",
+              "_reorder_candidates_from_llm",
+              "_new_model_usage",
+              "_record_model_usage",
+              "_labor_run_policy",
+              "_preserve_reviewed_item",
+              "run_pricing",
+              "serialize_boq_item",
+              "get_project_result",
+              "review_item",
+              "catalog_stats"
+            ]
+          }
+        ],
+        "benchmarks/holdout.py": [
+          {
+            "path": "app/__init__.py",
+            "batchIndex": 4,
+            "symbols": []
+          },
+          {
+            "path": "app/config.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_load_loose_env",
+              "_env_int",
+              "_env_float",
+              "Settings",
+              "ensure_directories"
+            ]
+          },
+          {
+            "path": "app/db.py",
+            "batchIndex": 3,
+            "symbols": [
+              "utc_now",
+              "get_db_path",
+              "connect",
+              "init_db",
+              "db_session",
+              "dumps",
+              "loads",
+              "row_dict"
+            ]
+          },
+          {
+            "path": "app/excel.py",
+            "batchIndex": 4,
+            "symbols": [
+              "SheetSnapshot",
+              "ParsedSheet",
+              "sha256_file",
+              "infer_effective_date",
+              "_safe_cell",
+              "load_workbook_snapshots",
+              "_row_text",
+              "detect_document_type",
+              "detect_sheet_type",
+              "find_header_row",
+              "map_columns",
+              "_header_number",
+              "detect_price_columns",
+              "_context_value",
+              "detect_sheet_metadata",
+              "_cell_at",
+              "classify_row",
+              "extract_rows",
+              "parse_workbook"
+            ]
+          },
+          {
+            "path": "app/ingest.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_classify_boq_row",
+              "_source_file_record",
+              "_link_catalog_source",
+              "_upsert_product",
+              "_merge_product_context",
+              "_upsert_labor_item",
+              "_project_name_from_filename",
+              "_supplier_name",
+              "_sheet_context_attributes",
+              "ingest_workbook",
+              "_decode_json_field",
+              "_source_ref_payload",
+              "source_file_detail",
+              "ingest_directory"
+            ]
+          },
+          {
+            "path": "app/pricing.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Candidate",
+              "clear_runtime_caches",
+              "_line_class_value",
+              "_is_non_priceable_line",
+              "_source_warnings",
+              "_pricing_status_reason",
+              "_normalise_drift_threshold",
+              "_price_source_type",
+              "_price_source_tier",
+              "_price_source_rank",
+              "_price_source_was_explicitly_selected",
+              "_compact_price_source",
+              "_price_source_explanation",
+              "_decorate_price_source",
+              "_db_identity",
+              "_tokens",
+              "_technical_tokens",
+              "_family_tokens",
+              "_jaccard",
+              "_family_compatible",
+              "_normalized_category",
+              "_is_meaningful_unit",
+              "_critical_missing",
+              "_shape_tokens",
+              "_safe_float",
+              "_attribute_score",
+              "_candidate_from_product",
+              "_candidate_from_labor",
+              "_score_candidate",
+              "_alias_matches",
+              "_product_catalog",
+              "_labor_catalog",
+              "_prepared_catalog",
+              "_prefilter_rows",
+              "find_product_candidates",
+              "find_labor_candidates",
+              "_provenance",
+              "_observation_provenance",
+              "choose_product_price",
+              "_choose_product_price_with_policy",
+              "_labor_policy_cache_key",
+              "choose_labor_rate",
+              "_price_multiplier",
+              "_candidate_signature",
+              "_round_money",
+              "_pricing_scope_for_item",
+              "_historical_exact_reference",
+              "_status_for",
+              "_candidate_json",
+              "_policy_bool",
+              "_llm_ambiguous",
+              "_reorder_candidates_from_llm",
+              "_new_model_usage",
+              "_record_model_usage",
+              "_labor_run_policy",
+              "_preserve_reviewed_item",
+              "run_pricing",
+              "serialize_boq_item",
+              "get_project_result",
+              "review_item",
+              "catalog_stats"
+            ]
+          }
+        ],
+        "benchmarks/modes.py": [
+          {
+            "path": "app/price_policy.py",
+            "batchIndex": 2,
+            "symbols": [
+              "_normalized_label",
+              "normalize_tax_mode",
+              "normalize_price_basis",
+              "normalize_discount_rate",
+              "_date_value",
+              "ManualPricingRule",
+              "_rule_id",
+              "_coerce_rule",
+              "load_manual_pricing_rules",
+              "_matches",
+              "rule_matches",
+              "select_manual_pricing_rule",
+              "find_observation",
+              "select_price_observation"
+            ]
+          }
+        ],
+        "tests/test_benchmark_modes.py": [
+          {
+            "path": "app/__init__.py",
+            "batchIndex": 4,
+            "symbols": []
+          },
+          {
+            "path": "app/db.py",
+            "batchIndex": 3,
+            "symbols": [
+              "utc_now",
+              "get_db_path",
+              "connect",
+              "init_db",
+              "db_session",
+              "dumps",
+              "loads",
+              "row_dict"
+            ]
+          }
+        ],
+        "tests/test_reports.py": [
+          {
+            "path": "app/__init__.py",
+            "batchIndex": 4,
+            "symbols": []
+          },
+          {
+            "path": "app/db.py",
+            "batchIndex": 3,
+            "symbols": [
+              "utc_now",
+              "get_db_path",
+              "connect",
+              "init_db",
+              "db_session",
+              "dumps",
+              "loads",
+              "row_dict"
+            ]
+          }
+        ],
+        "tests/test_row_audit.py": [
+          {
+            "path": "app/__init__.py",
+            "batchIndex": 4,
+            "symbols": []
+          },
+          {
+            "path": "app/db.py",
+            "batchIndex": 3,
+            "symbols": [
+              "utc_now",
+              "get_db_path",
+              "connect",
+              "init_db",
+              "db_session",
+              "dumps",
+              "loads",
+              "row_dict"
+            ]
+          },
+          {
+            "path": "app/pricing.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Candidate",
+              "clear_runtime_caches",
+              "_line_class_value",
+              "_is_non_priceable_line",
+              "_source_warnings",
+              "_pricing_status_reason",
+              "_normalise_drift_threshold",
+              "_price_source_type",
+              "_price_source_tier",
+              "_price_source_rank",
+              "_price_source_was_explicitly_selected",
+              "_compact_price_source",
+              "_price_source_explanation",
+              "_decorate_price_source",
+              "_db_identity",
+              "_tokens",
+              "_technical_tokens",
+              "_family_tokens",
+              "_jaccard",
+              "_family_compatible",
+              "_normalized_category",
+              "_is_meaningful_unit",
+              "_critical_missing",
+              "_shape_tokens",
+              "_safe_float",
+              "_attribute_score",
+              "_candidate_from_product",
+              "_candidate_from_labor",
+              "_score_candidate",
+              "_alias_matches",
+              "_product_catalog",
+              "_labor_catalog",
+              "_prepared_catalog",
+              "_prefilter_rows",
+              "find_product_candidates",
+              "find_labor_candidates",
+              "_provenance",
+              "_observation_provenance",
+              "choose_product_price",
+              "_choose_product_price_with_policy",
+              "_labor_policy_cache_key",
+              "choose_labor_rate",
+              "_price_multiplier",
+              "_candidate_signature",
+              "_round_money",
+              "_pricing_scope_for_item",
+              "_historical_exact_reference",
+              "_status_for",
+              "_candidate_json",
+              "_policy_bool",
+              "_llm_ambiguous",
+              "_reorder_candidates_from_llm",
+              "_new_model_usage",
+              "_record_model_usage",
+              "_labor_run_policy",
+              "_preserve_reviewed_item",
+              "run_pricing",
+              "serialize_boq_item",
+              "get_project_result",
+              "review_item",
+              "catalog_stats"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 2,
+      "files": [
+        {
+          "path": "app/ai.py",
+          "language": "python",
+          "sizeLines": 1041,
+          "fileCategory": "code"
+        },
+        {
+          "path": "app/labor_policy.py",
+          "language": "python",
+          "sizeLines": 577,
+          "fileCategory": "code"
+        },
+        {
+          "path": "app/price_policy.py",
+          "language": "python",
+          "sizeLines": 373,
+          "fileCategory": "code"
+        },
+        {
+          "path": "app/pricing.py",
+          "language": "python",
+          "sizeLines": 3043,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_ai.py",
+          "language": "python",
+          "sizeLines": 313,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_labor_policy.py",
+          "language": "python",
+          "sizeLines": 257,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_pricing_lifecycle_hardening.py",
+          "language": "python",
+          "sizeLines": 420,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_pricing_llm.py",
+          "language": "python",
+          "sizeLines": 170,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "app/ai.py": [
+          "app/config.py"
+        ],
+        "app/labor_policy.py": [],
+        "app/price_policy.py": [
+          "app/normalize.py"
+        ],
+        "app/pricing.py": [
+          "app/ai.py",
+          "app/config.py",
+          "app/db.py",
+          "app/labor_policy.py",
+          "app/normalize.py",
+          "app/price_policy.py"
+        ],
+        "tests/test_ai.py": [
+          "app/ai.py"
+        ],
+        "tests/test_labor_policy.py": [
+          "app/__init__.py",
+          "app/db.py",
+          "app/labor_policy.py",
+          "app/pricing.py"
+        ],
+        "tests/test_pricing_lifecycle_hardening.py": [
+          "app/__init__.py",
+          "app/db.py",
+          "app/price_policy.py",
+          "app/pricing.py"
+        ],
+        "tests/test_pricing_llm.py": [
+          "app/__init__.py",
+          "app/ai.py",
+          "app/db.py",
+          "app/pricing.py"
+        ]
+      },
+      "neighborMap": {
+        "app/ai.py": [
+          {
+            "path": "app/config.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_load_loose_env",
+              "_env_int",
+              "_env_float",
+              "Settings",
+              "ensure_directories"
+            ]
+          },
+          {
+            "path": "app/main.py",
+            "batchIndex": 3,
+            "symbols": [
+              "startup",
+              "_classification",
+              "_source_payload",
+              "_source_reference_counts",
+              "_source_lifecycle_payload",
+              "_project_payload",
+              "_save_upload",
+              "_cleanup_upload",
+              "index",
+              "health",
+              "list_sources",
+              "get_source",
+              "archive_source",
+              "restore_source",
+              "delete_source",
+              "reprocess_source",
+              "preview_import",
+              "import_files",
+              "seed_samples",
+              "get_catalog_stats",
+              "_catalog_source_pointer",
+              "_dedupe_pointers",
+              "_catalog_provenance",
+              "_serialize_product_catalog",
+              "_product_price_history",
+              "_product_observation_history",
+              "_serialize_labor_catalog",
+              "list_catalog_items",
+              "get_catalog_product",
+              "get_catalog_labor",
+              "_normalise_catalog_kind",
+              "_catalog_reference_counts",
+              "_catalog_item_payload",
+              "archive_catalog_item",
+              "restore_catalog_item",
+              "delete_catalog_item",
+              "list_quotations",
+              "create_quotation",
+              "_result_payload",
+              "get_quotation",
+              "price_quotation",
+              "quotation_review",
+              "review_boq_item",
+              "export_quotation",
+              "benchmark_status",
+              "benchmark_report"
+            ]
+          }
+        ],
+        "app/price_policy.py": [
+          {
+            "path": "app/normalize.py",
+            "batchIndex": 1,
+            "symbols": [
+              "strip_accents",
+              "normalize_text",
+              "canonical_key",
+              "normalize_unit",
+              "parse_number",
+              "_has_token",
+              "technical_attributes"
+            ]
+          },
+          {
+            "path": "app/ingest.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_classify_boq_row",
+              "_source_file_record",
+              "_link_catalog_source",
+              "_upsert_product",
+              "_merge_product_context",
+              "_upsert_labor_item",
+              "_project_name_from_filename",
+              "_supplier_name",
+              "_sheet_context_attributes",
+              "ingest_workbook",
+              "_decode_json_field",
+              "_source_ref_payload",
+              "source_file_detail",
+              "ingest_directory"
+            ]
+          },
+          {
+            "path": "benchmarks/modes.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_safe_float",
+              "_row_get",
+              "_loads",
+              "parse_date",
+              "date_text",
+              "normalize_mode",
+              "BenchmarkModeSpec",
+              "infer_benchmark_date",
+              "make_mode_spec",
+              "observation_date",
+              "observation_source_type",
+              "observation_selection_explicit",
+              "temporal_observation_status",
+              "eligible_observations",
+              "_lookup_observations",
+              "_source_json",
+              "_truth_value",
+              "_is_priceable",
+              "_relative_error",
+              "_price_equal",
+              "_source_date_for_row",
+              "_source_temporal_status",
+              "observation_amount",
+              "_source_priority",
+              "select_mode_observation",
+              "classify_price_error",
+              "_side_source_key",
+              "_evaluate_side",
+              "evaluate_mode_rows",
+              "compare_mode_metrics",
+              "evaluate_temporal_modes",
+              "_db_rows",
+              "_db_source_observations",
+              "evaluate_db_modes",
+              "render_temporal_markdown",
+              "write_temporal_report"
+            ]
+          },
+          {
+            "path": "tests/test_price_policy.py",
+            "batchIndex": 4,
+            "symbols": [
+              "test_real_cable_tong_preserves_base_vat_and_discount_tiers",
+              "test_manual_rule_selects_published_tier_without_inventing_price",
+              "test_ingest_keeps_observations_and_uses_configured_tier",
+              "test_supplier_detail_sheet_enriches_tong_product_identity",
+              "test_holdout_exclusion_does_not_publish_price_observations"
+            ]
+          }
+        ],
+        "app/pricing.py": [
+          {
+            "path": "app/config.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_load_loose_env",
+              "_env_int",
+              "_env_float",
+              "Settings",
+              "ensure_directories"
+            ]
+          },
+          {
+            "path": "app/db.py",
+            "batchIndex": 3,
+            "symbols": [
+              "utc_now",
+              "get_db_path",
+              "connect",
+              "init_db",
+              "db_session",
+              "dumps",
+              "loads",
+              "row_dict"
+            ]
+          },
+          {
+            "path": "app/normalize.py",
+            "batchIndex": 1,
+            "symbols": [
+              "strip_accents",
+              "normalize_text",
+              "canonical_key",
+              "normalize_unit",
+              "parse_number",
+              "_has_token",
+              "technical_attributes"
+            ]
+          },
+          {
+            "path": "app/cli.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_print",
+              "cmd_init_db",
+              "cmd_ingest",
+              "cmd_seed",
+              "cmd_price",
+              "cmd_stats",
+              "cmd_reset",
+              "cmd_benchmark",
+              "build_parser",
+              "main"
+            ]
+          },
+          {
+            "path": "app/export.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_column",
+              "_write_cell",
+              "_audit_rows",
+              "_source_label",
+              "_style_audit",
+              "_formula_cache_map",
+              "_restore_formula_caches",
+              "_recalculate_formula_caches",
+              "export_project"
+            ]
+          },
+          {
+            "path": "app/main.py",
+            "batchIndex": 3,
+            "symbols": [
+              "startup",
+              "_classification",
+              "_source_payload",
+              "_source_reference_counts",
+              "_source_lifecycle_payload",
+              "_project_payload",
+              "_save_upload",
+              "_cleanup_upload",
+              "index",
+              "health",
+              "list_sources",
+              "get_source",
+              "archive_source",
+              "restore_source",
+              "delete_source",
+              "reprocess_source",
+              "preview_import",
+              "import_files",
+              "seed_samples",
+              "get_catalog_stats",
+              "_catalog_source_pointer",
+              "_dedupe_pointers",
+              "_catalog_provenance",
+              "_serialize_product_catalog",
+              "_product_price_history",
+              "_product_observation_history",
+              "_serialize_labor_catalog",
+              "list_catalog_items",
+              "get_catalog_product",
+              "get_catalog_labor",
+              "_normalise_catalog_kind",
+              "_catalog_reference_counts",
+              "_catalog_item_payload",
+              "archive_catalog_item",
+              "restore_catalog_item",
+              "delete_catalog_item",
+              "list_quotations",
+              "create_quotation",
+              "_result_payload",
+              "get_quotation",
+              "price_quotation",
+              "quotation_review",
+              "review_boq_item",
+              "export_quotation",
+              "benchmark_status",
+              "benchmark_report"
+            ]
+          },
+          {
+            "path": "benchmarks/holdout.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_portable_report_path",
+              "_json_default",
+              "_compact_data_gap",
+              "_compact_failure_analysis",
+              "_compact_temporal_modes",
+              "_compact_report_for_disk",
+              "_utc_now",
+              "_find_workbooks",
+              "_resolve_holdout",
+              "_isolated_application_storage",
+              "_safe_float",
+              "_relative_error",
+              "_price_equal",
+              "_token_set",
+              "_technical_match_quality",
+              "_count",
+              "_snapshot_ground_truth",
+              "_evaluate",
+              "_markdown_report",
+              "run_benchmark",
+              "_build_parser",
+              "main"
+            ]
+          },
+          {
+            "path": "tests/test_pricing.py",
+            "batchIndex": 4,
+            "symbols": [
+              "_count",
+              "test_holdout_ingest_never_publishes_holdout_prices",
+              "test_ingest_is_idempotent_for_same_checksum",
+              "test_allow_duplicate_creates_distinct_source_and_project",
+              "test_price_rows_have_complete_provenance",
+              "test_holdout_metadata_explicitly_records_exclusion",
+              "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+              "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+              "test_candidate_conflict_is_not_auto_approved",
+              "test_result_endpoint_shape_contains_items_and_metrics",
+              "test_parallel_bundle_scales_matching_multi_core_catalog_item",
+              "test_price_drift_warning_is_actionable_and_not_auto_approved"
+            ]
+          },
+          {
+            "path": "tests/test_row_audit.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_row",
+              "test_row_audit_distinguishes_priceable_item_from_heading",
+              "test_row_audit_reads_total_label_from_unmapped_raw_cell",
+              "test_row_audit_does_not_treat_single_cell_subsection_as_header",
+              "test_row_audit_keeps_missing_quantity_visible_as_priceable",
+              "test_pricing_ignores_explicit_structural_rows"
+            ]
+          }
+        ],
+        "tests/test_labor_policy.py": [
+          {
+            "path": "app/__init__.py",
+            "batchIndex": 4,
+            "symbols": []
+          },
+          {
+            "path": "app/db.py",
+            "batchIndex": 3,
+            "symbols": [
+              "utc_now",
+              "get_db_path",
+              "connect",
+              "init_db",
+              "db_session",
+              "dumps",
+              "loads",
+              "row_dict"
+            ]
+          }
+        ],
+        "tests/test_pricing_lifecycle_hardening.py": [
+          {
+            "path": "app/__init__.py",
+            "batchIndex": 4,
+            "symbols": []
+          },
+          {
+            "path": "app/db.py",
+            "batchIndex": 3,
+            "symbols": [
+              "utc_now",
+              "get_db_path",
+              "connect",
+              "init_db",
+              "db_session",
+              "dumps",
+              "loads",
+              "row_dict"
+            ]
+          }
+        ],
+        "tests/test_pricing_llm.py": [
+          {
+            "path": "app/__init__.py",
+            "batchIndex": 4,
+            "symbols": []
+          },
+          {
+            "path": "app/db.py",
+            "batchIndex": 3,
+            "symbols": [
+              "utc_now",
+              "get_db_path",
+              "connect",
+              "init_db",
+              "db_session",
+              "dumps",
+              "loads",
+              "row_dict"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 3,
+      "files": [
+        {
+          "path": "app/cli.py",
+          "language": "python",
+          "sizeLines": 155,
+          "fileCategory": "code"
+        },
+        {
+          "path": "app/config.py",
+          "language": "python",
+          "sizeLines": 119,
+          "fileCategory": "code"
+        },
+        {
+          "path": "app/db.py",
+          "language": "python",
+          "sizeLines": 421,
+          "fileCategory": "code"
+        },
+        {
+          "path": "app/export.py",
+          "language": "python",
+          "sizeLines": 466,
+          "fileCategory": "code"
+        },
+        {
+          "path": "app/ingest.py",
+          "language": "python",
+          "sizeLines": 1534,
+          "fileCategory": "code"
+        },
+        {
+          "path": "app/main.py",
+          "language": "python",
+          "sizeLines": 1765,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_security.py",
+          "language": "python",
+          "sizeLines": 26,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_source_lifecycle_api.py",
+          "language": "python",
+          "sizeLines": 405,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "app/cli.py": [
+          "app/config.py",
+          "app/db.py",
+          "app/ingest.py",
+          "app/pricing.py"
+        ],
+        "app/config.py": [],
+        "app/db.py": [
+          "app/config.py"
+        ],
+        "app/export.py": [
+          "app/config.py",
+          "app/db.py",
+          "app/pricing.py"
+        ],
+        "app/ingest.py": [
+          "app/config.py",
+          "app/db.py",
+          "app/excel.py",
+          "app/normalize.py",
+          "app/price_policy.py"
+        ],
+        "app/main.py": [
+          "app/ai.py",
+          "app/config.py",
+          "app/db.py",
+          "app/excel.py",
+          "app/export.py",
+          "app/ingest.py",
+          "app/normalize.py",
+          "app/pricing.py"
+        ],
+        "tests/test_security.py": [
+          "app/main.py"
+        ],
+        "tests/test_source_lifecycle_api.py": [
+          "app/db.py",
+          "app/ingest.py",
+          "app/main.py",
+          "tests/conftest.py"
+        ]
+      },
+      "neighborMap": {
+        "app/cli.py": [
+          {
+            "path": "app/pricing.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Candidate",
+              "clear_runtime_caches",
+              "_line_class_value",
+              "_is_non_priceable_line",
+              "_source_warnings",
+              "_pricing_status_reason",
+              "_normalise_drift_threshold",
+              "_price_source_type",
+              "_price_source_tier",
+              "_price_source_rank",
+              "_price_source_was_explicitly_selected",
+              "_compact_price_source",
+              "_price_source_explanation",
+              "_decorate_price_source",
+              "_db_identity",
+              "_tokens",
+              "_technical_tokens",
+              "_family_tokens",
+              "_jaccard",
+              "_family_compatible",
+              "_normalized_category",
+              "_is_meaningful_unit",
+              "_critical_missing",
+              "_shape_tokens",
+              "_safe_float",
+              "_attribute_score",
+              "_candidate_from_product",
+              "_candidate_from_labor",
+              "_score_candidate",
+              "_alias_matches",
+              "_product_catalog",
+              "_labor_catalog",
+              "_prepared_catalog",
+              "_prefilter_rows",
+              "find_product_candidates",
+              "find_labor_candidates",
+              "_provenance",
+              "_observation_provenance",
+              "choose_product_price",
+              "_choose_product_price_with_policy",
+              "_labor_policy_cache_key",
+              "choose_labor_rate",
+              "_price_multiplier",
+              "_candidate_signature",
+              "_round_money",
+              "_pricing_scope_for_item",
+              "_historical_exact_reference",
+              "_status_for",
+              "_candidate_json",
+              "_policy_bool",
+              "_llm_ambiguous",
+              "_reorder_candidates_from_llm",
+              "_new_model_usage",
+              "_record_model_usage",
+              "_labor_run_policy",
+              "_preserve_reviewed_item",
+              "run_pricing",
+              "serialize_boq_item",
+              "get_project_result",
+              "review_item",
+              "catalog_stats"
+            ]
+          }
+        ],
+        "app/config.py": [
+          {
+            "path": "app/ai.py",
+            "batchIndex": 2,
+            "symbols": [
+              "AIProviderError",
+              "AIDisabledError",
+              "AIBudgetExceeded",
+              "AIProtocolError",
+              "AIResponse",
+              "RerankResult",
+              "ClassificationResult",
+              "_sensitive_key",
+              "_clip_text",
+              "_safe_json_value",
+              "_id_key",
+              "_candidate_value",
+              "_safe_candidate",
+              "_candidate_dict",
+              "_strip_code_fence",
+              "_parse_json_content",
+              "_message_content",
+              "_as_bool",
+              "_as_confidence",
+              "AIProvider",
+              "_is_ambiguous",
+              "safe_rerank",
+              "safe_classify",
+              "_run_coro_sync",
+              "safe_rerank_sync",
+              "safe_classify_sync"
+            ]
+          },
+          {
+            "path": "app/pricing.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Candidate",
+              "clear_runtime_caches",
+              "_line_class_value",
+              "_is_non_priceable_line",
+              "_source_warnings",
+              "_pricing_status_reason",
+              "_normalise_drift_threshold",
+              "_price_source_type",
+              "_price_source_tier",
+              "_price_source_rank",
+              "_price_source_was_explicitly_selected",
+              "_compact_price_source",
+              "_price_source_explanation",
+              "_decorate_price_source",
+              "_db_identity",
+              "_tokens",
+              "_technical_tokens",
+              "_family_tokens",
+              "_jaccard",
+              "_family_compatible",
+              "_normalized_category",
+              "_is_meaningful_unit",
+              "_critical_missing",
+              "_shape_tokens",
+              "_safe_float",
+              "_attribute_score",
+              "_candidate_from_product",
+              "_candidate_from_labor",
+              "_score_candidate",
+              "_alias_matches",
+              "_product_catalog",
+              "_labor_catalog",
+              "_prepared_catalog",
+              "_prefilter_rows",
+              "find_product_candidates",
+              "find_labor_candidates",
+              "_provenance",
+              "_observation_provenance",
+              "choose_product_price",
+              "_choose_product_price_with_policy",
+              "_labor_policy_cache_key",
+              "choose_labor_rate",
+              "_price_multiplier",
+              "_candidate_signature",
+              "_round_money",
+              "_pricing_scope_for_item",
+              "_historical_exact_reference",
+              "_status_for",
+              "_candidate_json",
+              "_policy_bool",
+              "_llm_ambiguous",
+              "_reorder_candidates_from_llm",
+              "_new_model_usage",
+              "_record_model_usage",
+              "_labor_run_policy",
+              "_preserve_reviewed_item",
+              "run_pricing",
+              "serialize_boq_item",
+              "get_project_result",
+              "review_item",
+              "catalog_stats"
+            ]
+          },
+          {
+            "path": "benchmarks/holdout.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_portable_report_path",
+              "_json_default",
+              "_compact_data_gap",
+              "_compact_failure_analysis",
+              "_compact_temporal_modes",
+              "_compact_report_for_disk",
+              "_utc_now",
+              "_find_workbooks",
+              "_resolve_holdout",
+              "_isolated_application_storage",
+              "_safe_float",
+              "_relative_error",
+              "_price_equal",
+              "_token_set",
+              "_technical_match_quality",
+              "_count",
+              "_snapshot_ground_truth",
+              "_evaluate",
+              "_markdown_report",
+              "run_benchmark",
+              "_build_parser",
+              "main"
+            ]
+          },
+          {
+            "path": "tests/conftest.py",
+            "batchIndex": 4,
+            "symbols": [
+              "find_input_file",
+              "isolated_db"
+            ]
+          }
+        ],
+        "app/db.py": [
+          {
+            "path": "app/pricing.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Candidate",
+              "clear_runtime_caches",
+              "_line_class_value",
+              "_is_non_priceable_line",
+              "_source_warnings",
+              "_pricing_status_reason",
+              "_normalise_drift_threshold",
+              "_price_source_type",
+              "_price_source_tier",
+              "_price_source_rank",
+              "_price_source_was_explicitly_selected",
+              "_compact_price_source",
+              "_price_source_explanation",
+              "_decorate_price_source",
+              "_db_identity",
+              "_tokens",
+              "_technical_tokens",
+              "_family_tokens",
+              "_jaccard",
+              "_family_compatible",
+              "_normalized_category",
+              "_is_meaningful_unit",
+              "_critical_missing",
+              "_shape_tokens",
+              "_safe_float",
+              "_attribute_score",
+              "_candidate_from_product",
+              "_candidate_from_labor",
+              "_score_candidate",
+              "_alias_matches",
+              "_product_catalog",
+              "_labor_catalog",
+              "_prepared_catalog",
+              "_prefilter_rows",
+              "find_product_candidates",
+              "find_labor_candidates",
+              "_provenance",
+              "_observation_provenance",
+              "choose_product_price",
+              "_choose_product_price_with_policy",
+              "_labor_policy_cache_key",
+              "choose_labor_rate",
+              "_price_multiplier",
+              "_candidate_signature",
+              "_round_money",
+              "_pricing_scope_for_item",
+              "_historical_exact_reference",
+              "_status_for",
+              "_candidate_json",
+              "_policy_bool",
+              "_llm_ambiguous",
+              "_reorder_candidates_from_llm",
+              "_new_model_usage",
+              "_record_model_usage",
+              "_labor_run_policy",
+              "_preserve_reviewed_item",
+              "run_pricing",
+              "serialize_boq_item",
+              "get_project_result",
+              "review_item",
+              "catalog_stats"
+            ]
+          },
+          {
+            "path": "benchmarks/holdout.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_portable_report_path",
+              "_json_default",
+              "_compact_data_gap",
+              "_compact_failure_analysis",
+              "_compact_temporal_modes",
+              "_compact_report_for_disk",
+              "_utc_now",
+              "_find_workbooks",
+              "_resolve_holdout",
+              "_isolated_application_storage",
+              "_safe_float",
+              "_relative_error",
+              "_price_equal",
+              "_token_set",
+              "_technical_match_quality",
+              "_count",
+              "_snapshot_ground_truth",
+              "_evaluate",
+              "_markdown_report",
+              "run_benchmark",
+              "_build_parser",
+              "main"
+            ]
+          },
+          {
+            "path": "tests/conftest.py",
+            "batchIndex": 4,
+            "symbols": [
+              "find_input_file",
+              "isolated_db"
+            ]
+          },
+          {
+            "path": "tests/test_benchmark_modes.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_row",
+              "test_mode_date_inference_requires_unambiguous_date",
+              "test_future_observations_are_excluded_only_by_temporal_cutoff",
+              "test_evaluate_temporal_modes_separates_historical_and_current_metrics",
+              "test_price_error_root_causes_are_evidence_backed",
+              "test_compare_mode_metrics_reports_current_minus_historical",
+              "test_db_source_observations_prefers_active_ex_vat_observations",
+              "test_mode_selector_prefers_explicit_tier_and_normalizes_tax_basis",
+              "test_db_legacy_price_fallback_prefers_ex_vat_rows"
+            ]
+          },
+          {
+            "path": "tests/test_labor_policy.py",
+            "batchIndex": 2,
+            "symbols": [
+              "_row",
+              "test_normalise_policy_accepts_percent_adjustment_and_aliases",
+              "test_statistics_include_spread_variance_and_recency",
+              "test_median_last_3_with_adjustment_preserves_all_provenance",
+              "test_master_rate_wins_by_default_but_can_be_bypassed",
+              "test_high_spread_and_variance_become_review_warnings",
+              "test_invalid_or_empty_rates_are_not_selected",
+              "test_choose_labor_rate_wires_policy_and_sql_provenance",
+              "test_labor_warning_prevents_auto_approval",
+              "test_labor_only_exact_match_does_not_require_material_candidate"
+            ]
+          },
+          {
+            "path": "tests/test_price_policy.py",
+            "batchIndex": 4,
+            "symbols": [
+              "test_real_cable_tong_preserves_base_vat_and_discount_tiers",
+              "test_manual_rule_selects_published_tier_without_inventing_price",
+              "test_ingest_keeps_observations_and_uses_configured_tier",
+              "test_supplier_detail_sheet_enriches_tong_product_identity",
+              "test_holdout_exclusion_does_not_publish_price_observations"
+            ]
+          },
+          {
+            "path": "tests/test_pricing.py",
+            "batchIndex": 4,
+            "symbols": [
+              "_count",
+              "test_holdout_ingest_never_publishes_holdout_prices",
+              "test_ingest_is_idempotent_for_same_checksum",
+              "test_allow_duplicate_creates_distinct_source_and_project",
+              "test_price_rows_have_complete_provenance",
+              "test_holdout_metadata_explicitly_records_exclusion",
+              "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+              "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+              "test_candidate_conflict_is_not_auto_approved",
+              "test_result_endpoint_shape_contains_items_and_metrics",
+              "test_parallel_bundle_scales_matching_multi_core_catalog_item",
+              "test_price_drift_warning_is_actionable_and_not_auto_approved"
+            ]
+          },
+          {
+            "path": "tests/test_pricing_lifecycle_hardening.py",
+            "batchIndex": 2,
+            "symbols": [
+              "_source",
+              "test_product_selection_uses_ex_vat_observation_for_drift",
+              "test_selected_supplier_tier_wins_and_tax_labels_are_normalized",
+              "test_current_observation_wins_over_legacy_historical_operational_row",
+              "test_zero_drift_threshold_is_preserved_and_flags_any_difference",
+              "test_archived_source_is_not_selected_for_new_price",
+              "test_manual_review_is_persisted_and_survives_default_rerun",
+              "test_selected_candidate_with_explicit_price_creates_manual_observation"
+            ]
+          },
+          {
+            "path": "tests/test_pricing_llm.py",
+            "batchIndex": 2,
+            "symbols": [
+              "StubProvider",
+              "_candidate",
+              "test_run_pricing_uses_llm_only_for_ambiguous_candidates_and_persists_usage"
+            ]
+          },
+          {
+            "path": "tests/test_reports.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_insert_product",
+              "test_normalize_category_is_stable_and_generic",
+              "test_data_gap_and_failure_reports_separate_source_gap_from_match_failure",
+              "test_data_requirement_writer_creates_required_artifacts"
+            ]
+          },
+          {
+            "path": "tests/test_row_audit.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_row",
+              "test_row_audit_distinguishes_priceable_item_from_heading",
+              "test_row_audit_reads_total_label_from_unmapped_raw_cell",
+              "test_row_audit_does_not_treat_single_cell_subsection_as_header",
+              "test_row_audit_keeps_missing_quantity_visible_as_priceable",
+              "test_pricing_ignores_explicit_structural_rows"
+            ]
+          }
+        ],
+        "app/export.py": [
+          {
+            "path": "app/pricing.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Candidate",
+              "clear_runtime_caches",
+              "_line_class_value",
+              "_is_non_priceable_line",
+              "_source_warnings",
+              "_pricing_status_reason",
+              "_normalise_drift_threshold",
+              "_price_source_type",
+              "_price_source_tier",
+              "_price_source_rank",
+              "_price_source_was_explicitly_selected",
+              "_compact_price_source",
+              "_price_source_explanation",
+              "_decorate_price_source",
+              "_db_identity",
+              "_tokens",
+              "_technical_tokens",
+              "_family_tokens",
+              "_jaccard",
+              "_family_compatible",
+              "_normalized_category",
+              "_is_meaningful_unit",
+              "_critical_missing",
+              "_shape_tokens",
+              "_safe_float",
+              "_attribute_score",
+              "_candidate_from_product",
+              "_candidate_from_labor",
+              "_score_candidate",
+              "_alias_matches",
+              "_product_catalog",
+              "_labor_catalog",
+              "_prepared_catalog",
+              "_prefilter_rows",
+              "find_product_candidates",
+              "find_labor_candidates",
+              "_provenance",
+              "_observation_provenance",
+              "choose_product_price",
+              "_choose_product_price_with_policy",
+              "_labor_policy_cache_key",
+              "choose_labor_rate",
+              "_price_multiplier",
+              "_candidate_signature",
+              "_round_money",
+              "_pricing_scope_for_item",
+              "_historical_exact_reference",
+              "_status_for",
+              "_candidate_json",
+              "_policy_bool",
+              "_llm_ambiguous",
+              "_reorder_candidates_from_llm",
+              "_new_model_usage",
+              "_record_model_usage",
+              "_labor_run_policy",
+              "_preserve_reviewed_item",
+              "run_pricing",
+              "serialize_boq_item",
+              "get_project_result",
+              "review_item",
+              "catalog_stats"
+            ]
+          },
+          {
+            "path": "tests/test_export.py",
+            "batchIndex": 4,
+            "symbols": [
+              "_template",
+              "test_export_only_updates_unit_price_columns"
+            ]
+          }
+        ],
+        "app/ingest.py": [
+          {
+            "path": "app/excel.py",
+            "batchIndex": 4,
+            "symbols": [
+              "SheetSnapshot",
+              "ParsedSheet",
+              "sha256_file",
+              "infer_effective_date",
+              "_safe_cell",
+              "load_workbook_snapshots",
+              "_row_text",
+              "detect_document_type",
+              "detect_sheet_type",
+              "find_header_row",
+              "map_columns",
+              "_header_number",
+              "detect_price_columns",
+              "_context_value",
+              "detect_sheet_metadata",
+              "_cell_at",
+              "classify_row",
+              "extract_rows",
+              "parse_workbook"
+            ]
+          },
+          {
+            "path": "app/normalize.py",
+            "batchIndex": 1,
+            "symbols": [
+              "strip_accents",
+              "normalize_text",
+              "canonical_key",
+              "normalize_unit",
+              "parse_number",
+              "_has_token",
+              "technical_attributes"
+            ]
+          },
+          {
+            "path": "app/price_policy.py",
+            "batchIndex": 2,
+            "symbols": [
+              "_normalized_label",
+              "normalize_tax_mode",
+              "normalize_price_basis",
+              "normalize_discount_rate",
+              "_date_value",
+              "ManualPricingRule",
+              "_rule_id",
+              "_coerce_rule",
+              "load_manual_pricing_rules",
+              "_matches",
+              "rule_matches",
+              "select_manual_pricing_rule",
+              "find_observation",
+              "select_price_observation"
+            ]
+          },
+          {
+            "path": "benchmarks/holdout.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_portable_report_path",
+              "_json_default",
+              "_compact_data_gap",
+              "_compact_failure_analysis",
+              "_compact_temporal_modes",
+              "_compact_report_for_disk",
+              "_utc_now",
+              "_find_workbooks",
+              "_resolve_holdout",
+              "_isolated_application_storage",
+              "_safe_float",
+              "_relative_error",
+              "_price_equal",
+              "_token_set",
+              "_technical_match_quality",
+              "_count",
+              "_snapshot_ground_truth",
+              "_evaluate",
+              "_markdown_report",
+              "run_benchmark",
+              "_build_parser",
+              "main"
+            ]
+          },
+          {
+            "path": "tests/conftest.py",
+            "batchIndex": 4,
+            "symbols": [
+              "find_input_file",
+              "isolated_db"
+            ]
+          },
+          {
+            "path": "tests/test_price_policy.py",
+            "batchIndex": 4,
+            "symbols": [
+              "test_real_cable_tong_preserves_base_vat_and_discount_tiers",
+              "test_manual_rule_selects_published_tier_without_inventing_price",
+              "test_ingest_keeps_observations_and_uses_configured_tier",
+              "test_supplier_detail_sheet_enriches_tong_product_identity",
+              "test_holdout_exclusion_does_not_publish_price_observations"
+            ]
+          },
+          {
+            "path": "tests/test_pricing.py",
+            "batchIndex": 4,
+            "symbols": [
+              "_count",
+              "test_holdout_ingest_never_publishes_holdout_prices",
+              "test_ingest_is_idempotent_for_same_checksum",
+              "test_allow_duplicate_creates_distinct_source_and_project",
+              "test_price_rows_have_complete_provenance",
+              "test_holdout_metadata_explicitly_records_exclusion",
+              "test_candidate_search_prefers_exact_normalized_name_and_keeps_explanation",
+              "test_run_pricing_applies_only_sourced_prices_and_calculates_totals",
+              "test_candidate_conflict_is_not_auto_approved",
+              "test_result_endpoint_shape_contains_items_and_metrics",
+              "test_parallel_bundle_scales_matching_multi_core_catalog_item",
+              "test_price_drift_warning_is_actionable_and_not_auto_approved"
+            ]
+          }
+        ],
+        "app/main.py": [
+          {
+            "path": "app/ai.py",
+            "batchIndex": 2,
+            "symbols": [
+              "AIProviderError",
+              "AIDisabledError",
+              "AIBudgetExceeded",
+              "AIProtocolError",
+              "AIResponse",
+              "RerankResult",
+              "ClassificationResult",
+              "_sensitive_key",
+              "_clip_text",
+              "_safe_json_value",
+              "_id_key",
+              "_candidate_value",
+              "_safe_candidate",
+              "_candidate_dict",
+              "_strip_code_fence",
+              "_parse_json_content",
+              "_message_content",
+              "_as_bool",
+              "_as_confidence",
+              "AIProvider",
+              "_is_ambiguous",
+              "safe_rerank",
+              "safe_classify",
+              "_run_coro_sync",
+              "safe_rerank_sync",
+              "safe_classify_sync"
+            ]
+          },
+          {
+            "path": "app/excel.py",
+            "batchIndex": 4,
+            "symbols": [
+              "SheetSnapshot",
+              "ParsedSheet",
+              "sha256_file",
+              "infer_effective_date",
+              "_safe_cell",
+              "load_workbook_snapshots",
+              "_row_text",
+              "detect_document_type",
+              "detect_sheet_type",
+              "find_header_row",
+              "map_columns",
+              "_header_number",
+              "detect_price_columns",
+              "_context_value",
+              "detect_sheet_metadata",
+              "_cell_at",
+              "classify_row",
+              "extract_rows",
+              "parse_workbook"
+            ]
+          },
+          {
+            "path": "app/normalize.py",
+            "batchIndex": 1,
+            "symbols": [
+              "strip_accents",
+              "normalize_text",
+              "canonical_key",
+              "normalize_unit",
+              "parse_number",
+              "_has_token",
+              "technical_attributes"
+            ]
+          },
+          {
+            "path": "app/pricing.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Candidate",
+              "clear_runtime_caches",
+              "_line_class_value",
+              "_is_non_priceable_line",
+              "_source_warnings",
+              "_pricing_status_reason",
+              "_normalise_drift_threshold",
+              "_price_source_type",
+              "_price_source_tier",
+              "_price_source_rank",
+              "_price_source_was_explicitly_selected",
+              "_compact_price_source",
+              "_price_source_explanation",
+              "_decorate_price_source",
+              "_db_identity",
+              "_tokens",
+              "_technical_tokens",
+              "_family_tokens",
+              "_jaccard",
+              "_family_compatible",
+              "_normalized_category",
+              "_is_meaningful_unit",
+              "_critical_missing",
+              "_shape_tokens",
+              "_safe_float",
+              "_attribute_score",
+              "_candidate_from_product",
+              "_candidate_from_labor",
+              "_score_candidate",
+              "_alias_matches",
+              "_product_catalog",
+              "_labor_catalog",
+              "_prepared_catalog",
+              "_prefilter_rows",
+              "find_product_candidates",
+              "find_labor_candidates",
+              "_provenance",
+              "_observation_provenance",
+              "choose_product_price",
+              "_choose_product_price_with_policy",
+              "_labor_policy_cache_key",
+              "choose_labor_rate",
+              "_price_multiplier",
+              "_candidate_signature",
+              "_round_money",
+              "_pricing_scope_for_item",
+              "_historical_exact_reference",
+              "_status_for",
+              "_candidate_json",
+              "_policy_bool",
+              "_llm_ambiguous",
+              "_reorder_candidates_from_llm",
+              "_new_model_usage",
+              "_record_model_usage",
+              "_labor_run_policy",
+              "_preserve_reviewed_item",
+              "run_pricing",
+              "serialize_boq_item",
+              "get_project_result",
+              "review_item",
+              "catalog_stats"
+            ]
+          }
+        ],
+        "tests/test_source_lifecycle_api.py": [
+          {
+            "path": "tests/conftest.py",
+            "batchIndex": 4,
+            "symbols": [
+              "find_input_file",
+              "isolated_db"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 4,
+      "files": [
+        {
+          "path": "app/__init__.py",
+          "language": "python",
+          "sizeLines": 2,
+          "fileCategory": "code"
+        },
+        {
+          "path": "app/excel.py",
+          "language": "python",
+          "sizeLines": 694,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/conftest.py",
+          "language": "python",
+          "sizeLines": 64,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_excel.py",
+          "language": "python",
+          "sizeLines": 160,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_export.py",
+          "language": "python",
+          "sizeLines": 102,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_price_policy.py",
+          "language": "python",
+          "sizeLines": 171,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_pricing.py",
+          "language": "python",
+          "sizeLines": 411,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "app/__init__.py": [],
+        "app/excel.py": [
+          "app/normalize.py"
+        ],
+        "tests/conftest.py": [
+          "app/__init__.py",
+          "app/config.py",
+          "app/db.py",
+          "app/ingest.py"
+        ],
+        "tests/test_excel.py": [
+          "app/excel.py",
+          "tests/conftest.py"
+        ],
+        "tests/test_export.py": [
+          "app/__init__.py",
+          "app/export.py"
+        ],
+        "tests/test_price_policy.py": [
+          "app/__init__.py",
+          "app/db.py",
+          "app/excel.py",
+          "app/ingest.py",
+          "app/price_policy.py",
+          "tests/conftest.py"
+        ],
+        "tests/test_pricing.py": [
+          "app/__init__.py",
+          "app/db.py",
+          "app/ingest.py",
+          "app/pricing.py",
+          "tests/conftest.py"
+        ]
+      },
+      "neighborMap": {
+        "app/__init__.py": [
+          {
+            "path": "benchmarks/holdout.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_portable_report_path",
+              "_json_default",
+              "_compact_data_gap",
+              "_compact_failure_analysis",
+              "_compact_temporal_modes",
+              "_compact_report_for_disk",
+              "_utc_now",
+              "_find_workbooks",
+              "_resolve_holdout",
+              "_isolated_application_storage",
+              "_safe_float",
+              "_relative_error",
+              "_price_equal",
+              "_token_set",
+              "_technical_match_quality",
+              "_count",
+              "_snapshot_ground_truth",
+              "_evaluate",
+              "_markdown_report",
+              "run_benchmark",
+              "_build_parser",
+              "main"
+            ]
+          },
+          {
+            "path": "tests/test_benchmark_modes.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_row",
+              "test_mode_date_inference_requires_unambiguous_date",
+              "test_future_observations_are_excluded_only_by_temporal_cutoff",
+              "test_evaluate_temporal_modes_separates_historical_and_current_metrics",
+              "test_price_error_root_causes_are_evidence_backed",
+              "test_compare_mode_metrics_reports_current_minus_historical",
+              "test_db_source_observations_prefers_active_ex_vat_observations",
+              "test_mode_selector_prefers_explicit_tier_and_normalizes_tax_basis",
+              "test_db_legacy_price_fallback_prefers_ex_vat_rows"
+            ]
+          },
+          {
+            "path": "tests/test_labor_policy.py",
+            "batchIndex": 2,
+            "symbols": [
+              "_row",
+              "test_normalise_policy_accepts_percent_adjustment_and_aliases",
+              "test_statistics_include_spread_variance_and_recency",
+              "test_median_last_3_with_adjustment_preserves_all_provenance",
+              "test_master_rate_wins_by_default_but_can_be_bypassed",
+              "test_high_spread_and_variance_become_review_warnings",
+              "test_invalid_or_empty_rates_are_not_selected",
+              "test_choose_labor_rate_wires_policy_and_sql_provenance",
+              "test_labor_warning_prevents_auto_approval",
+              "test_labor_only_exact_match_does_not_require_material_candidate"
+            ]
+          },
+          {
+            "path": "tests/test_pricing_lifecycle_hardening.py",
+            "batchIndex": 2,
+            "symbols": [
+              "_source",
+              "test_product_selection_uses_ex_vat_observation_for_drift",
+              "test_selected_supplier_tier_wins_and_tax_labels_are_normalized",
+              "test_current_observation_wins_over_legacy_historical_operational_row",
+              "test_zero_drift_threshold_is_preserved_and_flags_any_difference",
+              "test_archived_source_is_not_selected_for_new_price",
+              "test_manual_review_is_persisted_and_survives_default_rerun",
+              "test_selected_candidate_with_explicit_price_creates_manual_observation"
+            ]
+          },
+          {
+            "path": "tests/test_pricing_llm.py",
+            "batchIndex": 2,
+            "symbols": [
+              "StubProvider",
+              "_candidate",
+              "test_run_pricing_uses_llm_only_for_ambiguous_candidates_and_persists_usage"
+            ]
+          },
+          {
+            "path": "tests/test_reports.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_insert_product",
+              "test_normalize_category_is_stable_and_generic",
+              "test_data_gap_and_failure_reports_separate_source_gap_from_match_failure",
+              "test_data_requirement_writer_creates_required_artifacts"
+            ]
+          },
+          {
+            "path": "tests/test_row_audit.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_row",
+              "test_row_audit_distinguishes_priceable_item_from_heading",
+              "test_row_audit_reads_total_label_from_unmapped_raw_cell",
+              "test_row_audit_does_not_treat_single_cell_subsection_as_header",
+              "test_row_audit_keeps_missing_quantity_visible_as_priceable",
+              "test_pricing_ignores_explicit_structural_rows"
+            ]
+          }
+        ],
+        "app/excel.py": [
+          {
+            "path": "app/normalize.py",
+            "batchIndex": 1,
+            "symbols": [
+              "strip_accents",
+              "normalize_text",
+              "canonical_key",
+              "normalize_unit",
+              "parse_number",
+              "_has_token",
+              "technical_attributes"
+            ]
+          },
+          {
+            "path": "app/ingest.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_classify_boq_row",
+              "_source_file_record",
+              "_link_catalog_source",
+              "_upsert_product",
+              "_merge_product_context",
+              "_upsert_labor_item",
+              "_project_name_from_filename",
+              "_supplier_name",
+              "_sheet_context_attributes",
+              "ingest_workbook",
+              "_decode_json_field",
+              "_source_ref_payload",
+              "source_file_detail",
+              "ingest_directory"
+            ]
+          },
+          {
+            "path": "app/main.py",
+            "batchIndex": 3,
+            "symbols": [
+              "startup",
+              "_classification",
+              "_source_payload",
+              "_source_reference_counts",
+              "_source_lifecycle_payload",
+              "_project_payload",
+              "_save_upload",
+              "_cleanup_upload",
+              "index",
+              "health",
+              "list_sources",
+              "get_source",
+              "archive_source",
+              "restore_source",
+              "delete_source",
+              "reprocess_source",
+              "preview_import",
+              "import_files",
+              "seed_samples",
+              "get_catalog_stats",
+              "_catalog_source_pointer",
+              "_dedupe_pointers",
+              "_catalog_provenance",
+              "_serialize_product_catalog",
+              "_product_price_history",
+              "_product_observation_history",
+              "_serialize_labor_catalog",
+              "list_catalog_items",
+              "get_catalog_product",
+              "get_catalog_labor",
+              "_normalise_catalog_kind",
+              "_catalog_reference_counts",
+              "_catalog_item_payload",
+              "archive_catalog_item",
+              "restore_catalog_item",
+              "delete_catalog_item",
+              "list_quotations",
+              "create_quotation",
+              "_result_payload",
+              "get_quotation",
+              "price_quotation",
+              "quotation_review",
+              "review_boq_item",
+              "export_quotation",
+              "benchmark_status",
+              "benchmark_report"
+            ]
+          },
+          {
+            "path": "benchmarks/holdout.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_portable_report_path",
+              "_json_default",
+              "_compact_data_gap",
+              "_compact_failure_analysis",
+              "_compact_temporal_modes",
+              "_compact_report_for_disk",
+              "_utc_now",
+              "_find_workbooks",
+              "_resolve_holdout",
+              "_isolated_application_storage",
+              "_safe_float",
+              "_relative_error",
+              "_price_equal",
+              "_token_set",
+              "_technical_match_quality",
+              "_count",
+              "_snapshot_ground_truth",
+              "_evaluate",
+              "_markdown_report",
+              "run_benchmark",
+              "_build_parser",
+              "main"
+            ]
+          }
+        ],
+        "tests/conftest.py": [
+          {
+            "path": "app/config.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_load_loose_env",
+              "_env_int",
+              "_env_float",
+              "Settings",
+              "ensure_directories"
+            ]
+          },
+          {
+            "path": "app/db.py",
+            "batchIndex": 3,
+            "symbols": [
+              "utc_now",
+              "get_db_path",
+              "connect",
+              "init_db",
+              "db_session",
+              "dumps",
+              "loads",
+              "row_dict"
+            ]
+          },
+          {
+            "path": "app/ingest.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_classify_boq_row",
+              "_source_file_record",
+              "_link_catalog_source",
+              "_upsert_product",
+              "_merge_product_context",
+              "_upsert_labor_item",
+              "_project_name_from_filename",
+              "_supplier_name",
+              "_sheet_context_attributes",
+              "ingest_workbook",
+              "_decode_json_field",
+              "_source_ref_payload",
+              "source_file_detail",
+              "ingest_directory"
+            ]
+          },
+          {
+            "path": "tests/test_source_lifecycle_api.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_seed_source_graph",
+              "test_source_detail_archive_and_safe_delete",
+              "test_source_raw_row_limit_is_workbook_wide",
+              "test_catalog_list_and_product_detail",
+              "test_catalog_current_price_prefers_immutable_observation_over_legacy_price",
+              "test_catalog_all_pagination_is_global_and_stable",
+              "test_source_detail_uses_legacy_direct_provenance_when_bridge_is_missing",
+              "test_force_reimport_versions_source_without_breaking_provenance"
+            ]
+          }
+        ],
+        "tests/test_export.py": [
+          {
+            "path": "app/export.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_column",
+              "_write_cell",
+              "_audit_rows",
+              "_source_label",
+              "_style_audit",
+              "_formula_cache_map",
+              "_restore_formula_caches",
+              "_recalculate_formula_caches",
+              "export_project"
+            ]
+          }
+        ],
+        "tests/test_price_policy.py": [
+          {
+            "path": "app/db.py",
+            "batchIndex": 3,
+            "symbols": [
+              "utc_now",
+              "get_db_path",
+              "connect",
+              "init_db",
+              "db_session",
+              "dumps",
+              "loads",
+              "row_dict"
+            ]
+          },
+          {
+            "path": "app/ingest.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_classify_boq_row",
+              "_source_file_record",
+              "_link_catalog_source",
+              "_upsert_product",
+              "_merge_product_context",
+              "_upsert_labor_item",
+              "_project_name_from_filename",
+              "_supplier_name",
+              "_sheet_context_attributes",
+              "ingest_workbook",
+              "_decode_json_field",
+              "_source_ref_payload",
+              "source_file_detail",
+              "ingest_directory"
+            ]
+          },
+          {
+            "path": "app/price_policy.py",
+            "batchIndex": 2,
+            "symbols": [
+              "_normalized_label",
+              "normalize_tax_mode",
+              "normalize_price_basis",
+              "normalize_discount_rate",
+              "_date_value",
+              "ManualPricingRule",
+              "_rule_id",
+              "_coerce_rule",
+              "load_manual_pricing_rules",
+              "_matches",
+              "rule_matches",
+              "select_manual_pricing_rule",
+              "find_observation",
+              "select_price_observation"
+            ]
+          }
+        ],
+        "tests/test_pricing.py": [
+          {
+            "path": "app/db.py",
+            "batchIndex": 3,
+            "symbols": [
+              "utc_now",
+              "get_db_path",
+              "connect",
+              "init_db",
+              "db_session",
+              "dumps",
+              "loads",
+              "row_dict"
+            ]
+          },
+          {
+            "path": "app/ingest.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_classify_boq_row",
+              "_source_file_record",
+              "_link_catalog_source",
+              "_upsert_product",
+              "_merge_product_context",
+              "_upsert_labor_item",
+              "_project_name_from_filename",
+              "_supplier_name",
+              "_sheet_context_attributes",
+              "ingest_workbook",
+              "_decode_json_field",
+              "_source_ref_payload",
+              "source_file_detail",
+              "ingest_directory"
+            ]
+          },
+          {
+            "path": "app/pricing.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Candidate",
+              "clear_runtime_caches",
+              "_line_class_value",
+              "_is_non_priceable_line",
+              "_source_warnings",
+              "_pricing_status_reason",
+              "_normalise_drift_threshold",
+              "_price_source_type",
+              "_price_source_tier",
+              "_price_source_rank",
+              "_price_source_was_explicitly_selected",
+              "_compact_price_source",
+              "_price_source_explanation",
+              "_decorate_price_source",
+              "_db_identity",
+              "_tokens",
+              "_technical_tokens",
+              "_family_tokens",
+              "_jaccard",
+              "_family_compatible",
+              "_normalized_category",
+              "_is_meaningful_unit",
+              "_critical_missing",
+              "_shape_tokens",
+              "_safe_float",
+              "_attribute_score",
+              "_candidate_from_product",
+              "_candidate_from_labor",
+              "_score_candidate",
+              "_alias_matches",
+              "_product_catalog",
+              "_labor_catalog",
+              "_prepared_catalog",
+              "_prefilter_rows",
+              "find_product_candidates",
+              "find_labor_candidates",
+              "_provenance",
+              "_observation_provenance",
+              "choose_product_price",
+              "_choose_product_price_with_policy",
+              "_labor_policy_cache_key",
+              "choose_labor_rate",
+              "_price_multiplier",
+              "_candidate_signature",
+              "_round_money",
+              "_pricing_scope_for_item",
+              "_historical_exact_reference",
+              "_status_for",
+              "_candidate_json",
+              "_policy_bool",
+              "_llm_ambiguous",
+              "_reorder_candidates_from_llm",
+              "_new_model_usage",
+              "_record_model_usage",
+              "_labor_run_policy",
+              "_preserve_reviewed_item",
+              "run_pricing",
+              "serialize_boq_item",
+              "get_project_result",
+              "review_item",
+              "catalog_stats"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 5,
+      "files": [
+        {
+          "path": "migrations/001_initial.sql",
+          "language": "sql",
+          "sizeLines": 294,
+          "fileCategory": "data"
+        }
+      ],
+      "batchImportData": {
+        "migrations/001_initial.sql": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 6,
+      "files": [
+        {
+          "path": ".env.example",
+          "language": "config",
+          "sizeLines": 23,
+          "fileCategory": "config"
+        },
+        {
+          "path": "AGENTS.md",
+          "language": "markdown",
+          "sizeLines": 36,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "ARCHITECTURE.md",
+          "language": "markdown",
+          "sizeLines": 90,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "CLAUDE.md",
+          "language": "markdown",
+          "sizeLines": 3,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "KNOWN_LIMITATIONS.md",
+          "language": "markdown",
+          "sizeLines": 19,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "PLAN.md",
+          "language": "markdown",
+          "sizeLines": 33,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "README.md",
+          "language": "markdown",
+          "sizeLines": 133,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "ROUND2-FINAL-REPORT.md",
+          "language": "markdown",
+          "sizeLines": 290,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "requirements.txt",
+          "language": "txt",
+          "sizeLines": 7,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "run.ps1",
+          "language": "powershell",
+          "sizeLines": 5,
+          "fileCategory": "script"
+        }
+      ],
+      "batchImportData": {
+        ".env.example": [],
+        "AGENTS.md": [],
+        "ARCHITECTURE.md": [],
+        "CLAUDE.md": [],
+        "KNOWN_LIMITATIONS.md": [],
+        "PLAN.md": [],
+        "README.md": [],
+        "ROUND2-FINAL-REPORT.md": [],
+        "requirements.txt": [],
+        "run.ps1": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 7,
+      "files": [
+        {
+          "path": "deliverables/ARCH-DHBG1.md",
+          "language": "markdown",
+          "sizeLines": 53,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "deliverables/MODULEMAP-DHBG1.md",
+          "language": "markdown",
+          "sizeLines": 27,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "deliverables/SCOPE-DHBG1.md",
+          "language": "markdown",
+          "sizeLines": 48,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "deliverables/SPEC-DHBG1.md",
+          "language": "markdown",
+          "sizeLines": 63,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "deliverables/WBS-DHBG1.md",
+          "language": "markdown",
+          "sizeLines": 60,
+          "fileCategory": "docs"
+        }
+      ],
+      "batchImportData": {
+        "deliverables/ARCH-DHBG1.md": [],
+        "deliverables/MODULEMAP-DHBG1.md": [],
+        "deliverables/SCOPE-DHBG1.md": [],
+        "deliverables/SPEC-DHBG1.md": [],
+        "deliverables/WBS-DHBG1.md": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 8,
+      "files": [
+        {
+          "path": "deliverables/adr/ADR-001-modular-monolith.md",
+          "language": "markdown",
+          "sizeLines": 16,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "deliverables/adr/ADR-002-sqlite-provenance.md",
+          "language": "markdown",
+          "sizeLines": 16,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "deliverables/adr/ADR-003-bounded-ai-rerank.md",
+          "language": "markdown",
+          "sizeLines": 16,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "deliverables/adr/ADR-004-formula-preserving-export.md",
+          "language": "markdown",
+          "sizeLines": 16,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "deliverables/adr/ADR-005-network-port-3000.md",
+          "language": "markdown",
+          "sizeLines": 16,
+          "fileCategory": "docs"
+        }
+      ],
+      "batchImportData": {
+        "deliverables/adr/ADR-001-modular-monolith.md": [],
+        "deliverables/adr/ADR-002-sqlite-provenance.md": [],
+        "deliverables/adr/ADR-003-bounded-ai-rerank.md": [],
+        "deliverables/adr/ADR-004-formula-preserving-export.md": [],
+        "deliverables/adr/ADR-005-network-port-3000.md": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 9,
+      "files": [
+        {
+          "path": ".ua/config.json",
+          "language": "json",
+          "sizeLines": 4,
+          "fileCategory": "config"
+        },
+        {
+          "path": "app/static/app.js",
+          "language": "javascript",
+          "sizeLines": 3115,
+          "fileCategory": "code"
+        },
+        {
+          "path": "app/static/index.html",
+          "language": "html",
+          "sizeLines": 229,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "app/static/styles.css",
+          "language": "css",
+          "sizeLines": 2704,
+          "fileCategory": "markup"
+        },
+        {
+          "path": "benchmarks/__init__.py",
+          "language": "python",
+          "sizeLines": 2,
+          "fileCategory": "code"
+        },
+        {
+          "path": "docs/DATA-REQUIREMENTS-NEXT.md",
+          "language": "markdown",
+          "sizeLines": 29,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "docs/DECISIONS.md",
+          "language": "markdown",
+          "sizeLines": 50,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "tests/__init__.py",
+          "language": "python",
+          "sizeLines": 1,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_config.py",
+          "language": "python",
+          "sizeLines": 25,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        ".ua/config.json": [],
+        "app/static/app.js": [],
+        "app/static/index.html": [],
+        "app/static/styles.css": [],
+        "benchmarks/__init__.py": [],
+        "docs/DATA-REQUIREMENTS-NEXT.md": [],
+        "docs/DECISIONS.md": [],
+        "tests/__init__.py": [],
+        "tests/test_config.py": []
+      },
+      "neighborMap": {}
+    }
+  ]
+}

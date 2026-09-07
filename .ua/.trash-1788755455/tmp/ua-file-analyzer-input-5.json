@@ -1,0 +1,7 @@
+{
+  "projectRoot": "E:/Desktop/DH-company",
+  "batchFiles": [
+    {"path": "migrations/001_initial.sql", "language": "sql", "sizeLines": 294, "fileCategory": "data"}
+  ],
+  "batchImportData": {"migrations/001_initial.sql": []}
+}

@@ -1,0 +1,16 @@
+{
+  "projectRoot": "E:/Desktop/DH-company",
+  "batchFiles": [
+    {"path": ".env.example", "language": "config", "sizeLines": 23, "fileCategory": "config"},
+    {"path": "AGENTS.md", "language": "markdown", "sizeLines": 36, "fileCategory": "docs"},
+    {"path": "ARCHITECTURE.md", "language": "markdown", "sizeLines": 90, "fileCategory": "docs"},
+    {"path": "CLAUDE.md", "language": "markdown", "sizeLines": 3, "fileCategory": "docs"},
+    {"path": "KNOWN_LIMITATIONS.md", "language": "markdown", "sizeLines": 19, "fileCategory": "docs"},
+    {"path": "PLAN.md", "language": "markdown", "sizeLines": 33, "fileCategory": "docs"},
+    {"path": "README.md", "language": "markdown", "sizeLines": 133, "fileCategory": "docs"},
+    {"path": "ROUND2-FINAL-REPORT.md", "language": "markdown", "sizeLines": 290, "fileCategory": "docs"},
+    {"path": "requirements.txt", "language": "txt", "sizeLines": 7, "fileCategory": "docs"},
+    {"path": "run.ps1", "language": "powershell", "sizeLines": 5, "fileCategory": "script"}
+  ],
+  "batchImportData": {".env.example": [], "AGENTS.md": [], "ARCHITECTURE.md": [], "CLAUDE.md": [], "KNOWN_LIMITATIONS.md": [], "PLAN.md": [], "README.md": [], "ROUND2-FINAL-REPORT.md": [], "requirements.txt": [], "run.ps1": []}
+}

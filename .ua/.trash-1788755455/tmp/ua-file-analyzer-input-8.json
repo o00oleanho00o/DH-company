@@ -1,0 +1,42 @@
+{
+  "projectRoot": "E:/Desktop/DH-company",
+  "batchFiles": [
+    {
+      "path": "deliverables/adr/ADR-001-modular-monolith.md",
+      "language": "markdown",
+      "sizeLines": 16,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "deliverables/adr/ADR-002-sqlite-provenance.md",
+      "language": "markdown",
+      "sizeLines": 16,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "deliverables/adr/ADR-003-bounded-ai-rerank.md",
+      "language": "markdown",
+      "sizeLines": 16,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "deliverables/adr/ADR-004-formula-preserving-export.md",
+      "language": "markdown",
+      "sizeLines": 16,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "deliverables/adr/ADR-005-network-port-3000.md",
+      "language": "markdown",
+      "sizeLines": 16,
+      "fileCategory": "docs"
+    }
+  ],
+  "batchImportData": {
+    "deliverables/adr/ADR-001-modular-monolith.md": [],
+    "deliverables/adr/ADR-002-sqlite-provenance.md": [],
+    "deliverables/adr/ADR-003-bounded-ai-rerank.md": [],
+    "deliverables/adr/ADR-004-formula-preserving-export.md": [],
+    "deliverables/adr/ADR-005-network-port-3000.md": []
+  }
+}

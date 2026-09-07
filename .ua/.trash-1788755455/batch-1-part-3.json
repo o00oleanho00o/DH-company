@@ -1,0 +1,246 @@
+{
+  "nodes": [
+    {
+      "id": "file:tests/test_normalize.py",
+      "type": "file",
+      "name": "test_normalize.py",
+      "filePath": "tests/test_normalize.py",
+      "summary": "Bộ test bảo vệ tầng chuẩn hóa: normalize_text phải an toàn với Unicode tiếng Việt và ký hiệu kỹ thuật, canonical_key loại khoảng trắng trang trí, parse_number chấp nhận định dạng số Việt/Excel, và technical_attributes trích đúng thông số cáp/ống kể cả ký hiệu lồng nhau.",
+      "tags": ["test", "normalization", "unit-test", "parametrized", "domain-parsing"],
+      "complexity": "moderate",
+      "languageNotes": "Dùng pytest.mark.parametrize để phủ nhiều biến thể mô tả cáp mà không nhân bản test — hữu ích khi luật regex có nhiều nhánh."
+    },
+    {
+      "id": "function:tests/test_normalize.py:test_normalize_text_is_unicode_and_engineering_safe",
+      "type": "function",
+      "name": "test_normalize_text_is_unicode_and_engineering_safe",
+      "filePath": "tests/test_normalize.py",
+      "lineRange": [14, 24],
+      "summary": "Xác nhận normalize_text bỏ dấu tiếng Việt, khử ký tự nbsp và newline, chuyển dấu nhân Unicode nhưng vẫn giữ nguyên ký hiệu như cu/xlpe và 3x240.",
+      "tags": ["test", "normalization", "unicode", "assertion"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_normalize.py:test_technical_attributes_extracts_cable_specification",
+      "type": "function",
+      "name": "test_technical_attributes_extracts_cable_specification",
+      "filePath": "tests/test_normalize.py",
+      "lineRange": [67, 78],
+      "summary": "Kiểm tra technical_attributes trích đúng category, số lõi, tiết diện, cấp điện áp và loại giáp từ một mô tả cáp ngầm điển hình.",
+      "tags": ["test", "attribute-extraction", "domain-parsing", "assertion"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_normalize.py:test_technical_attributes_prefers_outer_core_count_for_parenthesized_spec",
+      "type": "function",
+      "name": "test_technical_attributes_prefers_outer_core_count_for_parenthesized_spec",
+      "filePath": "tests/test_normalize.py",
+      "lineRange": [81, 93],
+      "summary": "Xác nhận với ký hiệu lồng nhau kiểu 3x(1x240), bộ trích lấy số lõi ở lớp ngoài thay vì số trong ngoặc.",
+      "tags": ["test", "attribute-extraction", "edge-case", "domain-parsing"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_reports.py",
+      "type": "file",
+      "name": "test_reports.py",
+      "filePath": "tests/test_reports.py",
+      "summary": "Test tích hợp cho tầng báo cáo benchmark trên DB cô lập: normalize_category phải ổn định và generic, báo cáo phải phân biệt rõ thiếu nguồn dữ liệu với thất bại matching, và writer phải tạo đủ artifact yêu cầu.",
+      "tags": ["test", "reporting", "integration-test", "database", "data-gap"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_reports.py:_insert_product",
+      "type": "function",
+      "name": "_insert_product",
+      "filePath": "tests/test_reports.py",
+      "lineRange": [17, 37],
+      "summary": "Helper chèn một product kèm price observation vào DB test và trả về product id, dùng SQL tham số hóa với RETURNING.",
+      "tags": ["test", "fixture", "database", "test-helper"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_reports.py:test_data_gap_and_failure_reports_separate_source_gap_from_match_failure",
+      "type": "function",
+      "name": "test_data_gap_and_failure_reports_separate_source_gap_from_match_failure",
+      "filePath": "tests/test_reports.py",
+      "lineRange": [47, 128],
+      "summary": "Xác nhận build_data_gap_report và build_failure_analysis không lẫn hai nguyên nhân: dòng không có nguồn nào trong catalog được tính khác dòng có nguồn nhưng engine match sai.",
+      "tags": ["test", "data-gap", "failure-analysis", "integration-test", "database"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:tests/test_reports.py:test_data_requirement_writer_creates_required_artifacts",
+      "type": "function",
+      "name": "test_data_requirement_writer_creates_required_artifacts",
+      "filePath": "tests/test_reports.py",
+      "lineRange": [131, 174],
+      "summary": "Kiểm tra write_report_files tạo đủ cặp JSON/Markdown cho data-gap, failure và data-requirements trong thư mục tạm.",
+      "tags": ["test", "reporting", "file-output", "artifacts"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_round2_report.py",
+      "type": "file",
+      "name": "test_round2_report.py",
+      "filePath": "tests/test_round2_report.py",
+      "summary": "Test bảo đảm báo cáo Round 2 không bóp méo dữ liệu: metric Round 1 chưa đo phải giữ null, bản compact của report chính phải bỏ được các mảng dòng nặng, và writer phải sinh đủ JSON + Markdown.",
+      "tags": ["test", "reporting", "comparison", "unit-test", "artifacts"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_round2_report.py:_snapshot",
+      "type": "function",
+      "name": "_snapshot",
+      "filePath": "tests/test_round2_report.py",
+      "lineRange": [14, 64],
+      "summary": "Helper dựng snapshot report benchmark giả lập với coverage vật tư/nhân công và tùy chọn source_supported để mô phỏng cả Round 1 và Round 2.",
+      "tags": ["test", "fixture", "test-helper", "factory"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_round2_report.py:test_round2_report_preserves_unmeasured_round1_values_as_null",
+      "type": "function",
+      "name": "test_round2_report_preserves_unmeasured_round1_values_as_null",
+      "filePath": "tests/test_round2_report.py",
+      "lineRange": [67, 96],
+      "summary": "Xác nhận metric mà Round 1 chưa từng đo vẫn là null trong báo cáo so sánh, không bị mặc định thành 0 gây delta sai.",
+      "tags": ["test", "reporting", "null-safety", "assertion"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_round2_report.py:test_compact_primary_report_omits_heavy_row_arrays",
+      "type": "function",
+      "name": "test_compact_primary_report_omits_heavy_row_arrays",
+      "filePath": "tests/test_round2_report.py",
+      "lineRange": [99, 127],
+      "summary": "Kiểm tra _compact_report_for_disk của holdout loại bỏ mảng chi tiết từng dòng nhưng vẫn giữ nguyên các chỉ số tổng hợp.",
+      "tags": ["test", "compaction", "serialization", "benchmark"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_round2_report.py:test_round2_report_writer_creates_json_and_markdown",
+      "type": "function",
+      "name": "test_round2_report_writer_creates_json_and_markdown",
+      "filePath": "tests/test_round2_report.py",
+      "lineRange": [130, 155],
+      "summary": "Xác nhận write_round2_report tạo đúng cặp file round2-report.json và round2-report.md với nội dung đọc lại được.",
+      "tags": ["test", "reporting", "file-output", "artifacts"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_row_audit.py",
+      "type": "file",
+      "name": "test_row_audit.py",
+      "filePath": "tests/test_row_audit.py",
+      "summary": "Test cho lớp audit phân loại dòng BOQ: phân biệt hạng mục định giá được với tiêu đề, đọc nhãn tổng từ ô raw chưa map, không coi mục con một ô là header, giữ dòng thiếu khối lượng vẫn hiển thị là priceable, và xác nhận pricing engine bỏ qua dòng cấu trúc tường minh.",
+      "tags": ["test", "row-classification", "audit", "integration-test", "boq"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_row_audit.py:_row",
+      "type": "function",
+      "name": "_row",
+      "filePath": "tests/test_row_audit.py",
+      "lineRange": [10, 32],
+      "summary": "Helper dựng một dòng đã parse với mô tả, đơn vị, khối lượng, giá vật tư, row_kind và raw_cells tùy chọn để đưa vào classify_row.",
+      "tags": ["test", "fixture", "test-helper", "factory"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_row_audit.py:test_row_audit_distinguishes_priceable_item_from_heading",
+      "type": "function",
+      "name": "test_row_audit_distinguishes_priceable_item_from_heading",
+      "filePath": "tests/test_row_audit.py",
+      "lineRange": [35, 52],
+      "summary": "Xác nhận classify_row gán PRICEABLE_LINE_ITEM cho hạng mục vật tư thật và SECTION cho dòng tiêu đề nhóm.",
+      "tags": ["test", "row-classification", "assertion", "boq"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_row_audit.py:test_row_audit_reads_total_label_from_unmapped_raw_cell",
+      "type": "function",
+      "name": "test_row_audit_reads_total_label_from_unmapped_raw_cell",
+      "filePath": "tests/test_row_audit.py",
+      "lineRange": [55, 66],
+      "summary": "Kiểm tra nhãn tổng nằm trong ô raw chưa được map vào cột nào vẫn được nhận diện là dòng TOTAL/SUBTOTAL.",
+      "tags": ["test", "row-classification", "edge-case", "raw-cells"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_row_audit.py:test_row_audit_does_not_treat_single_cell_subsection_as_header",
+      "type": "function",
+      "name": "test_row_audit_does_not_treat_single_cell_subsection_as_header",
+      "filePath": "tests/test_row_audit.py",
+      "lineRange": [69, 81],
+      "summary": "Xác nhận mục con chỉ có một ô văn bản không bị phân loại nhầm thành HEADER của bảng.",
+      "tags": ["test", "row-classification", "header-detection", "edge-case"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_row_audit.py:test_row_audit_keeps_missing_quantity_visible_as_priceable",
+      "type": "function",
+      "name": "test_row_audit_keeps_missing_quantity_visible_as_priceable",
+      "filePath": "tests/test_row_audit.py",
+      "lineRange": [84, 95],
+      "summary": "Xác nhận dòng thiếu khối lượng vẫn được giữ là priceable để không bị âm thầm loại khỏi benchmark, chỉ đánh dấu thiếu dữ liệu.",
+      "tags": ["test", "row-classification", "data-completeness", "boq"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_row_audit.py:test_pricing_ignores_explicit_structural_rows",
+      "type": "function",
+      "name": "test_pricing_ignores_explicit_structural_rows",
+      "filePath": "tests/test_row_audit.py",
+      "lineRange": [98, 152],
+      "summary": "Test tích hợp trên DB cô lập, xác nhận run_pricing không định giá các dòng cấu trúc (section, tổng, ghi chú) đã được gắn nhãn tường minh.",
+      "tags": ["test", "integration-test", "pricing", "database", "row-classification"],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {"source": "file:tests/test_normalize.py", "target": "file:app/normalize.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_normalize.py", "target": "function:tests/test_normalize.py:test_normalize_text_is_unicode_and_engineering_safe", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_normalize.py", "target": "function:tests/test_normalize.py:test_technical_attributes_extracts_cable_specification", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_normalize.py", "target": "function:tests/test_normalize.py:test_technical_attributes_prefers_outer_core_count_for_parenthesized_spec", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "function:tests/test_normalize.py:test_normalize_text_is_unicode_and_engineering_safe", "target": "function:app/normalize.py:normalize_text", "type": "calls", "direction": "forward", "weight": 0.8},
+    {"source": "function:tests/test_normalize.py:test_technical_attributes_extracts_cable_specification", "target": "function:app/normalize.py:technical_attributes", "type": "calls", "direction": "forward", "weight": 0.8},
+    {"source": "function:tests/test_normalize.py:test_technical_attributes_prefers_outer_core_count_for_parenthesized_spec", "target": "function:app/normalize.py:technical_attributes", "type": "calls", "direction": "forward", "weight": 0.8},
+
+    {"source": "file:tests/test_reports.py", "target": "file:app/__init__.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_reports.py", "target": "file:app/db.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_reports.py", "target": "file:benchmarks/reports.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_reports.py", "target": "function:tests/test_reports.py:_insert_product", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_reports.py", "target": "function:tests/test_reports.py:test_data_gap_and_failure_reports_separate_source_gap_from_match_failure", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_reports.py", "target": "function:tests/test_reports.py:test_data_requirement_writer_creates_required_artifacts", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "function:tests/test_reports.py:test_data_gap_and_failure_reports_separate_source_gap_from_match_failure", "target": "function:benchmarks/reports.py:build_data_gap_report", "type": "calls", "direction": "forward", "weight": 0.8},
+    {"source": "function:tests/test_reports.py:test_data_gap_and_failure_reports_separate_source_gap_from_match_failure", "target": "function:benchmarks/reports.py:build_failure_analysis", "type": "calls", "direction": "forward", "weight": 0.8},
+    {"source": "function:tests/test_reports.py:test_data_requirement_writer_creates_required_artifacts", "target": "function:benchmarks/reports.py:write_report_files", "type": "calls", "direction": "forward", "weight": 0.8},
+
+    {"source": "file:tests/test_round2_report.py", "target": "file:benchmarks/holdout.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_round2_report.py", "target": "file:benchmarks/round2_report.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_round2_report.py", "target": "function:tests/test_round2_report.py:_snapshot", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_round2_report.py", "target": "function:tests/test_round2_report.py:test_round2_report_preserves_unmeasured_round1_values_as_null", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_round2_report.py", "target": "function:tests/test_round2_report.py:test_compact_primary_report_omits_heavy_row_arrays", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_round2_report.py", "target": "function:tests/test_round2_report.py:test_round2_report_writer_creates_json_and_markdown", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "function:tests/test_round2_report.py:test_round2_report_preserves_unmeasured_round1_values_as_null", "target": "function:benchmarks/round2_report.py:build_round2_report", "type": "calls", "direction": "forward", "weight": 0.8},
+    {"source": "function:tests/test_round2_report.py:test_compact_primary_report_omits_heavy_row_arrays", "target": "function:benchmarks/holdout.py:_compact_report_for_disk", "type": "calls", "direction": "forward", "weight": 0.8},
+    {"source": "function:tests/test_round2_report.py:test_round2_report_writer_creates_json_and_markdown", "target": "function:benchmarks/round2_report.py:write_round2_report", "type": "calls", "direction": "forward", "weight": 0.8},
+
+    {"source": "file:tests/test_row_audit.py", "target": "file:app/__init__.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_row_audit.py", "target": "file:app/db.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_row_audit.py", "target": "file:app/pricing.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_row_audit.py", "target": "file:benchmarks/row_audit.py", "type": "imports", "direction": "forward", "weight": 0.7},
+    {"source": "file:tests/test_row_audit.py", "target": "function:tests/test_row_audit.py:_row", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_row_audit.py", "target": "function:tests/test_row_audit.py:test_row_audit_distinguishes_priceable_item_from_heading", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_row_audit.py", "target": "function:tests/test_row_audit.py:test_row_audit_reads_total_label_from_unmapped_raw_cell", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_row_audit.py", "target": "function:tests/test_row_audit.py:test_row_audit_does_not_treat_single_cell_subsection_as_header", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_row_audit.py", "target": "function:tests/test_row_audit.py:test_row_audit_keeps_missing_quantity_visible_as_priceable", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "file:tests/test_row_audit.py", "target": "function:tests/test_row_audit.py:test_pricing_ignores_explicit_structural_rows", "type": "contains", "direction": "forward", "weight": 1.0},
+    {"source": "function:tests/test_row_audit.py:test_row_audit_distinguishes_priceable_item_from_heading", "target": "function:benchmarks/row_audit.py:classify_row", "type": "calls", "direction": "forward", "weight": 0.8},
+    {"source": "function:tests/test_row_audit.py:test_row_audit_reads_total_label_from_unmapped_raw_cell", "target": "function:benchmarks/row_audit.py:classify_row", "type": "calls", "direction": "forward", "weight": 0.8},
+    {"source": "function:tests/test_row_audit.py:test_row_audit_does_not_treat_single_cell_subsection_as_header", "target": "function:benchmarks/row_audit.py:classify_row", "type": "calls", "direction": "forward", "weight": 0.8},
+    {"source": "function:tests/test_row_audit.py:test_row_audit_keeps_missing_quantity_visible_as_priceable", "target": "function:benchmarks/row_audit.py:classify_row", "type": "calls", "direction": "forward", "weight": 0.8},
+    {"source": "function:tests/test_row_audit.py:test_pricing_ignores_explicit_structural_rows", "target": "function:app/pricing.py:run_pricing", "type": "calls", "direction": "forward", "weight": 0.8}
+  ]
+}

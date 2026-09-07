@@ -1,0 +1,521 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 8,
+  "filesSkipped": [
+    "requirements.txt",
+    "run.ps1"
+  ],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 8,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 0,
+      "failed": 0,
+      "skipped": 8
+    }
+  },
+  "results": [
+    {
+      "path": ".env.example",
+      "language": "config",
+      "fileCategory": "config",
+      "totalLines": 23,
+      "nonEmptyLines": 23,
+      "definitions": [
+        {
+          "name": "CLAUDE_BASE_URL",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 2,
+          "endLine": 2
+        },
+        {
+          "name": "CLAUDE_API_KEY",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 3,
+          "endLine": 3
+        },
+        {
+          "name": "CLAUDE_MODEL",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 4,
+          "endLine": 4
+        },
+        {
+          "name": "ENABLE_LLM",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 5,
+          "endLine": 5
+        },
+        {
+          "name": "MANUAL_PRICING_RULES_JSON",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 9,
+          "endLine": 9
+        },
+        {
+          "name": "LLM_TIMEOUT_SECONDS",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 12,
+          "endLine": 12
+        },
+        {
+          "name": "LLM_MAX_CALLS",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 13,
+          "endLine": 13
+        },
+        {
+          "name": "LLM_MAX_CANDIDATES",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 14,
+          "endLine": 14
+        },
+        {
+          "name": "LLM_MAX_RETRIES",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 15,
+          "endLine": 15
+        },
+        {
+          "name": "LLM_MAX_PROMPT_CHARS",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 16,
+          "endLine": 16
+        },
+        {
+          "name": "LLM_MAX_TOKENS",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 17,
+          "endLine": 17
+        },
+        {
+          "name": "LLM_RERANK_MARGIN",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 18,
+          "endLine": 18
+        },
+        {
+          "name": "PRICE_DRIFT_WARNING_THRESHOLD",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 20,
+          "endLine": 20
+        },
+        {
+          "name": "DATABASE_URL",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 21,
+          "endLine": 21
+        },
+        {
+          "name": "APP_HOST",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 22,
+          "endLine": 22
+        },
+        {
+          "name": "APP_PORT",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 23,
+          "endLine": 23
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 16
+      }
+    },
+    {
+      "path": "AGENTS.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 36,
+      "nonEmptyLines": 30,
+      "sections": [
+        {
+          "heading": "Agent Instructions",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Context First",
+          "level": 2,
+          "line": 3
+        },
+        {
+          "heading": "Runtime",
+          "level": 2,
+          "line": 9
+        },
+        {
+          "heading": "File-Scoped Commands",
+          "level": 2,
+          "line": 15
+        },
+        {
+          "heading": "Key Conventions",
+          "level": 2,
+          "line": 22
+        },
+        {
+          "heading": "Documentation Map",
+          "level": 2,
+          "line": 30
+        },
+        {
+          "heading": "Commit Attribution",
+          "level": 2,
+          "line": 35
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 7
+      }
+    },
+    {
+      "path": "ARCHITECTURE.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 90,
+      "nonEmptyLines": 72,
+      "sections": [
+        {
+          "heading": "DH M&E Pricing Platform — Architecture Note",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Scope",
+          "level": 2,
+          "line": 3
+        },
+        {
+          "heading": "Runtime topology",
+          "level": 2,
+          "line": 9
+        },
+        {
+          "heading": "Ingestion pipeline",
+          "level": 2,
+          "line": 32
+        },
+        {
+          "heading": "Matching and pricing",
+          "level": 2,
+          "line": 48
+        },
+        {
+          "heading": "Data model",
+          "level": 2,
+          "line": 64
+        },
+        {
+          "heading": "AI provider",
+          "level": 2,
+          "line": 73
+        },
+        {
+          "heading": "Reliability and extension points",
+          "level": 2,
+          "line": 81
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 8
+      }
+    },
+    {
+      "path": "CLAUDE.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 3,
+      "nonEmptyLines": 2,
+      "sections": [
+        {
+          "heading": "Agent Entry Point",
+          "level": 1,
+          "line": 1
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "KNOWN_LIMITATIONS.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 19,
+      "nonEmptyLines": 18,
+      "sections": [
+        {
+          "heading": "Known limitations",
+          "level": 1,
+          "line": 1
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "PLAN.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 33,
+      "nonEmptyLines": 25,
+      "sections": [
+        {
+          "heading": "M&E Pricing Platform — Implementation Plan",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Goal",
+          "level": 2,
+          "line": 3
+        },
+        {
+          "heading": "Decisions",
+          "level": 2,
+          "line": 7
+        },
+        {
+          "heading": "Delivery slices",
+          "level": 2,
+          "line": 16
+        },
+        {
+          "heading": "Acceptance checks",
+          "level": 2,
+          "line": 25
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 5
+      }
+    },
+    {
+      "path": "README.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 133,
+      "nonEmptyLines": 102,
+      "sections": [
+        {
+          "heading": "DH M&E Pricing Hub",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Chạy nhanh",
+          "level": 2,
+          "line": 7
+        },
+        {
+          "heading": "Cấu hình",
+          "level": 2,
+          "line": 29
+        },
+        {
+          "heading": "Luồng nghiệp vụ",
+          "level": 2,
+          "line": 47
+        },
+        {
+          "heading": "API chính",
+          "level": 2,
+          "line": 67
+        },
+        {
+          "heading": "Kiểm thử",
+          "level": 2,
+          "line": 77
+        },
+        {
+          "heading": "Kiến trúc và tài liệu",
+          "level": 2,
+          "line": 87
+        },
+        {
+          "heading": "Thứ tự sửa tài liệu",
+          "level": 3,
+          "line": 100
+        },
+        {
+          "heading": "Cấu trúc code",
+          "level": 2,
+          "line": 109
+        },
+        {
+          "heading": "Giới hạn production",
+          "level": 2,
+          "line": 128
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 10
+      }
+    },
+    {
+      "path": "ROUND2-FINAL-REPORT.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 290,
+      "nonEmptyLines": 226,
+      "sections": [
+        {
+          "heading": "DH M&E Pricing Engine — Round 2 Final Report",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "1. Baseline reproduced",
+          "level": 2,
+          "line": 7
+        },
+        {
+          "heading": "2. Root causes found",
+          "level": 2,
+          "line": 23
+        },
+        {
+          "heading": "3. Bugs and design issues fixed",
+          "level": 2,
+          "line": 41
+        },
+        {
+          "heading": "4. BOQ row classification",
+          "level": 2,
+          "line": 60
+        },
+        {
+          "heading": "5. Pricing policy",
+          "level": 2,
+          "line": 78
+        },
+        {
+          "heading": "6. Material benchmark before/after",
+          "level": 2,
+          "line": 93
+        },
+        {
+          "heading": "7. Labor benchmark before/after",
+          "level": 2,
+          "line": 109
+        },
+        {
+          "heading": "8. Coverage by category",
+          "level": 2,
+          "line": 124
+        },
+        {
+          "heading": "9. Source-supported coverage",
+          "level": 2,
+          "line": 143
+        },
+        {
+          "heading": "10. Engine capture rate",
+          "level": 2,
+          "line": 154
+        },
+        {
+          "heading": "11. Data-gap analysis",
+          "level": 2,
+          "line": 167
+        },
+        {
+          "heading": "12. Historical reproduction vs current repricing",
+          "level": 2,
+          "line": 181
+        },
+        {
+          "heading": "13. Discount/VAT/net-price findings",
+          "level": 2,
+          "line": 195
+        },
+        {
+          "heading": "14. LLM experiment",
+          "level": 2,
+          "line": 210
+        },
+        {
+          "heading": "15. Test status",
+          "level": 2,
+          "line": 229
+        },
+        {
+          "heading": "16. Remaining failure",
+          "level": 2,
+          "line": 244
+        },
+        {
+          "heading": "17. Data the business should add",
+          "level": 2,
+          "line": 253
+        },
+        {
+          "heading": "18. Demo flow",
+          "level": 2,
+          "line": 268
+        },
+        {
+          "heading": "19. Next recommended engineering step",
+          "level": 2,
+          "line": 283
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 20
+      }
+    }
+  ]
+}

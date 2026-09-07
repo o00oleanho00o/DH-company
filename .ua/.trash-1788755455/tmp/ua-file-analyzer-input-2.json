@@ -1,0 +1,23 @@
+{
+  "projectRoot": "E:/Desktop/DH-company",
+  "batchFiles": [
+    {"path": "app/ai.py", "language": "python", "sizeLines": 1041, "fileCategory": "code"},
+    {"path": "app/labor_policy.py", "language": "python", "sizeLines": 577, "fileCategory": "code"},
+    {"path": "app/price_policy.py", "language": "python", "sizeLines": 373, "fileCategory": "code"},
+    {"path": "app/pricing.py", "language": "python", "sizeLines": 3043, "fileCategory": "code"},
+    {"path": "tests/test_ai.py", "language": "python", "sizeLines": 313, "fileCategory": "code"},
+    {"path": "tests/test_labor_policy.py", "language": "python", "sizeLines": 257, "fileCategory": "code"},
+    {"path": "tests/test_pricing_lifecycle_hardening.py", "language": "python", "sizeLines": 420, "fileCategory": "code"},
+    {"path": "tests/test_pricing_llm.py", "language": "python", "sizeLines": 170, "fileCategory": "code"}
+  ],
+  "batchImportData": {
+    "app/ai.py": ["app/config.py"],
+    "app/labor_policy.py": [],
+    "app/price_policy.py": ["app/normalize.py"],
+    "app/pricing.py": ["app/ai.py", "app/config.py", "app/db.py", "app/labor_policy.py", "app/normalize.py", "app/price_policy.py"],
+    "tests/test_ai.py": ["app/ai.py"],
+    "tests/test_labor_policy.py": ["app/__init__.py", "app/db.py", "app/labor_policy.py", "app/pricing.py"],
+    "tests/test_pricing_lifecycle_hardening.py": ["app/__init__.py", "app/db.py", "app/price_policy.py", "app/pricing.py"],
+    "tests/test_pricing_llm.py": ["app/__init__.py", "app/ai.py", "app/db.py", "app/pricing.py"]
+  }
+}
