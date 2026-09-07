@@ -84,6 +84,65 @@ python -m app.cli benchmark
 Test bao phủ parser `.xls/.xlsx`, lifecycle/provenance, matching và policy,
 AI boundary, security, holdout benchmark và formula-preserving export.
 
+## Khám phá code với Understand-Anything
+
+Understand-Anything (bên thứ ba, MIT) dựng knowledge graph tương tác cho codebase —
+sơ đồ kiến trúc, guided tour, semantic search và phân tích tác động thay đổi. Không
+bắt buộc để chạy hoặc dev app; chỉ hỗ trợ người mới/agent hiểu nhanh cấu trúc code.
+
+Repo: https://github.com/Egonex-AI/Understand-Anything
+
+Yêu cầu Node.js ≥ 18 và [pnpm](https://pnpm.io/) (dùng để build gói `core`/dashboard
+của plugin ở lần chạy đầu).
+
+### Cài đặt — dùng Claude Code
+
+```
+/plugin marketplace add Egonex-AI/Understand-Anything
+/plugin install understand-anything
+```
+
+Khởi động lại Claude Code để các skill mới nạp.
+
+### Cài đặt — không dùng Claude Code
+
+Plugin cũng hỗ trợ Codex, OpenCode, Cursor, VS Code Copilot, Gemini CLI và nhiều
+agent CLI khác qua script cài đặt riêng (clone repo về `~/.understand-anything/repo`
+và tạo symlink/junction skill vào thư mục agent tương ứng):
+
+macOS/Linux:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Egonex-AI/Understand-Anything/main/install.sh | bash
+```
+
+Windows (PowerShell):
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/Egonex-AI/Understand-Anything/main/install.ps1 | iex
+```
+
+Script sẽ hỏi chọn platform (hoặc truyền sẵn, ví dụ `install.ps1 codex`); chạy lại
+với `-Update`/`--update` để pull bản mới, `-Uninstall <platform>`/`--uninstall
+<platform>` để gỡ. Sau khi cài, agent tương ứng sẽ nhận diện các lệnh `/understand*`
+như một skill thông thường — không cần khởi động lại toàn bộ máy, chỉ cần agent
+nạp lại danh sách skill (thường là mở phiên làm việc mới).
+
+### Sử dụng
+
+```
+/understand                    # phân tích code, sinh .ua/knowledge-graph.json
+/understand-dashboard          # mở dashboard tương tác (Vite dev server local)
+/understand-chat <câu hỏi>     # hỏi đáp về codebase dựa trên knowledge graph
+/understand-diff                # phân tích tác động của một thay đổi/diff
+/understand-domain              # trích xuất business logic thành domain graph
+```
+
+`/understand` hỏi ngôn ngữ output (chọn `vi` cho dự án này) và sinh file
+`.understandignore` để review trước khi phân tích toàn bộ — nên loại `input/`
+(workbook Excel thật) khỏi phạm vi quét. Toàn bộ artifact nằm trong `.ua/`
+(đã có trong `.gitignore`, không commit).
+
 ## Kiến trúc và tài liệu
 
 | File | Nội dung |
