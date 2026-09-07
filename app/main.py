@@ -11,6 +11,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from .ai import ai_provider
+from .chatbot import ChatbotError, DEFAULT_GREETING, chatbot_status, generate_reply, register_upload
 from .config import EXPORT_DIR, RAW_DIR, ROOT_DIR, STORAGE_DIR, ensure_directories, settings
 from .db import db_session, dumps, init_db, loads, utc_now
 from .excel import parse_workbook
@@ -320,8 +321,46 @@ def health() -> dict[str, Any]:
         "service": settings.app_name,
         "database": "sqlite",
         "ai": ai_provider.status(),
+        "chatbot": chatbot_status(),
         "timestamp": utc_now(),
     }
+
+
+@app.post("/api/chatbot")
+def chatbot_chat(payload: dict = Body(...)) -> dict[str, Any]:
+    """Chat assistant widget endpoint — Q&A plus real tool-calling.
+
+    Separate provider/config from the pricing AI boundary in app.ai. Tool
+    calls reuse the exact same service-layer functions as the REST API
+    (app.ingest / app.pricing / app.export) — see app/chatbot.py for the
+    tool definitions and the confirm-gate safety model. The provider API
+    key stays server-side.
+    """
+
+    try:
+        reply = generate_reply(payload.get("messages"))
+    except ChatbotError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return {"reply": reply}
+
+
+@app.get("/api/chatbot/greeting")
+def chatbot_greeting() -> dict[str, Any]:
+    return {"greeting": DEFAULT_GREETING, **chatbot_status()}
+
+
+@app.post("/api/chatbot/upload")
+async def chatbot_upload(file: UploadFile = File(...)) -> dict[str, Any]:
+    """Save a file attached in the chat widget and hand back an upload_id.
+
+    Reuses `_save_upload`'s existing .xls/.xlsx + 50 MB validation. The saved
+    path is registered with app.chatbot so a later tool call (preview/import)
+    can resolve it; abandoned uploads are swept after 30 minutes.
+    """
+
+    path = _save_upload(file)
+    upload_id = register_upload(path, file.filename or path.name)
+    return {"upload_id": upload_id, "filename": file.filename or path.name, "size_bytes": path.stat().st_size}
 
 
 @app.get("/api/sources")

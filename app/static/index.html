@@ -224,6 +224,109 @@
     <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
     <div id="modal-root"></div>
 
+    <!-- Floating AI assistant widget (chatbot bubble). Self-contained: see
+         chatbot.js and the .chatbot-* rules in styles.css. Answers from
+         prompt_system.txt on the server — unrelated to the pricing engine. -->
+    <div id="chatbot-widget" class="chatbot-widget" hidden>
+      <button
+        type="button"
+        id="chatbot-toggle"
+        class="chatbot-toggle"
+        aria-haspopup="dialog"
+        aria-controls="chatbot-panel"
+        aria-expanded="false"
+        aria-label="Mở trợ lý AI"
+      >
+        <svg class="chatbot-toggle-icon chatbot-toggle-icon-open"><use href="#i-spark"></use></svg>
+        <svg class="chatbot-toggle-icon chatbot-toggle-icon-close"><use href="#i-x"></use></svg>
+      </button>
+
+      <section
+        id="chatbot-panel"
+        class="chatbot-panel"
+        role="dialog"
+        aria-label="Trợ lý AI"
+        aria-modal="false"
+        hidden
+      >
+        <header class="chatbot-header">
+          <div class="chatbot-header-info">
+            <span class="chatbot-status-dot" aria-hidden="true"></span>
+            <div>
+              <div class="chatbot-title">Trợ lý AI</div>
+              <div class="chatbot-subtitle">Đang hoạt động</div>
+            </div>
+          </div>
+          <div class="chatbot-header-actions">
+            <button
+              type="button"
+              id="chatbot-refresh"
+              class="icon-button chatbot-icon-btn"
+              aria-label="Làm mới hội thoại"
+              title="Làm mới hội thoại"
+            >
+              <svg><use href="#i-refresh"></use></svg>
+            </button>
+            <button
+              type="button"
+              id="chatbot-close"
+              class="icon-button chatbot-icon-btn"
+              aria-label="Đóng trợ lý"
+              title="Đóng"
+            >
+              <svg><use href="#i-x"></use></svg>
+            </button>
+          </div>
+        </header>
+
+        <div id="chatbot-messages" class="chatbot-messages" role="log" aria-live="polite"></div>
+
+        <div id="chatbot-typing" class="chatbot-typing" hidden>
+          <span>Đang nhập</span>
+          <span class="chatbot-typing-dots"><i></i><i></i><i></i></span>
+        </div>
+
+        <div id="chatbot-attachment" class="chatbot-attachment" hidden>
+          <svg><use href="#i-file"></use></svg>
+          <span id="chatbot-attachment-name" class="chatbot-attachment-name"></span>
+          <button
+            type="button"
+            id="chatbot-attachment-remove"
+            class="chatbot-attachment-remove"
+            aria-label="Bỏ đính kèm"
+            title="Bỏ đính kèm"
+          >
+            <svg><use href="#i-x"></use></svg>
+          </button>
+        </div>
+
+        <form id="chatbot-form" class="chatbot-input-bar">
+          <input type="file" id="chatbot-file-input" accept=".xls,.xlsx" hidden />
+          <button
+            type="button"
+            id="chatbot-attach"
+            class="icon-button chatbot-icon-btn chatbot-attach-btn"
+            aria-label="Đính kèm file Excel"
+            title="Đính kèm file .xls/.xlsx"
+          >
+            <svg><use href="#i-upload"></use></svg>
+          </button>
+          <textarea
+            id="chatbot-input"
+            class="chatbot-input"
+            rows="1"
+            placeholder="Nhập câu hỏi... (Enter để gửi, Shift+Enter xuống dòng)"
+            aria-label="Nhập câu hỏi"
+          ></textarea>
+          <button type="submit" id="chatbot-send" class="chatbot-send-btn" aria-label="Gửi">
+            <svg><use href="#i-arrow-right"></use></svg>
+          </button>
+        </form>
+      </section>
+    </div>
+
     <script src="/static/app.js" defer></script>
+    <script src="/static/vendor/marked.min.js" defer></script>
+    <script src="/static/chatbot.js" defer></script>
   </body>
 </html>

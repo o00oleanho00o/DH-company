@@ -1,0 +1,71 @@
+# Knowledge Base — DH M&E Pricing Hub AI Assistant
+
+Background knowledge for text-based (Q&A) answers. Edit this file to change
+what the chatbot knows — no code changes needed; the backend reloads it on
+server startup (see `app/chatbot.py`). Besides answering questions, the
+assistant can also **execute real actions** in the app through dedicated
+tools — see the last section.
+
+## Overview
+
+DH M&E Pricing Hub is an internal web platform: it imports M&E Excel
+workbooks, normalizes the material/labor catalog, matches BOQ (Bill of
+Quantities) lines against that catalog, surfaces ambiguous candidates for
+review, and exports priced quotations with full provenance (workbook/sheet/
+row traceability). The core pricing pipeline is **deterministic** (fixed
+rules); AI only assists with optional semantic matching and never invents
+prices or formulas.
+
+## The 5 core business steps
+
+1. **Kho dữ liệu** (Data warehouse) — import supplier price lists, labor
+   rate lists, and historical quotations from Excel files (.xls/.xlsx).
+2. **Danh mục & Giá** (Catalog & Pricing) — view records, sources, price
+   history, lifecycle status.
+3. **Tạo báo giá** (Create quotation) — upload a BOQ, pick a price policy,
+   run pricing.
+4. **Bàn rà soát** (Review desk) — inspect ambiguous candidates, confidence
+   scores, provenance, and apply manual corrections.
+5. **Xuất Excel** (Export to Excel) — fill in only unit prices, keeping the
+   workbook's original quantities/totals/formulas untouched.
+
+## The three price policies
+
+| Policy | Meaning |
+|---|---|
+| `latest_supplier_net` | Latest supplier price, after configured discount |
+| `approved_internal` | Most recently approved internal price |
+| `historical_median` | Median price across the three latest valid historical projects |
+
+Material and labor matching/price selection are **independent**, then
+combined on the same BOQ line. A candidate only auto-applies once it hits
+the default **90%** confidence threshold; anything ambiguous or missing a
+price is routed to the Review desk (Bàn rà soát).
+
+## Current limitations
+
+The app has **no authentication/RBAC yet** — it must not be exposed directly
+to the internet without a protective layer in front of it. Because of this,
+every data-writing action the AI assistant performs on a user's behalf
+requires that user's **explicit verbal confirmation** in chat before it
+actually executes (see the confirm rule in the system prompt).
+
+## What the AI assistant can do (a mini app inside the chat window)
+
+Beyond answering questions, the assistant has tools to act directly on the
+system's real data — equivalent to the app's main functional tabs:
+
+- **Kho dữ liệu**: list imported sources, view one source's detail, preview
+  the contents of an Excel file just attached in chat, and import that file
+  as a new data source.
+- **Danh mục & Giá**: quickly search materials/labor by name, view overall
+  catalog statistics.
+- **Tạo báo giá**: create a new quotation from a BOQ file just attached,
+  list existing quotations, check one quotation's status/result, run
+  pricing for it.
+- **Bàn rà soát**: list BOQ lines that need review, approve/manually set a
+  price for one line.
+- **Xuất Excel**: export a quotation to a file and return a download link.
+
+Users can attach `.xls`/`.xlsx` files directly in the chat window for the
+assistant to preview and import into the system once confirmed.

@@ -44,6 +44,35 @@ timeout, retry, ngân sách call/top-N và chỉ được trả lại thứ tự
 không được tính tiền, tạo giá, công thức hoặc nguồn tham chiếu. API key chỉ đọc
 server-side, không ghi log và không trả xuống trình duyệt.
 
+### Trợ lý AI (chatbot bubble)
+
+Widget floating góc dưới bên phải giao diện — hoạt động như một "mini app"
+trong khung chat: vừa trả lời Q&A dựa trên `prompt_system.txt`, vừa có thể
+gọi tool để đọc/ghi dữ liệu thật (xem nguồn, tra catalog, tạo báo giá, chạy
+pricing, duyệt rà soát, xuất Excel...). Tool ghi dữ liệu luôn yêu cầu người
+dùng xác nhận bằng lời trước khi thực thi thật — xem giới hạn an toàn ở đầu
+`app/chatbot.py`. Hoàn toàn tách biệt khỏi core pricing engine (deterministic).
+
+```text
+CHATBOT_BASE_URL=https://api.deepseek.com
+CHATBOT_API_KEY=
+CHATBOT_MODEL=deepseek-v4-pro
+ENABLE_CHATBOT=true
+```
+
+- Provider OpenAI-compatible (DeepSeek), gọi qua SDK `openai` chính thức
+  (`app/chatbot.py`), có bật chế độ reasoning (`reasoning_effort="high"`,
+  `extra_body={"thinking": {"type": "enabled"}}`).
+- `CHATBOT_API_KEY` bắt buộc để trả lời thật; thiếu key → widget vẫn hiện
+  nhưng trả lỗi thân thiện, không lộ chi tiết provider. Key chỉ đọc
+  server-side, không log, không trả xuống trình duyệt.
+- Sửa nội dung chatbot biết bằng cách chỉnh `prompt_system.txt` rồi khởi động
+  lại server (file được nạp một lần lúc start). System prompt viết bằng
+  tiếng Anh (tiết kiệm token) nhưng luôn ép trả lời cuối cùng bằng tiếng
+  Việt, và chỉ xử lý yêu cầu liên quan đến app này — câu hỏi ngoài phạm vi
+  (giá vàng, chứng khoán,...) sẽ bị từ chối ngắn gọn thay vì được trả lời.
+- `ENABLE_CHATBOT=false` ẩn hẳn widget.
+
 ## Luồng nghiệp vụ
 
 1. **Kho dữ liệu:** preview/import bảng giá, nhân công và báo giá lịch sử.
@@ -54,11 +83,11 @@ server-side, không ghi log và không trả xuống trình duyệt.
 
 Ba chính sách giá:
 
-| Policy | Ý nghĩa |
-|---|---|
-| `latest_supplier_net` | Giá NCC mới nhất sau discount đã cấu hình |
-| `approved_internal` | Giá nội bộ đã duyệt gần nhất |
-| `historical_median` | Trung vị ba dự án lịch sử hợp lệ gần nhất |
+| Policy                  | Ý nghĩa                                          |
+| ----------------------- | -------------------------------------------------- |
+| `latest_supplier_net` | Giá NCC mới nhất sau discount đã cấu hình   |
+| `approved_internal`   | Giá nội bộ đã duyệt gần nhất               |
+| `historical_median`   | Trung vị ba dự án lịch sử hợp lệ gần nhất |
 
 Material và labor được matching/chọn giá độc lập rồi kết hợp trên cùng dòng.
 Candidate cao nhất đạt ngưỡng mặc định 90% mới được tự áp dụng; trường hợp mơ
@@ -123,8 +152,7 @@ iwr -useb https://raw.githubusercontent.com/Egonex-AI/Understand-Anything/main/i
 ```
 
 Script sẽ hỏi chọn platform (hoặc truyền sẵn, ví dụ `install.ps1 codex`); chạy lại
-với `-Update`/`--update` để pull bản mới, `-Uninstall <platform>`/`--uninstall
-<platform>` để gỡ. Sau khi cài, agent tương ứng sẽ nhận diện các lệnh `/understand*`
+với `-Update`/`--update` để pull bản mới, `-Uninstall <platform>`/`--uninstall <platform>` để gỡ. Sau khi cài, agent tương ứng sẽ nhận diện các lệnh `/understand*`
 như một skill thông thường — không cần khởi động lại toàn bộ máy, chỉ cần agent
 nạp lại danh sách skill (thường là mở phiên làm việc mới).
 
@@ -145,16 +173,16 @@ nạp lại danh sách skill (thường là mở phiên làm việc mới).
 
 ## Kiến trúc và tài liệu
 
-| File | Nội dung |
-|---|---|
-| `AGENTS.md` | Context bắt buộc cho agent/task sau |
-| `docs/DECISIONS.md` | Quyết định đang có hiệu lực |
-| `deliverables/SCOPE-DHBG1.md` | Phạm vi và tiêu chí thành công |
-| `deliverables/SPEC-DHBG1.md` | REQ/NFR có mã truy vết |
-| `deliverables/MODULEMAP-DHBG1.md` | Module sở hữu từng REQ |
-| `deliverables/ARCH-DHBG1.md` | Topology, module và luồng dữ liệu |
-| `deliverables/adr/` | Quyết định kỹ thuật và trade-off |
-| `deliverables/WBS-DHBG1.md` | Công việc dẫn xuất và tiến độ |
+| File                                | Nội dung                              |
+| ----------------------------------- | -------------------------------------- |
+| `AGENTS.md`                       | Context bắt buộc cho agent/task sau  |
+| `docs/DECISIONS.md`               | Quyết định đang có hiệu lực     |
+| `deliverables/SCOPE-DHBG1.md`     | Phạm vi và tiêu chí thành công   |
+| `deliverables/SPEC-DHBG1.md`      | REQ/NFR có mã truy vết              |
+| `deliverables/MODULEMAP-DHBG1.md` | Module sở hữu từng REQ              |
+| `deliverables/ARCH-DHBG1.md`      | Topology, module và luồng dữ liệu  |
+| `deliverables/adr/`               | Quyết định kỹ thuật và trade-off |
+| `deliverables/WBS-DHBG1.md`       | Công việc dẫn xuất và tiến độ  |
 
 ### Thứ tự sửa tài liệu
 
@@ -177,11 +205,13 @@ app/
   price_policy.py  material pricing policy
   labor_policy.py  labor pricing policy
   ai.py            optional bounded reranker
+  chatbot.py       landing-page assistant (separate provider/boundary)
   export.py        formula-preserving XLSX export
   db.py            SQLite schema/session
-  static/          Vietnamese web UI
+  static/          Vietnamese web UI + chatbot widget (chatbot.js, vendor/marked.min.js)
 tests/             unit/integration/regression tests
 benchmarks/        leakage-safe holdout reports
+prompt_system.txt  system prompt + knowledge base cho chatbot widget
 ```
 
 ## Giới hạn production

@@ -52,6 +52,10 @@ def _load_loose_env() -> None:
                 "DATABASE_URL",
                 "APP_HOST",
                 "APP_PORT",
+                "CHATBOT_BASE_URL",
+                "CHATBOT_API_KEY",
+                "CHATBOT_MODEL",
+                "ENABLE_CHATBOT",
             } and key not in os.environ:
                 os.environ[key] = value
     except OSError:
@@ -108,6 +112,15 @@ class Settings:
     price_drift_warning_threshold: float = _env_float(
         "PRICE_DRIFT_WARNING_THRESHOLD", 0.25, minimum=0.0
     )
+    # Landing-page assistant widget. Fully separate from the pricing engine's
+    # AI boundary above: it never sees pricing/catalog data and must only
+    # answer from its own knowledge-base file. Base URL/model are not
+    # secrets; the API key must come from the environment and is never
+    # logged or returned to the browser.
+    chatbot_base_url: str = os.getenv("CHATBOT_BASE_URL", "https://api.deepseek.com")
+    chatbot_api_key: str = os.getenv("CHATBOT_API_KEY", "")
+    chatbot_model: str = os.getenv("CHATBOT_MODEL", "deepseek-v4-pro")
+    enable_chatbot: bool = os.getenv("ENABLE_CHATBOT", "true").lower() in {"1", "true", "yes", "on"}
 
 
 settings = Settings()
