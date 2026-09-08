@@ -17,6 +17,33 @@ from .price_policy import (
 )
 
 _BOQ_SHEET_TYPES = {"HISTORICAL_BOQ", "BOQ", "PANEL_BOM"}
+QUOTATION_INPUT_ROLE = "QUOTATION_INPUT"
+REFERENCE_SOURCE_ROLE = "REFERENCE"
+
+
+def is_generated_export(parsed: Mapping[str, Any]) -> bool:
+    """Return true only for workbooks emitted by this application."""
+
+    return any(
+        normalize_text(str(sheet.snapshot.name)) == "ai audit"
+        for sheet in parsed.get("sheets", [])
+    )
+
+
+def source_role(source: Mapping[str, Any]) -> str:
+    """Classify a persisted source for UI/API visibility.
+
+    Legacy NEW_BOQ rows did not have an explicit role, so their type remains
+    the compatibility fallback.
+    """
+
+    record = dict(source)
+    metadata = loads(str(record.get("metadata_json") or "{}"), {})
+    explicit_role = str(metadata.get("source_role") or "").upper()
+    if explicit_role:
+        return explicit_role
+    workbook_type = str(record.get("confirmed_type") or record.get("detected_type") or "").upper()
+    return QUOTATION_INPUT_ROLE if workbook_type == "NEW_BOQ" else REFERENCE_SOURCE_ROLE
 
 
 def _classify_boq_row(
@@ -330,6 +357,12 @@ def ingest_workbook(
     ensure_directories()
     display_filename = Path(source_filename).name if source_filename else path.name
     parsed = parse_workbook(path)
+    workbook_type = confirmed_type or parsed["workbook_type"]
+    if is_generated_export(parsed) and workbook_type != "NEW_BOQ":
+        raise ValueError(
+            "File này do DH M&E Pricing Hub xuất ra (có sheet AI Audit), "
+            "không thể dùng làm nguồn dữ liệu tham chiếu."
+        )
     manual_pricing_rules = load_manual_pricing_rules()
     supplier_hint = next(
         (
@@ -403,6 +436,9 @@ def ingest_workbook(
             "duplicate_of_source_file_id": duplicate_of_source_file_id,
             "supersedes_source_file_id": supersedes_source_file_id,
             "version_no": version_no,
+            "source_role": (
+                QUOTATION_INPUT_ROLE if workbook_type == "NEW_BOQ" else REFERENCE_SOURCE_ROLE
+            ),
         }
         cur = conn.execute(
             """
@@ -445,7 +481,6 @@ def ingest_workbook(
             )
 
         project_id: int | None = None
-        workbook_type = confirmed_type or parsed["workbook_type"]
         has_operational_sheets = any(
             sheet.detected_type in {"HISTORICAL_BOQ", "BOQ", "PANEL_BOM"}
             for sheet in parsed["sheets"]

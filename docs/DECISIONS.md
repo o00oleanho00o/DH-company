@@ -61,6 +61,15 @@ Tài liệu này là tầng quyết định nghiệp vụ/phạm vi. Mọi thay 
 - **Lý do:** Hỏi lại sau khi người dùng đã ra lệnh làm gián đoạn workflow và khiến thao tác lặp.
 - **Đánh đổi:** Bộ nhận diện ý định phải hẹp, theo từng tool; không được suy diễn đồng ý từ câu hỏi hoặc nội dung không liên quan.
 
+## QĐ-09 — BOQ đầu vào và file xuất không là nguồn tham chiếu
+
+- **Người quyết:** Người dùng dự án
+- **Ngày:** 2026-09-08
+- **Trạng thái:** Accepted
+- **Quyết định:** Workbook tải lên tại Tạo báo giá được lưu như `QUOTATION_INPUT` nội bộ chỉ để giữ provenance và export, không xuất hiện trong Kho dữ liệu và không được dùng làm catalog/giá tham chiếu. Workbook do hệ thống xuất có sheet `AI Audit` bị từ chối khi import vào Kho dữ liệu.
+- **Lý do:** Giá trong BOQ mới hoặc file phần mềm xuất chưa được xác minh, nên không thể trở thành knowledge/reference source.
+- **Đánh đổi:** Snapshot BOQ vẫn được giữ để tái lập export; người dùng muốn đưa báo giá lịch sử vào Kho dữ liệu phải import bản gốc tại workflow Kho dữ liệu.
+
 ## QĐ-07 — Chatbot có chế độ nhanh và workspace toàn màn hình
 
 - **Người quyết:** Người dùng dự án

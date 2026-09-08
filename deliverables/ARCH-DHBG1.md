@@ -34,6 +34,7 @@ FastAPI modular monolith (app/main.py)
 - `app/static/chatbot.js`: sở hữu một conversation state và một chat surface. Surface được chuyển giữa widget nổi và `#chatbot-page-host` theo route `#chatbot`, không clone DOM và không reset hội thoại.
 - `app/chatbot.py` + `/api/chatbot`: tool loop trả `downloads` metadata cho artifact export và trạng thái quotation theo nhóm explicit; `app/static/chatbot.js` dựng nút tải cùng origin.
 - Direct-intent detector trong `app/chatbot.py` chỉ nâng `confirm=true` cho cụm từ hành động rõ ràng và đúng tool; mặc định vẫn là preview.
+- `source_files` giữ snapshot `QUOTATION_INPUT` cho provenance/export, nhưng source APIs chỉ phục vụ `REFERENCE`; parser chặn workbook export có sheet `AI Audit` khỏi luồng import.
 
 ## Chatbot hai chế độ
 
@@ -50,6 +51,7 @@ FastAPI modular monolith (app/main.py)
 4. Run ghi metrics, candidate evidence và audit; dòng rủi ro đi vào review.
 5. Export sao chép workbook nguồn rồi chỉ cập nhật material/labor unit-price cells.
 6. Chatbot response mang artifact metadata; trình duyệt tải qua `FileResponse` của API export, không dùng URL do model tự viết.
+7. Tạo báo giá lưu snapshot BOQ nội bộ với role `QUOTATION_INPUT`; Kho dữ liệu chỉ liệt kê nguồn `REFERENCE`.
 
 ## Triển khai mạng
 

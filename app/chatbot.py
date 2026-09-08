@@ -40,7 +40,7 @@ from .config import ROOT_DIR, settings
 from .db import db_session, dumps, utc_now
 from .excel import parse_workbook
 from .export import export_project
-from .ingest import ingest_workbook, source_file_detail
+from .ingest import REFERENCE_SOURCE_ROLE, ingest_workbook, source_file_detail, source_role
 from .pricing import catalog_stats, get_project_result, review_item, run_pricing, serialize_boq_item
 
 logger = logging.getLogger(__name__)
@@ -666,23 +666,37 @@ def _tool_list_recent_sources(arguments: dict[str, Any]) -> dict[str, Any]:
     status = arguments.get("status")
     limit = min(max(int(arguments.get("limit") or 10), 1), 20)
     query = (
-        "SELECT id, filename, detected_type, confirmed_type, processing_status, "
-        "lifecycle_status, uploaded_at FROM source_files"
+        "SELECT * FROM source_files WHERE COALESCE(json_extract(metadata_json, '$.source_role'), "
+        "CASE WHEN COALESCE(confirmed_type, detected_type)='NEW_BOQ' "
+        "THEN 'QUOTATION_INPUT' ELSE 'REFERENCE' END)='REFERENCE'"
     )
     params: list[Any] = []
     if status:
-        query += " WHERE lifecycle_status = ?"
+        query += " AND lifecycle_status = ?"
         params.append(status)
     query += " ORDER BY uploaded_at DESC LIMIT ?"
     params.append(limit)
     with db_session() as conn:
         rows = conn.execute(query, params).fetchall()
-    return {"sources": [dict(row) for row in rows]}
+    return {
+        "sources": [
+            {
+                key: value
+                for key, value in dict(row).items()
+                if key in {"id", "filename", "detected_type", "confirmed_type", "processing_status", "lifecycle_status", "uploaded_at"}
+            }
+            for row in rows
+            if source_role(row) == REFERENCE_SOURCE_ROLE
+        ]
+    }
 
 
 def _tool_get_source_detail(arguments: dict[str, Any]) -> dict[str, Any]:
     source_id = int(arguments["source_id"])
     with db_session() as conn:
+        row = conn.execute("SELECT * FROM source_files WHERE id=?", (source_id,)).fetchone()
+        if not row or source_role(row) != REFERENCE_SOURCE_ROLE:
+            raise KeyError(f"source:{source_id}")
         return source_file_detail(conn, source_id, include_rows=False)
 
 

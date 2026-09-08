@@ -3006,7 +3006,14 @@ def catalog_stats() -> dict[str, Any]:
         ).fetchone()["n"]
         labor_items = conn.execute("SELECT COUNT(*) AS n FROM labor_items").fetchone()["n"]
         labor_rates = conn.execute("SELECT COUNT(*) AS n FROM labor_rates").fetchone()["n"]
-        files = conn.execute("SELECT COUNT(*) AS n FROM source_files").fetchone()["n"]
+        reference_source_filter = (
+            "COALESCE(json_extract(metadata_json, '$.source_role'), "
+            "CASE WHEN COALESCE(confirmed_type, detected_type)='NEW_BOQ' "
+            "THEN 'QUOTATION_INPUT' ELSE 'REFERENCE' END)='REFERENCE'"
+        )
+        files = conn.execute(
+            f"SELECT COUNT(*) AS n FROM source_files WHERE {reference_source_filter}"
+        ).fetchone()["n"]
         projects = conn.execute("SELECT COUNT(*) AS n FROM projects").fetchone()["n"]
         active_products = conn.execute(
             "SELECT COUNT(*) AS n FROM products WHERE COALESCE(lifecycle_status,'ACTIVE')='ACTIVE'"
@@ -3021,10 +3028,12 @@ def catalog_stats() -> dict[str, Any]:
             "SELECT COUNT(*) AS n FROM labor_items WHERE COALESCE(lifecycle_status,'ACTIVE')<>'ACTIVE'"
         ).fetchone()["n"]
         active_sources = conn.execute(
-            "SELECT COUNT(*) AS n FROM source_files WHERE COALESCE(lifecycle_status,'ACTIVE')='ACTIVE'"
+            f"SELECT COUNT(*) AS n FROM source_files WHERE {reference_source_filter} "
+            "AND COALESCE(lifecycle_status,'ACTIVE')='ACTIVE'"
         ).fetchone()["n"]
         archived_sources = conn.execute(
-            "SELECT COUNT(*) AS n FROM source_files WHERE COALESCE(lifecycle_status,'ACTIVE')<>'ACTIVE'"
+            f"SELECT COUNT(*) AS n FROM source_files WHERE {reference_source_filter} "
+            "AND COALESCE(lifecycle_status,'ACTIVE')<>'ACTIVE'"
         ).fetchone()["n"]
         return {
             "source_files": files,

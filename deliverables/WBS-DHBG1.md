@@ -45,6 +45,7 @@ bằng chứng kiểm chứng trước khi đánh dấu hoàn thành.
 | 3.6 | Chatbot panel nổi + workspace toàn màn hình dùng chung session | `web-ui` | 017 | ◐ |
 | 3.7 | Artifact tải Excel có cấu trúc và status semantics không suy diễn | `chatbot-api`, `web-ui` | 018 | ☑ |
 | 3.8 | Direct command không hỏi lại confirm, ambiguous command vẫn preview; 20 tests đạt và API thật xuất #10 ngay sau lệnh | `chatbot-api` | 019 | ☑ |
+| 3.9 | Isolate BOQ input, hide it from Kho dữ liệu and reject generated exports | `intake`, `quotation-api` | 020 | ☑ |
 
 ## Vận hành và bàn giao
 

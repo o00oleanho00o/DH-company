@@ -5,13 +5,13 @@
 | Module | Trách nhiệm | REQ sở hữu |
 |---|---|---|
 | `runtime-config` | env, host/port, storage path, feature flags | REQ-DHBG1-015 |
-| `intake` | inspect, classify, upload, raw snapshot | REQ-DHBG1-001 |
+| `intake` | inspect, classify, upload, raw snapshot, reject generated exports | REQ-DHBG1-001, REQ-DHBG1-020 |
 | `normalization` | text/unit/number/technical attributes, row kind | REQ-DHBG1-003 |
 | `provenance-store` | SQLite schema, source lifecycle, audit links | REQ-DHBG1-002, REQ-DHBG1-004, REQ-DHBG1-012, REQ-DHBG1-016 |
 | `pricing-engine` | retrieval, scoring, policy, independent material/labor combination | REQ-DHBG1-005, REQ-DHBG1-006, REQ-DHBG1-007, REQ-DHBG1-009 |
 | `ai-provider` | bounded OpenAI-compatible reranking | REQ-DHBG1-010 |
 | `review-workspace` | candidate review, correction and status | REQ-DHBG1-008 |
-| `quotation-api` | REST orchestration and error contract | REQ-DHBG1-013 |
+| `quotation-api` | REST orchestration, quotation input isolation and error contract | REQ-DHBG1-013, REQ-DHBG1-020 |
 | `excel-export` | price-cell writes, formula/cache preservation, AI Audit | REQ-DHBG1-011 |
 | `web-ui` | Vietnamese SPA navigation, workflow screens and dual-mode chatbot surface, download actions | REQ-DHBG1-014, REQ-DHBG1-017, REQ-DHBG1-018 |
 | `chatbot-api` | Structured artifacts, explicit status semantics and narrow direct-intent confirmation | REQ-DHBG1-018, REQ-DHBG1-019 |

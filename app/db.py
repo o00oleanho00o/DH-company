@@ -386,27 +386,35 @@ def init_db() -> None:
             "CREATE INDEX IF NOT EXISTS idx_source_files_lifecycle "
             "ON source_files(lifecycle_status)"
         )
-        # Generated/uploaded quotations are input workbooks, not trusted
-        # historical references. Older builds could accidentally persist
-        # their prices as catalog observations/rates before the NEW_BOQ guard
-        # was applied. Remove those derived references while retaining the
-        # source file and BOQ rows for audit/export.
-        new_boq_sources = """
+        # Quotation uploads are private inputs, not warehouse references.
+        # Older builds only encoded that distinction as NEW_BOQ; output files
+        # used the stable quotation-<id>-latest.xlsx filename. Preserve their
+        # snapshots for export/provenance while taking both forms out of the
+        # reference catalog and the warehouse source list.
+        quotation_inputs = """
             SELECT id FROM source_files
             WHERE COALESCE(confirmed_type, detected_type) = 'NEW_BOQ'
                OR json_extract(metadata_json, '$.excluded_from_knowledge') = 1
+               OR LOWER(filename) GLOB 'quotation-[0-9]*-latest.xlsx'
         """
         conn.execute(
-            f"DELETE FROM price_observations WHERE source_file_id IN ({new_boq_sources})"
+            f"""
+            UPDATE source_files
+            SET metadata_json=json_set(COALESCE(metadata_json, '{{}}'), '$.source_role', 'QUOTATION_INPUT')
+            WHERE id IN ({quotation_inputs})
+            """
         )
         conn.execute(
-            f"DELETE FROM product_prices WHERE source_file_id IN ({new_boq_sources})"
+            f"DELETE FROM price_observations WHERE source_file_id IN ({quotation_inputs})"
         )
         conn.execute(
-            f"DELETE FROM labor_rates WHERE source_file_id IN ({new_boq_sources})"
+            f"DELETE FROM product_prices WHERE source_file_id IN ({quotation_inputs})"
         )
         conn.execute(
-            f"DELETE FROM catalog_source_links WHERE source_file_id IN ({new_boq_sources})"
+            f"DELETE FROM labor_rates WHERE source_file_id IN ({quotation_inputs})"
+        )
+        conn.execute(
+            f"DELETE FROM catalog_source_links WHERE source_file_id IN ({quotation_inputs})"
         )
         conn.commit()
 

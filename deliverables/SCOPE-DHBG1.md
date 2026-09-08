@@ -23,6 +23,7 @@ công thức mẫu.
 - Chatbot có panel nổi để hỏi nhanh và workspace toàn màn hình từ điều hướng trái; hội thoại được giữ nguyên khi đổi chế độ.
 - Chatbot trả artifact xuất Excel dưới dạng metadata cùng origin để UI cung cấp nút tải trực tiếp; trạng thái quotation hiển thị riêng dòng đã áp giá, dòng bỏ qua và dòng cần xử lý.
 - Chatbot thực thi ngay mệnh lệnh rõ ràng cho đúng hành động; chỉ hỏi xác nhận bổ sung với yêu cầu mơ hồ hoặc dạng xem trước.
+- BOQ tải trong workflow Báo giá chỉ là input nội bộ của báo giá; file có `AI Audit` do phần mềm xuất không được nhập làm nguồn tham chiếu.
 - Chạy HTTP tại `0.0.0.0:3000`, truy cập LAN hoặc Cloudflare Tunnel.
 
 ## 3. Ngoài phạm vi

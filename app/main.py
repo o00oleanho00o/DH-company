@@ -22,7 +22,14 @@ from .config import EXPORT_DIR, RAW_DIR, ROOT_DIR, STORAGE_DIR, ensure_directori
 from .db import db_session, dumps, init_db, loads, utc_now
 from .excel import parse_workbook
 from .export import export_project
-from .ingest import ingest_directory, ingest_workbook, source_file_detail
+from .ingest import (
+    REFERENCE_SOURCE_ROLE,
+    ingest_directory,
+    ingest_workbook,
+    is_generated_export,
+    source_file_detail,
+    source_role,
+)
 from .pricing import (
     catalog_stats,
     clear_runtime_caches,
@@ -142,6 +149,13 @@ def _source_payload(conn, source_row: Any) -> dict[str, Any]:
         "warnings": result["warning_count"],
     }
     return result
+
+
+def _require_reference_source(conn, source_id: int) -> Any:
+    row = conn.execute("SELECT * FROM source_files WHERE id=?", (source_id,)).fetchone()
+    if not row or source_role(row) != REFERENCE_SOURCE_ROLE:
+        raise HTTPException(status_code=404, detail="Không tìm thấy nguồn dữ liệu")
+    return row
 
 
 def _source_reference_counts(conn, source_id: int) -> dict[str, int]:
@@ -375,7 +389,11 @@ def list_sources(
     q: str | None = Query(default=None),
 ) -> list[dict[str, Any]]:
     with db_session() as conn:
-        clauses: list[str] = []
+        clauses: list[str] = [
+            "COALESCE(json_extract(metadata_json, '$.source_role'), "
+            "CASE WHEN COALESCE(confirmed_type, detected_type)='NEW_BOQ' "
+            "THEN 'QUOTATION_INPUT' ELSE 'REFERENCE' END)='REFERENCE'"
+        ]
         params: list[Any] = []
         if status:
             clauses.append("COALESCE(lifecycle_status, 'ACTIVE')=?")
@@ -400,6 +418,7 @@ def get_source(
 ) -> dict[str, Any]:
     with db_session() as conn:
         try:
+            _require_reference_source(conn, source_id)
             return source_file_detail(
                 conn,
                 source_id,
@@ -418,11 +437,7 @@ def archive_source(
 ) -> dict[str, Any]:
     reason = reason or str((payload or {}).get("reason") or "").strip() or None
     with db_session() as conn:
-        row = conn.execute(
-            "SELECT lifecycle_status FROM source_files WHERE id=?", (source_id,)
-        ).fetchone()
-        if not row:
-            raise HTTPException(status_code=404, detail="Không tìm thấy nguồn dữ liệu")
+        row = _require_reference_source(conn, source_id)
         status = str(row["lifecycle_status"] or "ACTIVE").upper()
         if status == "SUPERSEDED":
             return source_file_detail(conn, source_id, include_rows=False)
@@ -451,11 +466,7 @@ def archive_source(
 @app.post("/api/sources/{source_id}/restore")
 def restore_source(source_id: int) -> dict[str, Any]:
     with db_session() as conn:
-        row = conn.execute(
-            "SELECT * FROM source_files WHERE id=?", (source_id,)
-        ).fetchone()
-        if not row:
-            raise HTTPException(status_code=404, detail="Không tìm thấy nguồn dữ liệu")
+        row = _require_reference_source(conn, source_id)
         status = str(row["lifecycle_status"] or "ACTIVE").upper()
         if status == "SUPERSEDED":
             raise HTTPException(
@@ -491,9 +502,7 @@ def delete_source(
 ) -> dict[str, Any]:
     storage_key: str | None = None
     with db_session() as conn:
-        row = conn.execute("SELECT * FROM source_files WHERE id=?", (source_id,)).fetchone()
-        if not row:
-            raise HTTPException(status_code=404, detail="Không tìm thấy nguồn dữ liệu")
+        row = _require_reference_source(conn, source_id)
         references = _source_reference_counts(conn, source_id)
         if references["derived_references"] and not force:
             raise HTTPException(
@@ -557,9 +566,7 @@ def delete_source(
 @app.post("/api/sources/{source_id}/reprocess")
 def reprocess_source(source_id: int) -> dict[str, Any]:
     with db_session() as conn:
-        row = conn.execute("SELECT * FROM source_files WHERE id=?", (source_id,)).fetchone()
-        if not row:
-            raise HTTPException(status_code=404, detail="Không tìm thấy nguồn dữ liệu")
+        row = _require_reference_source(conn, source_id)
         path = Path(row["storage_key"])
         confirmed = row["confirmed_type"]
     if not path.exists():
@@ -577,13 +584,22 @@ async def preview_import(file: UploadFile = File(...)) -> dict[str, Any]:
     path = _save_upload(file)
     try:
         parsed = parse_workbook(path)
+        generated_export = is_generated_export(parsed)
         return {
             "filename": file.filename,
             "detected_type": parsed["workbook_type"],
             "effective_date": parsed["effective_date"],
             "effective_date_inferred": parsed["effective_date_inferred"],
             "total_data_rows": parsed["total_data_rows"],
-            "warnings": parsed["warnings"],
+            "warnings": [
+                *parsed["warnings"],
+                *(
+                    ["File do DH M&E Pricing Hub xuất ra không thể dùng làm nguồn dữ liệu tham chiếu."]
+                    if generated_export
+                    else []
+                ),
+            ],
+            "import_allowed": not generated_export,
             "sheets": [
                 {
                     "name": sheet.snapshot.name,
@@ -617,11 +633,19 @@ async def import_files(
         try:
             original_name = upload.filename or path.name
             confirmed = _classification(classifications.get(original_name))
-            result = ingest_workbook(
-                path,
-                source_filename=original_name,
-                confirmed_type=confirmed,
-            )
+            if confirmed == "NEW_BOQ":
+                raise HTTPException(
+                    status_code=400,
+                    detail="BOQ mới phải được tải lên từ Tạo báo giá, không nhập vào Kho dữ liệu.",
+                )
+            try:
+                result = ingest_workbook(
+                    path,
+                    source_filename=original_name,
+                    confirmed_type=confirmed,
+                )
+            except ValueError as exc:
+                raise HTTPException(status_code=400, detail=str(exc)) from exc
             # Return the human filename even though the temporary upload path
             # is what the parser saw.
             result["filename"] = original_name
@@ -1285,6 +1309,9 @@ def list_catalog_items(
                            )
                        ) AS link_count
                 FROM source_files sf
+                WHERE COALESCE(json_extract(sf.metadata_json, '$.source_role'),
+                       CASE WHEN COALESCE(sf.confirmed_type, sf.detected_type)='NEW_BOQ'
+                            THEN 'QUOTATION_INPUT' ELSE 'REFERENCE' END)='REFERENCE'
                 ORDER BY sf.uploaded_at DESC, sf.id DESC
                 """
             ).fetchall()

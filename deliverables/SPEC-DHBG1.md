@@ -68,6 +68,12 @@ Chatbot phải nhận diện mệnh lệnh trực tiếp theo từng write tool 
 trong cùng lượt; câu hỏi hoặc đề xuất không rõ ý phải trả preview và yêu cầu
 xác nhận. Không được hỏi lại xác nhận sau một mệnh lệnh rõ ràng.
 
+### REQ-DHBG1-020
+BOQ upload tại API tạo báo giá phải được đánh dấu `QUOTATION_INPUT`, bị loại
+khỏi danh sách/thống kê/API quản trị Kho dữ liệu và không tạo catalog price/rate.
+Workbook do hệ thống xuất, nhận diện bằng sheet `AI Audit`, phải bị từ chối khi
+import làm nguồn dữ liệu.
+
 ## Yêu cầu phi chức năng
 
 | ID | Yêu cầu | Kiểm chứng |
