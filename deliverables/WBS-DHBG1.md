@@ -43,6 +43,7 @@ bằng chứng kiểm chứng trước khi đánh dấu hoàn thành.
 | 3.4 | Export chỉ ghi unit price, giữ formula | `excel-export` | 011 | ☑ |
 | 3.5 | Kiểm thử ZIP/XML/openpyxl | `excel-export` | 011, NFR-003 | ☑ |
 | 3.6 | Chatbot panel nổi + workspace toàn màn hình dùng chung session | `web-ui` | 017 | ◐ |
+| 3.7 | Artifact tải Excel có cấu trúc và status semantics không suy diễn | `chatbot-api`, `web-ui` | 018 | ☑ |
 
 ## Vận hành và bàn giao
 

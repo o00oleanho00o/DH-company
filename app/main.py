@@ -11,7 +11,13 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from .ai import ai_provider
-from .chatbot import ChatbotError, DEFAULT_GREETING, chatbot_status, generate_reply, register_upload
+from .chatbot import (
+    ChatbotError,
+    DEFAULT_GREETING,
+    chatbot_status,
+    generate_reply_with_metadata,
+    register_upload,
+)
 from .config import EXPORT_DIR, RAW_DIR, ROOT_DIR, STORAGE_DIR, ensure_directories, settings
 from .db import db_session, dumps, init_db, loads, utc_now
 from .excel import parse_workbook
@@ -338,10 +344,10 @@ def chatbot_chat(payload: dict = Body(...)) -> dict[str, Any]:
     """
 
     try:
-        reply = generate_reply(payload.get("messages"))
+        reply, downloads = generate_reply_with_metadata(payload.get("messages"))
     except ChatbotError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
-    return {"reply": reply}
+    return {"reply": reply, "downloads": downloads}
 
 
 @app.get("/api/chatbot/greeting")

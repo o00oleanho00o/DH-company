@@ -14,7 +14,7 @@ def test_chatbot_workspace_uses_one_shared_panel() -> None:
     assert html.count('id="chatbot-panel"') == 1
     assert 'data-route="chatbot"' in html
     assert 'id="chatbot-expand"' in html
-    assert html.count("?v=20260908-chat-workspace") == 4
+    assert "?v=20260908-chat-downloads" in html
     assert 'id="chatbot-page-host"' in app_js
     assert 'detail: { mode: "workspace" }' in app_js
     assert 'state.route === "chatbot" || route.base !== "chatbot"' in app_js
@@ -25,6 +25,18 @@ def test_chatbot_workspace_uses_one_shared_panel() -> None:
 def test_chatbot_route_is_registered_and_labelled() -> None:
     app_js = (ROOT / "app/static/app.js").read_text(encoding="utf-8")
 
-    assert 'chatbot: "Chatbot"' in app_js
+    assert 'chatbot: "Trợ Lý AI"' in app_js
     assert '"benchmark", "chatbot"' in app_js
     assert 'route.base === "chatbot"' in app_js
+
+
+def test_chatbot_download_contract_and_status_semantics() -> None:
+    chatbot_js = (ROOT / "app/static/chatbot.js").read_text(encoding="utf-8")
+    main_py = (ROOT / "app/main.py").read_text(encoding="utf-8")
+    chatbot_py = (ROOT / "app/chatbot.py").read_text(encoding="utf-8")
+
+    assert '"downloads": downloads' in main_py
+    assert "appendDownloads(data.downloads)" in chatbot_js
+    assert "link.download = filename" in chatbot_js
+    assert '"status_counts": status_counts' in chatbot_py
+    assert '"unresolved": unresolved' in chatbot_py

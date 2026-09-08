@@ -3122,6 +3122,23 @@ h3 {
   text-decoration: underline;
 }
 
+.chatbot-download-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 4px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--primary-strong);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.chatbot-download-link:hover {
+  filter: brightness(1.08);
+}
+
 .chat-markdown strong {
   font-weight: 700;
   color: var(--primary-strong);

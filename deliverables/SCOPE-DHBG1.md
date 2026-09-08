@@ -21,6 +21,7 @@ công thức mẫu.
 - Xuất Excel giữ nguyên workbook layout/formula; chỉ điền unit price được áp dụng và thêm `AI Audit`.
 - REST API và UI tiếng Việt cho Kho dữ liệu, Danh mục & Giá, Tạo báo giá, Bàn rà soát và Chatbot.
 - Chatbot có panel nổi để hỏi nhanh và workspace toàn màn hình từ điều hướng trái; hội thoại được giữ nguyên khi đổi chế độ.
+- Chatbot trả artifact xuất Excel dưới dạng metadata cùng origin để UI cung cấp nút tải trực tiếp; trạng thái quotation hiển thị riêng dòng đã áp giá, dòng bỏ qua và dòng cần xử lý.
 - Chạy HTTP tại `0.0.0.0:3000`, truy cập LAN hoặc Cloudflare Tunnel.
 
 ## 3. Ngoài phạm vi

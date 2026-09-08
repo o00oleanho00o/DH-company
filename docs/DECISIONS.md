@@ -43,6 +43,15 @@ Tài liệu này là tầng quyết định nghiệp vụ/phạm vi. Mọi thay 
 - **Lý do:** Cho phép truy cập từ máy khác trong LAN và public qua Cloudflare Tunnel.
 - **Đánh đổi:** Bind toàn bộ interface làm tăng bề mặt truy cập; chỉ mở trong mạng tin cậy, dùng firewall/auth trước production.
 
+## QĐ-07 — Chatbot trả artifact và trạng thái báo giá có cấu trúc
+
+- **Người quyết:** Người dùng dự án
+- **Ngày:** 2026-09-08
+- **Trạng thái:** Accepted
+- **Quyết định:** File do tool chatbot xuất phải được trả bằng metadata có cấu trúc để UI dựng nút tải cùng origin. Trạng thái báo giá phải dùng các nhóm trạng thái explicit; không được suy diễn số dòng lỗi bằng `total_items - auto_approved`.
+- **Lý do:** Câu chữ Markdown do mô hình sinh không đảm bảo tạo link có thể bấm, còn tổng số dòng bao gồm cả dòng `IGNORED` không cần áp giá.
+- **Đánh đổi:** API chatbot có thêm trường `downloads`; frontend phải kiểm tra chặt URL artifact trước khi hiển thị.
+
 ## QĐ-07 — Chatbot có chế độ nhanh và workspace toàn màn hình
 
 - **Người quyết:** Người dùng dự án

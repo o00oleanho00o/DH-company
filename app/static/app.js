@@ -34,7 +34,7 @@
     new: "Tạo báo giá",
     quotation: "Chi tiết báo giá",
     review: "Bàn rà soát",
-    chatbot: "Chatbot",
+    chatbot: "Trợ Lý AI",
   };
 
   const state = {

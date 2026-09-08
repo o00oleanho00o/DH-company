@@ -32,6 +32,7 @@ FastAPI modular monolith (app/main.py)
 - `app/export.py`: chỉ ghi ô unit price; native Excel được yêu cầu recalculation cho workbook nhiều sheet.
 - `app/main.py`: API, upload lifecycle và static UI.
 - `app/static/chatbot.js`: sở hữu một conversation state và một chat surface. Surface được chuyển giữa widget nổi và `#chatbot-page-host` theo route `#chatbot`, không clone DOM và không reset hội thoại.
+- `app/chatbot.py` + `/api/chatbot`: tool loop trả `downloads` metadata cho artifact export và trạng thái quotation theo nhóm explicit; `app/static/chatbot.js` dựng nút tải cùng origin.
 
 ## Chatbot hai chế độ
 
@@ -47,6 +48,7 @@ FastAPI modular monolith (app/main.py)
 3. Pricing truy xuất candidate theo từng loại giá, có thể gọi AI rerank nếu được bật.
 4. Run ghi metrics, candidate evidence và audit; dòng rủi ro đi vào review.
 5. Export sao chép workbook nguồn rồi chỉ cập nhật material/labor unit-price cells.
+6. Chatbot response mang artifact metadata; trình duyệt tải qua `FileResponse` của API export, không dùng URL do model tự viết.
 
 ## Triển khai mạng
 

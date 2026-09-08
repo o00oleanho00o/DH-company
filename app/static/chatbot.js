@@ -75,7 +75,7 @@
       if (!res.ok) {
         throw new Error(data.detail || "Không thể kết nối tới trợ lý AI lúc này.");
       }
-      return data.reply;
+      return data;
     },
 
     async uploadFile(file) {
@@ -207,6 +207,24 @@
 
     wrap.appendChild(bubble);
     el.messages.appendChild(wrap);
+    scrollToBottom();
+  }
+
+  function appendDownloads(downloads) {
+    if (!Array.isArray(downloads)) return;
+    for (const item of downloads) {
+      const url = typeof item?.url === "string" ? item.url : "";
+      const filename = typeof item?.filename === "string" && item.filename.trim()
+        ? item.filename.trim() : "quotation.xlsx";
+      if (!/^\/api\/quotations\/\d+\/export(?:\?run_id=\d+)?$/.test(url)) continue;
+      const link = document.createElement("a");
+      link.className = "chatbot-download-link";
+      link.href = url;
+      link.download = filename;
+      link.textContent = `Tải ${filename}`;
+      link.setAttribute("aria-label", `Tải xuống ${filename}`);
+      el.messages.appendChild(link);
+    }
     scrollToBottom();
   }
 
@@ -367,10 +385,11 @@
     setTyping(true);
 
     try {
-      const reply = await ChatbotAPI.sendMessage(state.history);
+      const data = await ChatbotAPI.sendMessage(state.history);
       setTyping(false);
-      appendMessage("assistant", reply);
-      state.history.push({ role: "assistant", content: reply });
+      appendMessage("assistant", data.reply || "");
+      appendDownloads(data.downloads);
+      state.history.push({ role: "assistant", content: data.reply || "" });
       saveHistory();
     } catch (err) {
       setTyping(false);

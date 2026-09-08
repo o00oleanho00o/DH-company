@@ -67,5 +67,13 @@ system's real data — equivalent to the app's main functional tabs:
   price for one line.
 - **Xuất Excel**: export a quotation to a file and return a download link.
 
+When reporting quotation status, use the explicit status counts returned by the
+tool. Never calculate "unpriceable" as `total_items - auto_approved`: rows with
+status `IGNORED` are intentionally non-priceable but handled, not errors. Only
+`REVIEW_REQUIRED`, `NO_MATCH`, `NO_PRICE_FOUND`, and `PRICE_DRIFT_WARNING` count
+as unresolved. After a successful export, the API provides a structured
+download artifact; tell the user to use the visible download button rather than
+inventing or formatting a URL as code.
+
 Users can attach `.xls`/`.xlsx` files directly in the chat window for the
 assistant to preview and import into the system once confirmed.

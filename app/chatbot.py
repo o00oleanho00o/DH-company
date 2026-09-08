@@ -793,11 +793,30 @@ def _tool_get_quotation_status(arguments: dict[str, Any]) -> dict[str, Any]:
     project_id = int(arguments["project_id"])
     run_id = arguments.get("run_id")
     result = get_project_result(project_id, int(run_id) if run_id else None)
+    metrics = result.get("metrics", {}) or {}
+    status_counts: dict[str, int] = {}
+    with db_session() as conn:
+        rows = conn.execute(
+            "SELECT status, COUNT(*) AS count FROM boq_items WHERE project_id=? GROUP BY status",
+            (project_id,),
+        ).fetchall()
+        status_counts = {str(row["status"]): int(row["count"]) for row in rows}
+    unresolved_statuses = ("REVIEW_REQUIRED", "NO_MATCH", "NO_PRICE_FOUND", "PRICE_DRIFT_WARNING")
+    unresolved = sum(status_counts.get(status, 0) for status in unresolved_statuses)
+    ignored = status_counts.get("IGNORED", 0)
+    auto_approved = status_counts.get("AUTO_APPROVED", 0)
     return {
         "project_id": project_id,
         "run": result.get("run"),
-        "metrics": result.get("metrics", {}),
+        "metrics": metrics,
         "total_items": len(result.get("items", [])),
+        "status_counts": status_counts,
+        "auto_approved": auto_approved,
+        "ignored": ignored,
+        "handled": auto_approved + ignored,
+        "unresolved": unresolved,
+        "unresolved_statuses": list(unresolved_statuses),
+        "note": "IGNORED là dòng không cần áp giá, đã được xử lý và không phải dòng lỗi.",
     }
 
 
@@ -931,7 +950,7 @@ def _dispatch_tool(name: str, arguments: dict[str, Any]) -> dict[str, Any]:
         return {"error": "Có lỗi xảy ra khi thực hiện hành động này."}
 
 
-def generate_reply(raw_messages: Any, *, client: Any = None) -> str:
+def generate_reply_with_metadata(raw_messages: Any, *, client: Any = None) -> tuple[str, list[dict[str, str]]]:
     """Run the tool-calling loop against the OpenAI-compatible provider.
 
     `client` is injectable (same pattern as `app.ai.AIProvider`) so tests can
@@ -954,6 +973,7 @@ def generate_reply(raw_messages: Any, *, client: Any = None) -> str:
         )
 
     history = _sanitize_history(raw_messages)
+    downloads: list[dict[str, str]] = []
 
     if client is None:
         try:
@@ -1009,7 +1029,7 @@ def generate_reply(raw_messages: Any, *, client: Any = None) -> str:
             content = ((msg.content if msg else "") or "").strip()
             if not content:
                 raise ChatbotError("Trợ lý AI không trả về nội dung. Vui lòng thử lại.")
-            return content
+            return content, downloads
 
         # Record the assistant's tool-call turn, then execute each tool and
         # feed the results back so the model can continue (or answer).
@@ -1035,6 +1055,11 @@ def generate_reply(raw_messages: Any, *, client: Any = None) -> str:
             except json.JSONDecodeError:
                 parsed_args = {}
             result = _dispatch_tool(tc.function.name, parsed_args)
+            if tc.function.name == "export_quotation_file" and result.get("status") == "exported":
+                url = str(result.get("download_url") or "")
+                filename = str(result.get("filename") or "quotation.xlsx")
+                if url.startswith("/api/quotations/") and "/export" in url:
+                    downloads.append({"filename": filename, "url": url})
             messages.append(
                 {
                     "role": "tool",
@@ -1044,3 +1069,9 @@ def generate_reply(raw_messages: Any, *, client: Any = None) -> str:
             )
 
     raise ChatbotError("Trợ lý AI thực hiện quá nhiều bước mà chưa có câu trả lời. Vui lòng thử lại.")
+
+
+def generate_reply(raw_messages: Any, *, client: Any = None) -> str:
+    """Backward-compatible text-only wrapper for callers outside the HTTP API."""
+    reply, _downloads = generate_reply_with_metadata(raw_messages, client=client)
+    return reply

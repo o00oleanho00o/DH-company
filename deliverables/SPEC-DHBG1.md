@@ -57,6 +57,12 @@ workspace toàn bộ vùng nội dung khi chọn tab `Chatbot` ở điều hư�
 chuyển chế độ phải giữ nguyên lịch sử hội thoại, trạng thái gửi và file đính kèm;
 giao diện phải dùng được trên desktop và mobile.
 
+### REQ-DHBG1-018
+Chatbot phải trả danh sách artifact tải xuống có `filename` và URL cùng origin;
+UI phải dựng liên kết tải trực tiếp sau khi tool export thành công. Tool trạng
+thái phải trả explicit counts cho `auto_approved`, `ignored`, `review_required`,
+`no_match`, `no_price_found` và không coi dòng `IGNORED` là lỗi.
+
 ## Yêu cầu phi chức năng
 
 | ID | Yêu cầu | Kiểm chứng |
