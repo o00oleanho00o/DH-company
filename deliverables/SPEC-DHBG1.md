@@ -63,6 +63,11 @@ UI phải dựng liên kết tải trực tiếp sau khi tool export thành côn
 thái phải trả explicit counts cho `auto_approved`, `ignored`, `review_required`,
 `no_match`, `no_price_found` và không coi dòng `IGNORED` là lỗi.
 
+### REQ-DHBG1-019
+Chatbot phải nhận diện mệnh lệnh trực tiếp theo từng write tool và thực thi
+trong cùng lượt; câu hỏi hoặc đề xuất không rõ ý phải trả preview và yêu cầu
+xác nhận. Không được hỏi lại xác nhận sau một mệnh lệnh rõ ràng.
+
 ## Yêu cầu phi chức năng
 
 | ID | Yêu cầu | Kiểm chứng |

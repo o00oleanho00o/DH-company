@@ -52,6 +52,15 @@ Tài liệu này là tầng quyết định nghiệp vụ/phạm vi. Mọi thay 
 - **Lý do:** Câu chữ Markdown do mô hình sinh không đảm bảo tạo link có thể bấm, còn tổng số dòng bao gồm cả dòng `IGNORED` không cần áp giá.
 - **Đánh đổi:** API chatbot có thêm trường `downloads`; frontend phải kiểm tra chặt URL artifact trước khi hiển thị.
 
+## QĐ-08 — Mệnh lệnh rõ không hỏi lại xác nhận
+
+- **Người quyết:** Người dùng dự án
+- **Ngày:** 2026-09-08
+- **Trạng thái:** Accepted
+- **Quyết định:** Chatbot coi mệnh lệnh trực tiếp cho đúng hành động, như “xuất Excel đi” hoặc “áp giá đi”, là xác nhận thực thi trong cùng lượt. Chỉ dùng preview/xác nhận bổ sung cho câu hỏi, đề xuất hoặc ngữ cảnh mơ hồ.
+- **Lý do:** Hỏi lại sau khi người dùng đã ra lệnh làm gián đoạn workflow và khiến thao tác lặp.
+- **Đánh đổi:** Bộ nhận diện ý định phải hẹp, theo từng tool; không được suy diễn đồng ý từ câu hỏi hoặc nội dung không liên quan.
+
 ## QĐ-07 — Chatbot có chế độ nhanh và workspace toàn màn hình
 
 - **Người quyết:** Người dùng dự án

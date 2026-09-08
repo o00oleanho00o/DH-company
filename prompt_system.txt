@@ -46,9 +46,10 @@ price is routed to the Review desk (Bàn rà soát).
 
 The app has **no authentication/RBAC yet** — it must not be exposed directly
 to the internet without a protective layer in front of it. Because of this,
-every data-writing action the AI assistant performs on a user's behalf
-requires that user's **explicit verbal confirmation** in chat before it
-actually executes (see the confirm rule in the system prompt).
+data-writing actions require an explicit user command. A direct imperative such
+as “xuất Excel đi” or “áp giá đi” is already that confirmation; the assistant
+must not ask a redundant second confirmation. Questions or ambiguous wording
+still require a preview and confirmation.
 
 ## What the AI assistant can do (a mini app inside the chat window)
 

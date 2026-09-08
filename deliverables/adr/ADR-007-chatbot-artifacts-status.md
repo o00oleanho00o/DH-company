@@ -20,3 +20,6 @@ status counts and handled/unresolved totals; `IGNORED` is handled, not an error.
 
 The assistant may still mention a URL in prose, but the usable control is always
 the structured button. Any future status consumer must use explicit counts.
+
+Direct imperative commands are treated as confirmation only for their matching
+write tool. Questions and ambiguous wording continue through the preview gate.

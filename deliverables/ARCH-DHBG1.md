@@ -33,6 +33,7 @@ FastAPI modular monolith (app/main.py)
 - `app/main.py`: API, upload lifecycle và static UI.
 - `app/static/chatbot.js`: sở hữu một conversation state và một chat surface. Surface được chuyển giữa widget nổi và `#chatbot-page-host` theo route `#chatbot`, không clone DOM và không reset hội thoại.
 - `app/chatbot.py` + `/api/chatbot`: tool loop trả `downloads` metadata cho artifact export và trạng thái quotation theo nhóm explicit; `app/static/chatbot.js` dựng nút tải cùng origin.
+- Direct-intent detector trong `app/chatbot.py` chỉ nâng `confirm=true` cho cụm từ hành động rõ ràng và đúng tool; mặc định vẫn là preview.
 
 ## Chatbot hai chế độ
 

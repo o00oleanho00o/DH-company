@@ -14,7 +14,7 @@
 | `quotation-api` | REST orchestration and error contract | REQ-DHBG1-013 |
 | `excel-export` | price-cell writes, formula/cache preservation, AI Audit | REQ-DHBG1-011 |
 | `web-ui` | Vietnamese SPA navigation, workflow screens and dual-mode chatbot surface, download actions | REQ-DHBG1-014, REQ-DHBG1-017, REQ-DHBG1-018 |
-| `chatbot-api` | Structured chatbot artifacts and explicit quotation status semantics | REQ-DHBG1-018 |
+| `chatbot-api` | Structured artifacts, explicit status semantics and narrow direct-intent confirmation | REQ-DHBG1-018, REQ-DHBG1-019 |
 
 ## Luồng chính
 

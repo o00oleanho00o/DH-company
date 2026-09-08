@@ -49,8 +49,9 @@ server-side, không ghi log và không trả xuống trình duyệt.
 Widget floating góc dưới bên phải giao diện — hoạt động như một "mini app"
 trong khung chat: vừa trả lời Q&A dựa trên `prompt_system.txt`, vừa có thể
 gọi tool để đọc/ghi dữ liệu thật (xem nguồn, tra catalog, tạo báo giá, chạy
-pricing, duyệt rà soát, xuất Excel...). Tool ghi dữ liệu luôn yêu cầu người
-dùng xác nhận bằng lời trước khi thực thi thật — xem giới hạn an toàn ở đầu
+pricing, duyệt rà soát, xuất Excel...). Lệnh trực tiếp như "Xuất Excel" hoặc
+"Áp giá đi" là xác nhận thực thi khi đã rõ báo giá và thông số; trợ lý chỉ hỏi
+thêm khi thiếu thông tin hoặc người dùng mới yêu cầu xem trước. Xem giới hạn ở đầu
 `app/chatbot.py`. Hoàn toàn tách biệt khỏi core pricing engine (deterministic).
 
 ```text
