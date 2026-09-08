@@ -3,9 +3,11 @@
 // Self-contained IIFE, independent of app.js. Structure:
 //   1. API layer   — the only place that talks to the backend.
 //   2. State       — in-memory conversation history + pending attachment.
-//   3. Rendering   — DOM/markdown output helpers.
-//   4. Logic       — conversation flow (send, reset, attach file).
-//   5. UI events   — wiring buttons/inputs to the logic above.
+//   3. Persistence — mirrors history to localStorage so a reload shows the
+//                    conversation immediately, before any network call.
+//   4. Rendering   — DOM/markdown output helpers.
+//   5. Logic       — conversation flow (send, reset, attach file).
+//   6. UI events   — wiring buttons/inputs to the logic above.
 //
 // The assistant answers from the server-side knowledge base
 // (prompt_system.txt) and can also call real backend tools (see
@@ -33,6 +35,22 @@
     "Có bao nhiêu báo giá đã tạo?",
     "Hướng dẫn tạo báo giá mới từ file BOQ",
   ];
+
+  const STORAGE_KEY = "dh-chatbot-history-v1";
+  const MAX_STORED_MESSAGES = 40;
+
+  // Matches the "[Tệp đính kèm]" note handleSend() bakes into a user
+  // message's persisted content (see there for why it must live in the
+  // content string itself). Stripped back out only for display, both live
+  // and when restoring from localStorage, so the bubble always shows the
+  // friendly "📎 Đã đính kèm: ..." form instead of the raw note.
+  const ATTACHMENT_NOTE_RE = /\n\n\[Tệp đính kèm\]\n- "([^"]+)" \(upload_id: [^)]*\)$/;
+
+  function toDisplayText(content) {
+    const match = ATTACHMENT_NOTE_RE.exec(content);
+    if (!match) return content;
+    return `${content.slice(0, match.index)}\n\n📎 Đã đính kèm: ${match[1]}`;
+  }
 
   // ------------------------------------------------------------------
   // 1. API layer
@@ -79,6 +97,43 @@
     greeting: FALLBACK_GREETING,
     pendingAttachment: null, // {upload_id, filename} | null
   };
+
+  // ------------------------------------------------------------------
+  // 3. Persistence — per-browser only (localStorage never reaches the
+  // server or other viewers). Wrapped in try/catch throughout: private
+  // browsing, blocked site data, or a full quota must degrade to a
+  // session-only conversation, never break the widget.
+  // ------------------------------------------------------------------
+  function saveHistory() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.history.slice(-MAX_STORED_MESSAGES)));
+    } catch (err) {
+      // Conversation still works for this session; it just won't survive a reload.
+    }
+  }
+
+  function loadStoredHistory() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return null;
+      const cleaned = parsed.filter(
+        (m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string"
+      );
+      return cleaned.length ? cleaned : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function clearStoredHistory() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (err) {
+      // ignore
+    }
+  }
 
   // ------------------------------------------------------------------
   // DOM refs
@@ -218,6 +273,7 @@
   // 4. Conversation logic
   // ------------------------------------------------------------------
   function resetConversation() {
+    clearStoredHistory();
     state.history = [];
     state.pendingAttachment = null;
     clearAttachmentChip();
@@ -226,10 +282,24 @@
     renderSuggestions();
   }
 
+  // Replays a conversation restored from localStorage: the greeting bubble
+  // still opens the panel (reminds the user what the bot can do), followed
+  // by every saved turn. No renderSuggestions() here — the quick-start chips
+  // are only for a conversation that hasn't started yet.
+  function restoreConversation(history) {
+    state.history = history;
+    state.pendingAttachment = null;
+    clearAttachmentChip();
+    el.messages.innerHTML = "";
+    appendMessage("assistant", state.greeting);
+    for (const message of history) {
+      const text = message.role === "user" ? toDisplayText(message.content) : message.content;
+      appendMessage(message.role, text);
+    }
+    scrollToBottom();
+  }
+
   async function loadGreetingAndAvailability() {
-    // Show the bubble optimistically so it never depends on a network round
-    // trip; hide it again only if the server explicitly says it's disabled.
-    el.widget.hidden = false;
     try {
       const data = await ChatbotAPI.getGreeting();
       if (data && data.enabled === false) {
@@ -243,7 +313,6 @@
       // Keep the fallback greeting; the widget still opens and a real error
       // (if any) surfaces the first time the user actually sends a message.
     }
-    resetConversation();
   }
 
   async function handleAttachFile(file) {
@@ -276,11 +345,11 @@
       ? `\n\n[Tệp đính kèm]\n- "${attachment.filename}" (upload_id: ${attachment.upload_id})`
       : "";
     const historyContent = messageText + attachmentNote;
-    const displayText = attachment ? `${messageText}\n\n📎 Đã đính kèm: ${attachment.filename}` : messageText;
 
     removeSuggestions();
-    appendMessage("user", displayText);
+    appendMessage("user", toDisplayText(historyContent));
     state.history.push({ role: "user", content: historyContent });
+    saveHistory();
 
     el.input.value = "";
     autoGrowInput();
@@ -294,6 +363,7 @@
       setTyping(false);
       appendMessage("assistant", reply);
       state.history.push({ role: "assistant", content: reply });
+      saveHistory();
     } catch (err) {
       setTyping(false);
       appendMessage("assistant", err.message || "Đã có lỗi xảy ra. Vui lòng thử lại.", {
@@ -373,5 +443,22 @@
   // ------------------------------------------------------------------
   // Init
   // ------------------------------------------------------------------
-  loadGreetingAndAvailability();
+  async function init() {
+    // Show the bubble optimistically so it never depends on a network round
+    // trip; hidden again only if the server explicitly says it's disabled.
+    el.widget.hidden = false;
+    const storedHistory = loadStoredHistory();
+    if (storedHistory) {
+      // A saved conversation renders instantly, with no network wait — the
+      // greeting/enabled check below still runs, but only in the background
+      // to refine state.greeting for next time and to hide the widget if the
+      // server reports it disabled; it never re-renders what's already shown.
+      restoreConversation(storedHistory);
+      loadGreetingAndAvailability();
+    } else {
+      await loadGreetingAndAvailability();
+      resetConversation();
+    }
+  }
+  init();
 })();
