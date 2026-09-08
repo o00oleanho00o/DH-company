@@ -37,7 +37,10 @@
   ];
 
   const STORAGE_KEY = "dh-chatbot-history-v1";
-  const MAX_STORED_MESSAGES = 40;
+  // Matches MAX_TOTAL_HISTORY_MESSAGES in app/chatbot.py: the server folds
+  // anything past its verbatim window into a recap instead of dropping it, so
+  // keeping (and resending) this much is what lets a long chat stay coherent.
+  const MAX_STORED_MESSAGES = 120;
 
   // Matches the "[Tệp đính kèm]" note handleSend() bakes into a user
   // message's persisted content (see there for why it must live in the

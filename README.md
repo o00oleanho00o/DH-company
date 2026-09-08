@@ -71,6 +71,15 @@ ENABLE_CHATBOT=true
   tiếng Anh (tiết kiệm token) nhưng luôn ép trả lời cuối cùng bằng tiếng
   Việt, và chỉ xử lý yêu cầu liên quan đến app này — câu hỏi ngoài phạm vi
   (giá vàng, chứng khoán,...) sẽ bị từ chối ngắn gọn thay vì được trả lời.
+- Hội thoại được lưu trong `localStorage` của trình duyệt (chỉ máy người
+  dùng, không lên server) nên tải lại trang là thấy lại ngay; nút "Làm mới
+  hội thoại" xoá cả bộ lưu này.
+- Không có session phía server: mỗi request gửi lại toàn bộ lịch sử. 24 lượt
+  gần nhất được gửi nguyên văn, các lượt cũ hơn được **gấp thành một đoạn tóm
+  tắt ngắn** (thay vì bị xoá như trước) nên chat dài không mất ngữ cảnh. Tóm
+  tắt được cache trong tiến trình theo block 8 tin, nên thường không phát
+  sinh lệnh gọi AI phụ; nếu tóm tắt lỗi thì tự rơi về hành vi cũ (bỏ lượt cũ)
+  chứ không làm hỏng câu trả lời.
 - `ENABLE_CHATBOT=false` ẩn hẳn widget.
 
 ## Luồng nghiệp vụ

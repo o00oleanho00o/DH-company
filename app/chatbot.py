@@ -27,6 +27,7 @@ Completely separate from the pricing engine's own bounded AI boundary in
 :mod:`app.ai` (which only reranks candidates during a pricing run).
 """
 
+import hashlib
 import json
 import logging
 import shutil
@@ -49,12 +50,24 @@ KB_PATH = ROOT_DIR / "prompt_system.txt"
 
 # Conservative guardrails so one chat session cannot balloon into an unbounded
 # provider bill, an oversized request, or a runaway tool-calling loop.
-MAX_HISTORY_MESSAGES = 24  # ~12 user/assistant turns
+MAX_HISTORY_MESSAGES = 24  # ~12 user/assistant turns sent verbatim
 MAX_MESSAGE_CHARS = 4000
 MAX_REPLY_TOKENS = 1200
 REQUEST_TIMEOUT_SECONDS = 30.0
 MAX_TOOL_ITERATIONS = 6
 UPLOAD_TTL_SECONDS = 1800  # abandoned chat-attached files are purged after 30 min
+
+# Long-conversation memory. Turns older than the verbatim window above used to
+# be dropped outright; they are now folded into a short running recap instead
+# (see _fold_history). Folding happens in whole blocks so the fold boundary —
+# and therefore the cached recap — stays put for several turns rather than
+# shifting on every message, which keeps this to roughly one extra provider
+# call per HISTORY_FOLD_BLOCK turns instead of one per turn.
+HISTORY_FOLD_BLOCK = 8
+SUMMARY_INPUT_MESSAGES = 16  # most turns one summarization call ever reads
+MAX_SUMMARY_TOKENS = 320
+MAX_SUMMARY_CACHE_ENTRIES = 64
+MAX_TOTAL_HISTORY_MESSAGES = 120  # hard cap on what a client may post at all
 
 # DeepSeek-specific reasoning-mode knobs. Harmless with most OpenAI-compatible
 # providers (extra/unknown fields are typically ignored), but remove these if
@@ -221,13 +234,18 @@ def _sanitize_history(raw_messages: Any) -> list[ChatMessage]:
     client-supplied ``system`` role is dropped so it cannot override the
     server-side system prompt), content must be a non-empty string, and both
     message count and per-message length are capped.
+
+    Keeps up to ``MAX_TOTAL_HISTORY_MESSAGES`` — well past the verbatim
+    window — because :func:`_fold_history` still needs the older turns in
+    order to summarize them. Only what exceeds even that hard cap is dropped
+    unseen.
     """
 
     if not isinstance(raw_messages, list):
         raise ChatbotError("Định dạng tin nhắn không hợp lệ.")
 
     cleaned: list[ChatMessage] = []
-    for item in raw_messages[-MAX_HISTORY_MESSAGES:]:
+    for item in raw_messages[-MAX_TOTAL_HISTORY_MESSAGES:]:
         if not isinstance(item, dict):
             continue
         role = item.get("role")
@@ -245,6 +263,129 @@ def _sanitize_history(raw_messages: Any) -> list[ChatMessage]:
         raise ChatbotError("Cần có tin nhắn từ người dùng để trả lời.")
 
     return cleaned
+
+
+# ---------------------------------------------------------------------------
+# Long-conversation memory.
+#
+# Every request re-sends the whole conversation (there is no server-side
+# session), so a long chat would otherwise lose its oldest turns the moment
+# they fall past MAX_HISTORY_MESSAGES. Those turns are folded into a short
+# Vietnamese recap instead, carried as a server-generated system message.
+#
+# The recap is cached in-process, keyed by the exact content it was built
+# from, so the usual case is a cache hit and no extra provider call at all.
+# The cache is purely an optimization: a miss (fresh process, edited history)
+# just recomputes, and a failed summarization degrades to the old behaviour of
+# dropping the oldest turns — never to a wrong answer.
+# ---------------------------------------------------------------------------
+
+_SUMMARY_SYSTEM_PROMPT = (
+    "You compress the older part of a Vietnamese M&E quotation chat into a "
+    "short running recap, so the assistant keeps context after those turns "
+    "fall out of the live window. Keep only what still matters for answering "
+    "later questions: what the user is working on, decisions and "
+    "confirmations already given, any ids/filenames/quotation names "
+    "mentioned, and anything still pending. Never invent facts, and never "
+    "invent a price or number that is not in the text. Write the recap in "
+    "Vietnamese as compact bullet points, 150 words at most."
+)
+
+_summary_cache: dict[str, str] = {}
+
+
+def _summary_cache_key(messages: list[ChatMessage]) -> str:
+    digest = hashlib.sha256()
+    for message in messages:
+        digest.update(message.role.encode("utf-8"))
+        digest.update(b"\x1f")
+        digest.update(message.content.encode("utf-8"))
+        digest.update(b"\x1e")
+    return digest.hexdigest()
+
+
+def _remember_summary(key: str, summary: str) -> None:
+    _summary_cache[key] = summary
+    # dict preserves insertion order, so this evicts the oldest entries.
+    while len(_summary_cache) > MAX_SUMMARY_CACHE_ENTRIES:
+        _summary_cache.pop(next(iter(_summary_cache)))
+
+
+def _summarize_older_turns(
+    messages: list[ChatMessage], client: Any, previous_summary: str | None
+) -> str | None:
+    """Fold old turns into a recap, or return ``None`` if that fails.
+
+    Deliberately bounded: it reads at most ``SUMMARY_INPUT_MESSAGES`` turns
+    plus the previous block's recap, so one call costs the same whether the
+    conversation is 30 messages long or 300. Plain completion — no tools, no
+    reasoning mode — because this is a text-compression task, not a decision.
+    """
+
+    transcript = "\n\n".join(
+        f"[{'Người dùng' if message.role == 'user' else 'Trợ lý'}] {message.content}"
+        for message in messages
+    )
+    prompt_parts = []
+    if previous_summary:
+        prompt_parts.append(f"Recap so far:\n{previous_summary}")
+    prompt_parts.append(f"Older turns to fold into the recap:\n{transcript}")
+
+    try:
+        response = client.chat.completions.create(
+            model=settings.chatbot_model,
+            messages=[
+                {"role": "system", "content": _SUMMARY_SYSTEM_PROMPT},
+                {"role": "user", "content": "\n\n".join(prompt_parts)},
+            ],
+            max_tokens=MAX_SUMMARY_TOKENS,
+            timeout=REQUEST_TIMEOUT_SECONDS,
+        )
+    except Exception as exc:  # noqa: BLE001 - a failed recap must not fail the reply
+        logger.warning("chatbot: history summarization failed: %s", type(exc).__name__)
+        return None
+
+    choice = response.choices[0] if response.choices else None
+    message = choice.message if choice else None
+    content = ((message.content if message else "") or "").strip()
+    return content or None
+
+
+def _fold_history(
+    history: list[ChatMessage], client: Any
+) -> tuple[str | None, list[ChatMessage]]:
+    """Split history into (recap of older turns, recent turns sent verbatim).
+
+    Folds only whole ``HISTORY_FOLD_BLOCK`` blocks of the overflow, which
+    keeps the fold boundary — and the cache key derived from it — stable for
+    several turns instead of shifting on every message.
+    """
+
+    overflow = len(history) - MAX_HISTORY_MESSAGES
+    if overflow <= 0:
+        return None, history
+    covered = (overflow // HISTORY_FOLD_BLOCK) * HISTORY_FOLD_BLOCK
+    if covered <= 0:
+        return None, history
+
+    older = history[:covered]
+    recent = history[covered:]
+    key = _summary_cache_key(older)
+    cached = _summary_cache.get(key)
+    if cached is not None:
+        return cached, recent
+
+    previous_summary = None
+    if covered > HISTORY_FOLD_BLOCK:
+        previous_summary = _summary_cache.get(
+            _summary_cache_key(older[: covered - HISTORY_FOLD_BLOCK])
+        )
+    summary = _summarize_older_turns(
+        older[-SUMMARY_INPUT_MESSAGES:], client, previous_summary
+    )
+    if summary:
+        _remember_summary(key, summary)
+    return summary, recent
 
 
 def chatbot_status() -> dict[str, Any]:
@@ -800,6 +941,9 @@ def generate_reply(raw_messages: Any, *, client: Any = None) -> str:
     Attachment references (upload_id) travel as plain text baked into the
     relevant message's own content by the caller — see the note above the
     upload registry for why that must not be a separate side-channel field.
+
+    Turns older than the verbatim window are folded into a recap rather than
+    dropped, so a long chat keeps its context — see :func:`_fold_history`.
     """
 
     if not settings.enable_chatbot:
@@ -820,7 +964,23 @@ def generate_reply(raw_messages: Any, *, client: Any = None) -> str:
             ) from exc
         client = OpenAI(base_url=settings.chatbot_base_url, api_key=settings.chatbot_api_key)
 
+    context_summary, history = _fold_history(history, client)
+
     messages: list[dict[str, Any]] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    if context_summary:
+        # Its own message rather than appended to SYSTEM_PROMPT, so that first
+        # message stays byte-identical on every request (provider-side prefix
+        # caching). Server-generated, so it cannot be spoofed by a client —
+        # _sanitize_history strips any client-supplied system role.
+        messages.append(
+            {
+                "role": "system",
+                "content": (
+                    "[Tóm tắt các lượt chat cũ hơn đã bị lược khỏi cửa sổ hội thoại]\n"
+                    f"{context_summary}"
+                ),
+            }
+        )
     messages.extend({"role": m.role, "content": m.content} for m in history)
 
     for _ in range(MAX_TOOL_ITERATIONS):
