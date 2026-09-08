@@ -99,6 +99,9 @@
     isSending: false,
     greeting: FALLBACK_GREETING,
     pendingAttachment: null, // {upload_id, filename} | null
+    mode: "quick",
+    returnRoute: "#dashboard",
+    enabled: true,
   };
 
   // ------------------------------------------------------------------
@@ -146,6 +149,7 @@
     toggle: document.getElementById("chatbot-toggle"),
     panel: document.getElementById("chatbot-panel"),
     closeBtn: document.getElementById("chatbot-close"),
+    expandBtn: document.getElementById("chatbot-expand"),
     refreshBtn: document.getElementById("chatbot-refresh"),
     messages: document.getElementById("chatbot-messages"),
     typing: document.getElementById("chatbot-typing"),
@@ -306,6 +310,7 @@
     try {
       const data = await ChatbotAPI.getGreeting();
       if (data && data.enabled === false) {
+        state.enabled = false;
         el.widget.hidden = true;
         return;
       }
@@ -382,6 +387,7 @@
   // 5. UI events
   // ------------------------------------------------------------------
   function openPanel() {
+    if (state.mode === "workspace") return;
     state.isOpen = true;
     el.widget.classList.add("is-open");
     el.panel.hidden = false;
@@ -390,10 +396,57 @@
   }
 
   function closePanel() {
+    if (state.mode === "workspace") {
+      window.location.hash = state.returnRoute || "#dashboard";
+      return;
+    }
     state.isOpen = false;
     el.widget.classList.remove("is-open");
     el.panel.hidden = true;
     el.toggle.setAttribute("aria-expanded", "false");
+  }
+
+  function enterWorkspace() {
+    const host = document.getElementById("chatbot-page-host");
+    if (!host) return;
+    if (state.mode !== "workspace") {
+      const currentRoute = window.location.hash || "#dashboard";
+      if (!currentRoute.replace(/^#\/?/, "").startsWith("chatbot")) {
+        state.returnRoute = currentRoute;
+      }
+    }
+    state.mode = "workspace";
+    state.isOpen = true;
+    host.appendChild(el.panel);
+    el.panel.hidden = false;
+    el.panel.classList.add("is-workspace");
+    el.widget.classList.add("is-page-mode");
+    el.toggle.setAttribute("aria-expanded", "true");
+    el.closeBtn.setAttribute("aria-label", "Thu nhỏ chatbot");
+    el.closeBtn.setAttribute("title", "Thu nhỏ");
+    el.input.focus({ preventScroll: true });
+  }
+
+  function leaveWorkspace() {
+    if (state.mode !== "workspace") return;
+    state.mode = "quick";
+    state.isOpen = false;
+    el.widget.appendChild(el.panel);
+    el.panel.hidden = true;
+    el.panel.classList.remove("is-workspace");
+    el.widget.classList.remove("is-page-mode", "is-open");
+    el.widget.hidden = !state.enabled;
+    el.toggle.setAttribute("aria-expanded", "false");
+    el.closeBtn.setAttribute("aria-label", "Đóng trợ lý");
+    el.closeBtn.setAttribute("title", "Đóng");
+  }
+
+  function openWorkspace() {
+    const currentRoute = window.location.hash || "#dashboard";
+    if (!currentRoute.replace(/^#\/?/, "").startsWith("chatbot")) {
+      state.returnRoute = currentRoute;
+    }
+    window.location.hash = "#chatbot";
   }
 
   el.toggle.addEventListener("click", () => {
@@ -402,6 +455,8 @@
   });
 
   el.closeBtn.addEventListener("click", closePanel);
+
+  if (el.expandBtn) el.expandBtn.addEventListener("click", openWorkspace);
 
   el.refreshBtn.addEventListener("click", () => {
     el.refreshBtn.classList.add("is-spinning");
@@ -440,7 +495,20 @@
   }
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && state.isOpen) closePanel();
+    if (event.key === "Escape" && state.isOpen && state.mode === "quick") closePanel();
+  });
+
+  window.addEventListener("dh:chatbot-route", (event) => {
+    if (event.detail?.mode === "workspace") enterWorkspace();
+    else leaveWorkspace();
+  });
+
+  window.addEventListener("hashchange", (event) => {
+    const nextHash = new URL(event.newURL).hash.replace(/^#\/?/, "");
+    const previousHash = new URL(event.oldURL).hash || "#dashboard";
+    if (nextHash.startsWith("chatbot") && !previousHash.replace(/^#\/?/, "").startsWith("chatbot")) {
+      state.returnRoute = previousHash;
+    }
   });
 
   // ------------------------------------------------------------------
@@ -461,6 +529,9 @@
     } else {
       await loadGreetingAndAvailability();
       resetConversation();
+    }
+    if (window.location.hash.replace(/^#\/?/, "").startsWith("chatbot")) {
+      enterWorkspace();
     }
   }
   init();

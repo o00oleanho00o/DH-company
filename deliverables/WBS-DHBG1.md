@@ -9,9 +9,9 @@ bằng chứng kiểm chứng trước khi đánh dấu hoàn thành.
 | Trạng thái | Số việc |
 |---|---:|
 | ☑ Hoàn thành trong repo | 10 |
-| ◐ Đang cần người dùng xác nhận | 2 |
+| ◐ Đang cần người dùng xác nhận | 3 |
 | ☐ Chưa làm | 8 |
-| **Tổng** | **20** |
+| **Tổng** | **21** |
 
 ## Nền tảng và dữ liệu
 
@@ -42,6 +42,7 @@ bằng chứng kiểm chứng trước khi đánh dấu hoàn thành.
 | 3.3 | UI điều hướng và giữ context list/detail | `web-ui` | 014 | ◐ |
 | 3.4 | Export chỉ ghi unit price, giữ formula | `excel-export` | 011 | ☑ |
 | 3.5 | Kiểm thử ZIP/XML/openpyxl | `excel-export` | 011, NFR-003 | ☑ |
+| 3.6 | Chatbot panel nổi + workspace toàn màn hình dùng chung session | `web-ui` | 017 | ◐ |
 
 ## Vận hành và bàn giao
 

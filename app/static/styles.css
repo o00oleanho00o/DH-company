@@ -2790,6 +2790,83 @@ h3 {
   display: none;
 }
 
+.chatbot-widget.is-page-mode .chatbot-toggle {
+  display: none;
+}
+
+.page-view.is-chatbot-route {
+  width: 100%;
+  height: calc(100vh - var(--topbar-height));
+  max-width: none;
+  padding: 18px 24px 24px;
+}
+
+.chatbot-page,
+.chatbot-page-host {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.chatbot-page-host .chatbot-panel {
+  position: static;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  animation: none;
+}
+
+.chatbot-panel.is-workspace .chatbot-header {
+  padding: 16px clamp(18px, 4vw, 56px);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.chatbot-panel.is-workspace #chatbot-expand {
+  display: none;
+}
+
+.chatbot-panel.is-workspace .chatbot-messages {
+  padding: 28px clamp(18px, 7vw, 112px);
+  gap: 16px;
+}
+
+.chatbot-panel.is-workspace .chatbot-msg {
+  max-width: min(780px, 88%);
+}
+
+.chatbot-panel.is-workspace .chatbot-bubble {
+  padding: 12px 15px;
+  font-size: 14px;
+}
+
+.chatbot-panel.is-workspace .chatbot-suggestions {
+  max-width: 900px;
+}
+
+.chatbot-panel.is-workspace .chatbot-typing {
+  padding-right: clamp(18px, 7vw, 112px);
+  padding-left: clamp(18px, 7vw, 112px);
+}
+
+.chatbot-panel.is-workspace .chatbot-attachment {
+  margin-right: clamp(18px, 7vw, 112px);
+  margin-left: clamp(18px, 7vw, 112px);
+}
+
+.chatbot-panel.is-workspace .chatbot-input-bar {
+  padding: 16px clamp(18px, 7vw, 112px) 18px;
+  background: var(--surface-subtle);
+}
+
+.chatbot-panel.is-workspace .chatbot-input {
+  min-height: 44px;
+  max-height: 160px;
+}
+
 @keyframes chatbot-panel-in {
   from {
     opacity: 0;
@@ -3204,6 +3281,25 @@ h3 {
   .chatbot-panel {
     width: calc(100vw - 24px);
     height: calc(100vh - 96px);
+  }
+
+  .page-view.is-chatbot-route {
+    height: calc(100vh - var(--topbar-height));
+    padding: 0;
+  }
+
+  .chatbot-page-host .chatbot-panel {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .chatbot-panel.is-workspace .chatbot-header,
+  .chatbot-panel.is-workspace .chatbot-messages,
+  .chatbot-panel.is-workspace .chatbot-input-bar {
+    padding-right: 14px;
+    padding-left: 14px;
   }
 
   .toast-region {

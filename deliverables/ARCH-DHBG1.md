@@ -28,8 +28,17 @@ FastAPI modular monolith (app/main.py)
 - `app/pricing.py`: candidate scoring, threshold 90%, exact historical reference, policy và review state.
 - `app/price_policy.py`/`app/labor_policy.py`: chọn giá theo policy, discount/tax và thống kê.
 - `app/ai.py`: OpenAI-compatible provider opt-in; bounded rerank, không tính toán.
+- `app/chatbot.py`: assistant provider và tool boundary riêng cho hội thoại hỗ trợ vận hành.
 - `app/export.py`: chỉ ghi ô unit price; native Excel được yêu cầu recalculation cho workbook nhiều sheet.
 - `app/main.py`: API, upload lifecycle và static UI.
+- `app/static/chatbot.js`: sở hữu một conversation state và một chat surface. Surface được chuyển giữa widget nổi và `#chatbot-page-host` theo route `#chatbot`, không clone DOM và không reset hội thoại.
+
+## Chatbot hai chế độ
+
+- `quick`: panel cố định góc phải, phù hợp câu hỏi ngắn trên các workflow khác.
+- `workspace`: tab điều hướng `Chatbot` đưa cùng panel vào vùng nội dung, mở rộng chiều ngang/cao và ẩn nút nổi.
+- Route change phát custom event để `chatbot.js` chuyển surface; mở trực tiếp `#chatbot` vẫn được xử lý khi khởi tạo.
+- Đóng workspace điều hướng về màn trước hoặc Tổng quan; lịch sử chỉ xóa khi người dùng bấm làm mới hội thoại.
 
 ## Luồng request
 

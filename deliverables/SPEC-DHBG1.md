@@ -51,6 +51,12 @@ Server phải mặc định bind `0.0.0.0:3000`, hỗ trợ override bằng bi�
 ### REQ-DHBG1-016
 Mọi run/review/export phải có audit event đủ để truy ngược input, policy, candidate, source và kết quả.
 
+### REQ-DHBG1-017
+UI phải cung cấp chatbot ở hai chế độ: panel nổi dùng trên mọi màn hình và
+workspace toàn bộ vùng nội dung khi chọn tab `Chatbot` ở điều hướng trái. Việc
+chuyển chế độ phải giữ nguyên lịch sử hội thoại, trạng thái gửi và file đính kèm;
+giao diện phải dùng được trên desktop và mobile.
+
 ## Yêu cầu phi chức năng
 
 | ID | Yêu cầu | Kiểm chứng |

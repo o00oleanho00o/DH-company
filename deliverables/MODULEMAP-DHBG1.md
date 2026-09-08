@@ -13,7 +13,7 @@
 | `review-workspace` | candidate review, correction and status | REQ-DHBG1-008 |
 | `quotation-api` | REST orchestration and error contract | REQ-DHBG1-013 |
 | `excel-export` | price-cell writes, formula/cache preservation, AI Audit | REQ-DHBG1-011 |
-| `web-ui` | Vietnamese SPA navigation and workflow screens | REQ-DHBG1-014 |
+| `web-ui` | Vietnamese SPA navigation, workflow screens and dual-mode chatbot surface | REQ-DHBG1-014, REQ-DHBG1-017 |
 
 ## Luồng chính
 

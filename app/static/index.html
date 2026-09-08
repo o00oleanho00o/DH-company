@@ -123,6 +123,9 @@
         <path d="m12 2 1.5 6.5L20 10l-6.5 1.5L12 18l-1.5-6.5L4 10l6.5-1.5L12 2Z"></path>
         <path d="m19 16 .7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"></path>
       </symbol>
+      <symbol id="i-expand" viewBox="0 0 24 24">
+        <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M21 16v5h-5"></path>
+      </symbol>
       <symbol id="i-calendar" viewBox="0 0 24 24">
         <rect x="4" y="5" width="16" height="15" rx="2"></rect>
         <path d="M8 3v4M16 3v4M4 10h16"></path>
@@ -168,6 +171,10 @@
           <button type="button" class="nav-item" data-route="benchmark">
             <svg><use href="#i-layers"></use></svg>
             <span>Đánh giá độ phủ</span>
+          </button>
+          <button type="button" class="nav-item" data-route="chatbot">
+            <svg><use href="#i-spark"></use></svg>
+            <span>Chatbot</span>
           </button>
         </nav>
 
@@ -258,6 +265,15 @@
             </div>
           </div>
           <div class="chatbot-header-actions">
+            <button
+              type="button"
+              id="chatbot-expand"
+              class="icon-button chatbot-icon-btn"
+              aria-label="Mở chatbot toàn màn hình"
+              title="Mở toàn màn hình"
+            >
+              <svg><use href="#i-expand"></use></svg>
+            </button>
             <button
               type="button"
               id="chatbot-refresh"

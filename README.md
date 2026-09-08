@@ -214,10 +214,10 @@ app/
   price_policy.py  material pricing policy
   labor_policy.py  labor pricing policy
   ai.py            optional bounded reranker
-  chatbot.py       landing-page assistant (separate provider/boundary)
+  chatbot.py       assistant riêng cho hỗ trợ vận hành
   export.py        formula-preserving XLSX export
   db.py            SQLite schema/session
-  static/          Vietnamese web UI + chatbot widget (chatbot.js, vendor/marked.min.js)
+  static/          Vietnamese web UI + chatbot panel nổi/workspace toàn màn hình
 tests/             unit/integration/regression tests
 benchmarks/        leakage-safe holdout reports
 prompt_system.txt  system prompt + knowledge base cho chatbot widget

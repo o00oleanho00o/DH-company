@@ -19,7 +19,8 @@ công thức mẫu.
 - AI semantic reranking tùy chọn, bounded và không được tạo giá/công thức.
 - Không gian rà soát, correction, audit và provenance.
 - Xuất Excel giữ nguyên workbook layout/formula; chỉ điền unit price được áp dụng và thêm `AI Audit`.
-- REST API và UI tiếng Việt cho Kho dữ liệu, Danh mục & Giá, Tạo báo giá, Bàn rà soát.
+- REST API và UI tiếng Việt cho Kho dữ liệu, Danh mục & Giá, Tạo báo giá, Bàn rà soát và Chatbot.
+- Chatbot có panel nổi để hỏi nhanh và workspace toàn màn hình từ điều hướng trái; hội thoại được giữ nguyên khi đổi chế độ.
 - Chạy HTTP tại `0.0.0.0:3000`, truy cập LAN hoặc Cloudflare Tunnel.
 
 ## 3. Ngoài phạm vi

@@ -43,6 +43,15 @@ Tài liệu này là tầng quyết định nghiệp vụ/phạm vi. Mọi thay 
 - **Lý do:** Cho phép truy cập từ máy khác trong LAN và public qua Cloudflare Tunnel.
 - **Đánh đổi:** Bind toàn bộ interface làm tăng bề mặt truy cập; chỉ mở trong mạng tin cậy, dùng firewall/auth trước production.
 
+## QĐ-07 — Chatbot có chế độ nhanh và workspace toàn màn hình
+
+- **Người quyết:** Người dùng dự án
+- **Ngày:** 2026-09-08
+- **Trạng thái:** Accepted
+- **Quyết định:** Giữ nút chatbot nổi để hỏi nhanh và thêm tab `Chatbot` ở điều hướng trái để mở giao diện toàn bộ vùng làm việc. Hai chế độ dùng chung một phiên hội thoại và file đính kèm.
+- **Lý do:** Panel nổi phù hợp câu hỏi ngắn nhưng thiếu không gian khi đọc câu trả lời dài hoặc thao tác với workbook.
+- **Đánh đổi:** UI phải quản lý việc di chuyển cùng một chat surface giữa hai container mà không khởi tạo lại state.
+
 ## Quy tắc thay đổi
 
 1. Ghi quyết định trước khi sửa tầng dẫn xuất.

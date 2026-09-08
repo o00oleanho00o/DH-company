@@ -34,6 +34,7 @@
     new: "Tạo báo giá",
     quotation: "Chi tiết báo giá",
     review: "Bàn rà soát",
+    chatbot: "Chatbot",
   };
 
   const state = {
@@ -774,7 +775,7 @@
   function routeFromHash() {
     const hash = window.location.hash.replace(/^#\/?/, "") || "dashboard";
     const [base, id] = hash.split("/");
-    if (["dashboard", "import", "new", "quotations", "catalog", "benchmark"].includes(base)) {
+    if (["dashboard", "import", "new", "quotations", "catalog", "benchmark", "chatbot"].includes(base)) {
       return { base, id: null };
     }
     if (base === "quotation" && id) return { base, id };
@@ -815,6 +816,16 @@
         ${actionLabel && action ? `<button class="button button-secondary" data-action="${escapeHtml(action)}">${icon("arrow-right")}<span>${escapeHtml(actionLabel)}</span></button>` : ""}
       </div>
     `;
+  }
+
+  function renderChatbotWorkspace() {
+    if (state.route !== "chatbot") return;
+    pageView.innerHTML = `
+      <section class="chatbot-page" aria-label="Không gian Chatbot">
+        <div id="chatbot-page-host" class="chatbot-page-host"></div>
+      </section>
+    `;
+    window.dispatchEvent(new CustomEvent("dh:chatbot-route", { detail: { mode: "workspace" } }));
   }
 
   function pageIntro(eyebrow, title, description, actions = "") {
@@ -2926,7 +2937,13 @@
 
   async function renderRoute() {
     const route = routeFromHash();
+    if (state.route === "chatbot" || route.base !== "chatbot") {
+      // The panel may currently live inside pageView. Move it back before a
+      // route renderer replaces pageView.innerHTML so conversation DOM survives.
+      window.dispatchEvent(new CustomEvent("dh:chatbot-route", { detail: { mode: "quick" } }));
+    }
     state.route = route.base;
+    pageView.classList.toggle("is-chatbot-route", route.base === "chatbot");
     setBreadcrumb(route.base);
     if (route.base === "dashboard") {
       renderDashboard();
@@ -2952,6 +2969,8 @@
     } else if (route.base === "benchmark") {
       renderBenchmark();
       await loadBenchmark();
+    } else if (route.base === "chatbot") {
+      renderChatbotWorkspace();
     }
     $$(".nav-item[data-route]").forEach((item) => item.classList.toggle("is-active", item.dataset.route === route.base || (route.base === "quotation" && item.dataset.route === "quotations") || route.base === "review" && item.dataset.route === "quotations"));
     pageView.focus({ preventScroll: true });
