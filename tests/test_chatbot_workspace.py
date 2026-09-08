@@ -14,6 +14,7 @@ def test_chatbot_workspace_uses_one_shared_panel() -> None:
     assert html.count('id="chatbot-panel"') == 1
     assert 'data-route="chatbot"' in html
     assert 'id="chatbot-expand"' in html
+    assert html.count("?v=20260908-chat-workspace") == 4
     assert 'id="chatbot-page-host"' in app_js
     assert 'detail: { mode: "workspace" }' in app_js
     assert 'state.route === "chatbot" || route.base !== "chatbot"' in app_js
